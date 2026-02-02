@@ -8,6 +8,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { getSession as getSupabaseAuthSession } from './supabaseAuth';
 import { logger } from '../utils/logger';
 
 const ENV = import.meta.env.VITE_ENVIRONMENT || 'dev';
@@ -149,6 +150,20 @@ class SupabaseAdapter implements DatabaseClient {
    */
   async setSession(): Promise<void> {
     try {
+      const authSession = await getSupabaseAuthSession();
+      if (authSession?.access_token && authSession.refresh_token) {
+        const { error } = await this.client.auth.setSession({
+          access_token: authSession.access_token,
+          refresh_token: authSession.refresh_token,
+        });
+        if (error) {
+          console.warn('Failed to set Supabase session from auth session:', error);
+        } else {
+          console.log('✅ Supabase session set from auth session');
+          return;
+        }
+      }
+
       // Debug: Log all localStorage keys to understand what's available
       const allKeys = Object.keys(localStorage);
       console.log('🔍 All localStorage keys:', allKeys);

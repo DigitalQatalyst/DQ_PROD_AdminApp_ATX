@@ -9,6 +9,7 @@ DECLARE
   new_user_id uuid;
   user_role text;
   user_segment text;
+  has_user_segment boolean;
 BEGIN
   -- Determine role and segment based on email
   IF NEW.email LIKE '%admin%' THEN
@@ -29,8 +30,8 @@ BEGIN
   SELECT id INTO default_org_id FROM public.auth_organizations WHERE name = 'default' LIMIT 1;
   
   IF default_org_id IS NULL THEN
-    INSERT INTO public.auth_organizations (name, display_name, is_active)
-    VALUES ('default', 'Default Organization', true)
+    INSERT INTO public.auth_organizations (name, display_name, status)
+    VALUES ('default', 'Default Organization', 'Active')
     RETURNING id INTO default_org_id;
   END IF;
 
@@ -50,20 +51,44 @@ BEGIN
     updated_at = NOW()
   RETURNING id INTO new_user_id;
 
-  -- Create user profile
-  INSERT INTO public.auth_user_profiles (user_id, organization_id, role, user_segment, created_at, updated_at)
-  VALUES (
-    new_user_id,
-    default_org_id,
-    user_role,
-    user_segment,
-    NOW(),
-    NOW()
-  )
-  ON CONFLICT (user_id, organization_id) DO UPDATE SET
-    role = EXCLUDED.role,
-    user_segment = EXCLUDED.user_segment,
-    updated_at = NOW();
+  -- Create user profile (supports customer_type or user_segment)
+  SELECT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'auth_user_profiles'
+      AND column_name = 'user_segment'
+  ) INTO has_user_segment;
+
+  IF has_user_segment THEN
+    INSERT INTO public.auth_user_profiles (user_id, organization_id, role, user_segment, created_at, updated_at)
+    VALUES (
+      new_user_id,
+      default_org_id,
+      user_role,
+      user_segment,
+      NOW(),
+      NOW()
+    )
+    ON CONFLICT (user_id, organization_id) DO UPDATE SET
+      role = EXCLUDED.role,
+      user_segment = EXCLUDED.user_segment,
+      updated_at = NOW();
+  ELSE
+    INSERT INTO public.auth_user_profiles (user_id, organization_id, role, customer_type, created_at, updated_at)
+    VALUES (
+      new_user_id,
+      default_org_id,
+      user_role,
+      user_segment,
+      NOW(),
+      NOW()
+    )
+    ON CONFLICT (user_id, organization_id) DO UPDATE SET
+      role = EXCLUDED.role,
+      customer_type = EXCLUDED.customer_type,
+      updated_at = NOW();
+  END IF;
 
   RETURN NEW;
 END;

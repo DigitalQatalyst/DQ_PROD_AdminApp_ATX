@@ -50,6 +50,8 @@ export function useCRUD<T extends { id: string }>(tableName: string): CRUDOperat
       'eco_business_directory': 'Business',
       'eco_zones': 'Zone',
       'eco_growth_areas': 'GrowthArea',
+      'crm_leads': 'Lead',
+      'crm_service_requests': 'ServiceRequest',
       'partners': 'Service', // Partners use Service permissions
       'events': 'Content', // Events use Content permissions
       'contents': 'Content', // Contents table
@@ -126,7 +128,7 @@ export function useCRUD<T extends { id: string }>(tableName: string): CRUDOperat
         
         if (organizationId && userSegment !== 'internal') {
           // Check if table has organization_id column
-          const orgScopedTables = ['cnt_contents', 'eco_business_directory', 'eco_growth_areas', 'mktplc_services'];
+          const orgScopedTables = ['cnt_contents', 'eco_business_directory', 'eco_growth_areas', 'mktplc_services', 'crm_leads'];
           if (orgScopedTables.includes(tableName)) {
             logger.warn(`⚠️ Applying org filter with organization_id: ${organizationId} - This may filter out records!`);
             query = query.eq('organization_id', organizationId);

@@ -1,12 +1,15 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/index';
 import ServiceManagementRoute from './pages/service-management';
+import LeadManagementRoute from './pages/lead-management';
 // Old content management route - replaced by ContentManagementNewRoute
 // import ContentManagementRoute from './pages/content-management';
 import BusinessDirectoryRoute from './pages/business-directory';
 import ZonesClustersRoute from './pages/zones-clusters';
 import GrowthAreasRoute from './pages/growth-areas';
 import ServiceFormRoute from './pages/service-form';
+import LeadFormRoute from './pages/lead-form';
+import CRMServiceRequestsRoute from './pages/crm-service-requests';
 import BusinessFormRoute from './pages/business-form';
 import GrowthAreaFormRoute from './pages/growth-area-form';
 import ZoneFormRoute from './pages/zone-form';
@@ -32,6 +35,7 @@ import { ContentSegmentGate } from './components/ContentSegmentGate';
 import { AppLayout } from './components/AppLayout';
 import EJPTransactionDashboard from './modules/ejp-transaction-dashboard';
 export function AppRouter() {
+  const ENABLE_CRM_SERVICE_REQUESTS = true; // TODO: disable after testing
   return <BrowserRouter>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
@@ -46,6 +50,12 @@ export function AppRouter() {
       <Route path="/service-management" element={
         <ProtectedRoute requiredRoles={['admin', 'approver', 'editor']}>
           <ServiceManagementRoute />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/lead-management" element={
+        <ProtectedRoute requiredRoles={['admin']}>
+          <LeadManagementRoute />
         </ProtectedRoute>
       } />
 
@@ -117,6 +127,26 @@ export function AppRouter() {
           <ServiceFormRoute />
         </ProtectedRoute>
       } />
+
+      <Route path="/lead-form" element={
+        <ProtectedRoute requiredRoles={['admin']}>
+          <LeadFormRoute />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/lead-form/:leadId" element={
+        <ProtectedRoute requiredRoles={['admin']}>
+          <LeadFormRoute />
+        </ProtectedRoute>
+      } />
+
+      {ENABLE_CRM_SERVICE_REQUESTS && (
+        <Route path="/crm-service-requests" element={
+          <ProtectedRoute requiredRoles={['admin']}>
+            <CRMServiceRequestsRoute />
+          </ProtectedRoute>
+        } />
+      )}
 
       {/* Enhanced Service Form Routes */}
       <Route path="/enhanced-service-form" element={

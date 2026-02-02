@@ -53,6 +53,9 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const isItemVisible = (itemId: string): boolean => {
     // Admin (internal) sees everything
     if (userSegment === 'internal') {
+      if (itemId === 'lead-management') {
+        return role === 'admin';
+      }
       return true;
     }
 
@@ -88,7 +91,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       // - Everything except some admin-only items
       // - Partners CAN see content-management and events (they can create content that needs approval)
       const partnerRestrictedItems = [
-        'content-taxonomy'
+        'content-taxonomy',
+        'lead-management'
       ];
       return !partnerRestrictedItems.includes(itemId);
     }
@@ -247,6 +251,25 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         label: 'Service Management',
         icon: <CheckCircle size={20} />,
         path: '/service-management'
+      });
+    }
+
+    if (isItemVisible('lead-management')) {
+      items.push({
+        id: 'lead-management',
+        label: 'Lead Management',
+        icon: <ClipboardList size={20} />,
+        path: '/lead-management'
+      });
+    }
+
+    const ENABLE_CRM_SERVICE_REQUESTS = true; // TODO: disable after testing
+    if (ENABLE_CRM_SERVICE_REQUESTS && isItemVisible('crm-service-requests')) {
+      items.push({
+        id: 'crm-service-requests',
+        label: 'Service Requests',
+        icon: <ClipboardList size={20} />,
+        path: '/crm-service-requests'
       });
     }
 

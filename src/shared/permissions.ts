@@ -52,6 +52,8 @@ export type Action = typeof Actions[number];
 export const Subjects = [
   'User',
   'Organization',
+  'Lead',
+  'ServiceRequest',
   'Content',
   'Service',
   'ServiceForm',
