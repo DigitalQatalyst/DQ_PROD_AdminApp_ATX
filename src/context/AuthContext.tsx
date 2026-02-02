@@ -12,7 +12,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { User, UserRole, RolePermissions } from '../types';
 import { buildAbility, AppAbility, UserContext, debugUserAbilities } from '../auth/ability';
 import { createMongoAbility } from '@casl/ability';
-import { getInternalJWT, parseInternalJWT, isInternalJWTExpired } from '../lib/federatedAuth';
+// import { getInternalJWT, parseInternalJWT, isInternalJWTExpired } from '../lib/federatedAuth';
 
 interface AuthContextType {
   user: User | null;
@@ -44,6 +44,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ability, setAbility] = useState<AppAbility>(createMongoAbility([]));
 
   useEffect(() => {
+    // START AUTH BYPASS CODE
+    console.log('🔓 AUTH BYPASS ENABLED: Logging in as Dev Admin');
+
+    const mockUser: User = {
+      id: 'dev-admin-id',
+      email: 'dev@admin.com',
+      name: 'Dev Admin',
+      role: 'admin' as UserRole,
+      user_segment: 'internal',
+      organization_id: 'default-org-id'
+    };
+
+    // Set state directly
+    setUser(mockUser);
+    setRole('admin' as UserRole);
+    setUserSegment('internal');
+
+    // Build CASL ability or mock context
+    const userContext: UserContext = {
+      role: 'admin' as UserRole,
+      user_segment: 'internal',
+      organizationId: 'default-org-id',
+      id: 'dev-admin-id',
+    };
+
+    const userAbility = buildAbility(userContext);
+    setAbility(userAbility);
+    setIsLoading(false);
+    return;
+    // END AUTH BYPASS CODE
+
+    /* ORIGINAL LOGIC DISABLED
     // Load user from localStorage (simulating session persistence)
     const loadUser = () => {
       try {
@@ -130,6 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Simulate async auth check
     const timer = setTimeout(loadUser, 500);
     return () => clearTimeout(timer);
+    */
   }, []);
 
   const login = async (userData: User, userSegmentValue?: string, roleValue?: string) => {
@@ -145,7 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(userData);
     setRole(userRole);
     setUserSegment(segment);
-    
+
     // Build CASL ability based on user context
     const userContext: UserContext = {
       role: userRole,
@@ -159,7 +192,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Debug user abilities
     debugUserAbilities(userAbility, userContext);
-    
+
     // Debug organization mapping
     console.log('🏢 Organization Mapping Debug:', {
       'userData.organization_id': userData.organization_id,
@@ -168,19 +201,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       'userData.name': userData.name,
       'userData.email': userData.email
     });
-    
+
     // Store in localStorage
     localStorage.setItem('platform_admin_user', JSON.stringify(userData));
     localStorage.setItem('user_role', userRole);
     localStorage.setItem('user_segment', segment);
-    
+
     console.log('🔐 AuthContext state set:', {
       user: userData,
       role: userRole,
       userSegment: segment,
       ability: userAbility
     });
-    
+
     setIsLoading(false);
   };
 
