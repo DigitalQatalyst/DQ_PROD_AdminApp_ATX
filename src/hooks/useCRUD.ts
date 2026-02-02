@@ -128,7 +128,7 @@ export function useCRUD<T extends { id: string }>(tableName: string): CRUDOperat
         
         if (organizationId && userSegment !== 'internal') {
           // Check if table has organization_id column
-          const orgScopedTables = ['cnt_contents', 'eco_business_directory', 'eco_growth_areas', 'mktplc_services', 'crm_leads'];
+      const orgScopedTables = ['cnt_contents', 'eco_business_directory', 'eco_growth_areas', 'mktplc_services'];
           if (orgScopedTables.includes(tableName)) {
             logger.warn(`⚠️ Applying org filter with organization_id: ${organizationId} - This may filter out records!`);
             query = query.eq('organization_id', organizationId);
@@ -332,13 +332,21 @@ const create = useCallback(
       };
 
       const orgScopedTables = ['cnt_contents', 'eco_business_directory', 'eco_growth_areas', 'mktplc_services'];
-      if (orgScopedTables.includes(tableName) && organizationId && userSegment !== 'internal') {
-        (dataWithTimestamp as any).organization_id = organizationId;
-      } else if (userSegment === 'internal' && organizationId) {
+      if (orgScopedTables.includes(tableName) && organizationId) {
         (dataWithTimestamp as any).organization_id = organizationId;
       }
 
-      if (userId) (dataWithTimestamp as any).created_by = userId;
+      const tablesWithCreatedBy = [
+        'cnt_contents',
+        'eco_business_directory',
+        'eco_growth_areas',
+        'mktplc_services',
+        'crm_service_requests',
+      ];
+
+      if (userId && tablesWithCreatedBy.includes(tableName)) {
+        (dataWithTimestamp as any).created_by = userId;
+      }
 
       // Prefer Supabase; if not configured and table is contents, fallback to API
       if (tableName === 'cnt_contents' && !getSupabaseClient()) {

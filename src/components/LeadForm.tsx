@@ -102,7 +102,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({ leadId }) => {
         disqualify_reason: formData.stage === 'Disqualified' ? formData.disqualify_reason : null,
         owner_id: existingLead?.owner_id || user?.id,
         owner_name: existingLead?.owner_name || user?.name,
-        organization_id: user?.organization_id || null
+        organization_id: null
       };
 
       if (leadId && existingLead) {

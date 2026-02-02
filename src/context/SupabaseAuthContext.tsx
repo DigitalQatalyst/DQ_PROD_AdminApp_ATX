@@ -94,7 +94,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           contact_name: userProfile.name,
           contact_email: userProfile.email,
           organization_name: userProfile.organization_name || null,
-          organization_id: userProfile.organization_id || null,
+          organization_id: null,
           related_user_id: userProfile.user_id,
           owner_id: userProfile.user_id,
           owner_name: userProfile.name,

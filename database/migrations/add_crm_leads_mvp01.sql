@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS "public"."crm_leads" (
     )
 );
 
+ALTER TABLE "public"."crm_leads" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ONLY "public"."crm_leads" FORCE ROW LEVEL SECURITY;
 ALTER TABLE "public"."crm_leads" OWNER TO "postgres";
 
@@ -102,6 +103,14 @@ BEGIN
         END IF;
     END IF;
 END $$;
+
+-- ============================================
+-- 6. Grants (for Supabase API access)
+-- ============================================
+
+GRANT ALL ON TABLE "public"."crm_leads" TO "anon";
+GRANT ALL ON TABLE "public"."crm_leads" TO "authenticated";
+GRANT ALL ON TABLE "public"."crm_leads" TO "service_role";
 
 -- ============================================
 -- 3. Indexes
