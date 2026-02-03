@@ -110,4 +110,6 @@ Make sure your `eco_business_directory` table has these columns:
 - `founded_year` (or `foundedYear`)
 - `organization_id` (nullable or with default value)
 
+trytrigger deployment.
+
 If `organization_id` is required but your records don't have it, that's the issue.
