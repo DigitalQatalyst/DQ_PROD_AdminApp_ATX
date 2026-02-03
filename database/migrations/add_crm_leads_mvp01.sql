@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS "public"."crm_leads" (
     "owner_name" TEXT,
     "source" TEXT DEFAULT 'Manual'::TEXT,
     "stage" TEXT DEFAULT 'New'::TEXT,
+    "dedup_key" TEXT,
     "disqualify_reason" TEXT,
     "notes" TEXT,
     "metadata" JSONB DEFAULT '{}'::JSONB,
@@ -121,6 +122,9 @@ CREATE INDEX IF NOT EXISTS "idx_crm_leads_source" ON "public"."crm_leads"("sourc
 CREATE INDEX IF NOT EXISTS "idx_crm_leads_owner_id" ON "public"."crm_leads"("owner_id");
 CREATE INDEX IF NOT EXISTS "idx_crm_leads_org_id" ON "public"."crm_leads"("organization_id");
 CREATE INDEX IF NOT EXISTS "idx_crm_leads_created_at" ON "public"."crm_leads"("created_at");
+CREATE UNIQUE INDEX IF NOT EXISTS "uidx_crm_leads_enquiry_dedup"
+  ON "public"."crm_leads"(dedup_key)
+  WHERE source = 'Enquiry';
 
 -- ============================================
 -- 4. Updated_at trigger
@@ -147,6 +151,8 @@ BEGIN
     DROP POLICY IF EXISTS "crm_leads_insert_policy" ON "public"."crm_leads";
     DROP POLICY IF EXISTS "crm_leads_update_policy" ON "public"."crm_leads";
     DROP POLICY IF EXISTS "crm_leads_delete_policy" ON "public"."crm_leads";
+    DROP POLICY IF EXISTS "crm_leads_enquiry_insert_policy" ON "public"."crm_leads";
+    DROP POLICY IF EXISTS "crm_leads_enquiry_update_policy" ON "public"."crm_leads";
     DROP POLICY IF EXISTS "admin_override" ON "public"."crm_leads";
 
     CREATE POLICY "admin_override" ON "public"."crm_leads"
@@ -165,6 +171,24 @@ BEGIN
         FOR UPDATE
         USING (public.is_staff_user())
         WITH CHECK (public.is_staff_user());
+
+    -- Public enquiry ingestion (limited to Enquiry source)
+    BEGIN
+        CREATE POLICY "crm_leads_enquiry_insert_policy" ON "public"."crm_leads"
+            FOR INSERT
+            WITH CHECK (source = 'Enquiry');
+    EXCEPTION WHEN duplicate_object THEN
+        NULL;
+    END;
+
+    BEGIN
+        CREATE POLICY "crm_leads_enquiry_update_policy" ON "public"."crm_leads"
+            FOR UPDATE
+            USING (source = 'Enquiry')
+            WITH CHECK (source = 'Enquiry');
+    EXCEPTION WHEN duplicate_object THEN
+        NULL;
+    END;
 
     CREATE POLICY "crm_leads_delete_policy" ON "public"."crm_leads"
         FOR DELETE

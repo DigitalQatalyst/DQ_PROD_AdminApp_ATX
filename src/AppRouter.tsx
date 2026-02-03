@@ -30,6 +30,7 @@ import ContentManagementNewRoute from './pages/content-management-new';
 import ContentFormNewRoute from './pages/content-form-new';
 import ServiceFormBuilderNewRoute from './pages/service-form-builder-new';
 import ServiceRequestsRoute from './pages/service-requests';
+import EnquiryRoute from './pages/enquiry';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ContentSegmentGate } from './components/ContentSegmentGate';
 import { AppLayout } from './components/AppLayout';
@@ -39,6 +40,7 @@ export function AppRouter() {
   return <BrowserRouter>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/enquiry" element={<EnquiryRoute />} />
 
       {/* Protected Routes - Require Authentication */}
       <Route path="/" element={

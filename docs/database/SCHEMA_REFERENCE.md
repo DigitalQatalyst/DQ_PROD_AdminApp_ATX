@@ -193,6 +193,7 @@ CREATE TABLE IF NOT EXISTS "public"."crm_leads" (
 | `owner_name` | TEXT | | Owner display name |
 | `source` | TEXT | CHECK | Lead source: `Login`, `Enquiry`, `Manual` |
 | `stage` | TEXT | CHECK | Lifecycle stage: `New`, `Qualifying`, `Qualified`, `Converted`, `Disqualified` |
+| `dedup_key` | TEXT | Unique (Enquiry) | Deduplication key for enquiry submissions |
 | `disqualify_reason` | TEXT | | Required when disqualified |
 | `notes` | TEXT | | Internal notes |
 | `metadata` | JSONB | DEFAULT '{}' | Additional data |

@@ -85,6 +85,19 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       }
 
       if (existingLead) {
+        const { error: updateError } = await supabase
+          .from('crm_leads')
+          .update({
+            contact_name: userProfile.name,
+            contact_email: userProfile.email,
+            organization_name: userProfile.organization_name || null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existingLead.id);
+
+        if (updateError) {
+          console.warn('Failed to update login lead:', updateError);
+        }
         return;
       }
 

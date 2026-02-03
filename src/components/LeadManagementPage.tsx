@@ -13,13 +13,15 @@ const sourceOptions: LeadSource[] = ['Login', 'Enquiry', 'Manual'];
 
 export const LeadManagementPage: React.FC = () => {
   const navigate = useNavigate();
-  const { userSegment, role, isLoading: authLoading } = useAuth();
+  const { userSegment, role, user, isLoading: authLoading } = useAuth();
   const { data: leads, loading, error, list, update } = useCRUD<Lead>('crm_leads');
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [stageFilter, setStageFilter] = useState('All');
   const [sourceFilter, setSourceFilter] = useState('All');
+  const [ownerFilter, setOwnerFilter] = useState('All');
+  const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   useEffect(() => {
@@ -40,6 +42,15 @@ export const LeadManagementPage: React.FC = () => {
     return leads.filter((lead) => {
       if (stageFilter !== 'All' && lead.stage !== stageFilter) return false;
       if (sourceFilter !== 'All' && lead.source !== sourceFilter) return false;
+      if (ownerFilter !== 'All' && (lead.owner_name || 'Unassigned') !== ownerFilter) return false;
+      if (dateRange.startDate && dateRange.endDate) {
+        const createdAt = lead.created_at ? new Date(lead.created_at) : null;
+        if (!createdAt) return false;
+        const startDate = new Date(dateRange.startDate);
+        const endDate = new Date(dateRange.endDate);
+        endDate.setHours(23, 59, 59, 999);
+        if (createdAt < startDate || createdAt > endDate) return false;
+      }
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const target = [
@@ -52,7 +63,15 @@ export const LeadManagementPage: React.FC = () => {
       }
       return true;
     });
-  }, [leads, searchQuery, stageFilter, sourceFilter]);
+  }, [leads, searchQuery, stageFilter, sourceFilter, ownerFilter, dateRange.startDate, dateRange.endDate]);
+
+  const ownerOptions = useMemo(() => {
+    const owners = new Set<string>();
+    leads.forEach((lead) => {
+      owners.add(lead.owner_name || 'Unassigned');
+    });
+    return Array.from(owners);
+  }, [leads]);
 
   const handleOpenDrawer = (lead: Lead) => {
     setSelectedLead(lead);
@@ -62,6 +81,31 @@ export const LeadManagementPage: React.FC = () => {
   const handleUpdateLead = async (leadId: string, updates: Partial<Lead>) => {
     await update(leadId, updates);
     await list({}, { page: 1, pageSize: 1000, sortBy: 'created_at', sortOrder: 'desc' });
+  };
+
+  const handleAssignToMe = async (lead: Lead) => {
+    if (!user?.id || !user?.name) {
+      setToast({ type: 'error', message: 'User info not available for assignment.' });
+      return;
+    }
+    await handleUpdateLead(lead.id, {
+      owner_id: user.id,
+      owner_name: user.name,
+    });
+    setToast({ type: 'success', message: 'Lead assigned to you.' });
+  };
+
+  const handleQuickStage = async (lead: Lead, nextStage: LeadStage) => {
+    if (lead.stage === 'Converted') {
+      setToast({ type: 'info', message: 'Converted leads are read-only.' });
+      return;
+    }
+    await handleUpdateLead(lead.id, {
+      stage: nextStage,
+      qualified_at: nextStage === 'Qualified' ? new Date().toISOString() : lead.qualified_at,
+      disqualify_reason: nextStage === 'Disqualified' ? lead.disqualify_reason || 'Disqualified via quick action' : null,
+    });
+    setToast({ type: 'success', message: `Lead moved to ${nextStage}.` });
   };
 
   const formatDate = (date?: string) => {
@@ -127,7 +171,7 @@ export const LeadManagementPage: React.FC = () => {
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm mb-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <div className="flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2">
             <SearchIcon className="w-4 h-4 text-gray-400" />
             <input
@@ -163,6 +207,35 @@ export const LeadManagementPage: React.FC = () => {
               ))}
             </select>
           </div>
+          <div className="flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2">
+            <FilterIcon className="w-4 h-4 text-gray-400" />
+            <select
+              value={ownerFilter}
+              onChange={(event) => setOwnerFilter(event.target.value)}
+              className="w-full text-sm outline-none"
+            >
+              <option value="All">All owners</option>
+              {ownerOptions.map((owner) => (
+                <option key={owner} value={owner}>{owner}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-500">
+            <input
+              type="date"
+              value={dateRange.startDate}
+              onChange={(event) => setDateRange((prev) => ({ ...prev, startDate: event.target.value }))}
+              className="w-full outline-none"
+            />
+          </div>
+          <div className="flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-500">
+            <input
+              type="date"
+              value={dateRange.endDate}
+              onChange={(event) => setDateRange((prev) => ({ ...prev, endDate: event.target.value }))}
+              className="w-full outline-none"
+            />
+          </div>
           <div className="text-sm text-gray-500 flex items-center">
             {filteredLeads.length} leads
           </div>
@@ -179,6 +252,7 @@ export const LeadManagementPage: React.FC = () => {
                 <th className="text-left px-4 py-3 font-medium">Stage</th>
                 <th className="text-left px-4 py-3 font-medium">Owner</th>
                 <th className="text-left px-4 py-3 font-medium">Created</th>
+                <th className="text-left px-4 py-3 font-medium">Quick Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -209,6 +283,54 @@ export const LeadManagementPage: React.FC = () => {
                     </td>
                     <td className="px-4 py-3 text-gray-700">{lead.owner_name || 'Unassigned'}</td>
                     <td className="px-4 py-3 text-gray-500">{formatDate(lead.created_at)}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-2">
+                        {!lead.owner_id && (
+                          <button
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleAssignToMe(lead);
+                            }}
+                            className="rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-50"
+                          >
+                            Assign to me
+                          </button>
+                        )}
+                        {lead.stage === 'New' && (
+                          <button
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleQuickStage(lead, 'Qualifying');
+                            }}
+                            className="rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-50"
+                          >
+                            Qualify
+                          </button>
+                        )}
+                        {lead.stage === 'Qualifying' && (
+                          <>
+                            <button
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleQuickStage(lead, 'Qualified');
+                              }}
+                              className="rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-50"
+                            >
+                              Mark Qualified
+                            </button>
+                            <button
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleQuickStage(lead, 'Disqualified');
+                              }}
+                              className="rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-50"
+                            >
+                              Disqualify
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))
               )}
