@@ -32,6 +32,47 @@ export const RolePermissions: Record<string, string[]> = {
   viewer: ['view'],
 };
 
+// Lead Types
+export type LeadStage = 'New' | 'Qualifying' | 'Qualified' | 'Converted' | 'Disqualified';
+export type LeadSource = 'Login' | 'Enquiry' | 'Manual';
+
+export interface Lead {
+  id: string;
+  contact_name?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  organization_name?: string;
+  organization_id?: string;
+  related_user_id?: string;
+  owner_id?: string;
+  owner_name?: string;
+  source: LeadSource;
+  stage: LeadStage;
+  disqualify_reason?: string;
+  notes?: string;
+  metadata?: Record<string, any>;
+  qualified_at?: string;
+  converted_at?: string;
+  service_request_id?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type ServiceRequestStatus = 'Open' | 'In Progress' | 'Closed';
+
+export interface ServiceRequest {
+  id: string;
+  lead_id: string;
+  organization_id?: string;
+  owner_id?: string;
+  source?: LeadSource;
+  status: ServiceRequestStatus;
+  notes?: string;
+  metadata?: Record<string, any>;
+  created_at?: string;
+  updated_at?: string;
+}
+
 // Service Types
 export interface Service {
   id: string;

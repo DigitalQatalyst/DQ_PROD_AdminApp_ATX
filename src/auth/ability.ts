@@ -75,6 +75,8 @@ export function buildAbility(user: UserContext): AppAbility {
   // Note: We apply roles directly here to match the canonical permissions
   
   const crudSubjects = ['Service', 'ServiceForm', 'ServiceFormField', 'Content', 'Business', 'Zone', 'GrowthArea'] as Subject[];
+  const leadSubject: Subject = 'Lead';
+  const serviceRequestSubject: Subject = 'ServiceRequest';
   const conditions = user_segment === 'internal' ? undefined : { organization_id: organizationId };
 
   switch (role) {
@@ -140,6 +142,31 @@ export function buildAbility(user: UserContext): AppAbility {
     cannot('publish', 'all');
     cannot('archive', 'all');
     cannot('flag', 'all');
+  }
+
+  // Lead Management: Internal users only
+  if (user_segment === 'internal') {
+    switch (role) {
+      case 'admin':
+        can('manage', leadSubject);
+        can('manage', serviceRequestSubject);
+        break;
+      default:
+        cannot('manage', leadSubject);
+        cannot('manage', serviceRequestSubject);
+        break;
+    }
+  } else {
+    cannot('read', leadSubject);
+    cannot('create', leadSubject);
+    cannot('update', leadSubject);
+    cannot('delete', leadSubject);
+    cannot('manage', leadSubject);
+    cannot('read', serviceRequestSubject);
+    cannot('create', serviceRequestSubject);
+    cannot('update', serviceRequestSubject);
+    cannot('delete', serviceRequestSubject);
+    cannot('manage', serviceRequestSubject);
   }
 
   // Segment-specific overrides and special rules
@@ -243,6 +270,8 @@ export function canAccessModule(ability: AppAbility, module: string): boolean {
     'business_directory': 'Business',
     'zones': 'Zone',
     'growth_areas': 'GrowthArea',
+    'leads': 'Lead',
+    'service_requests': 'ServiceRequest',
   };
 
   const subject = moduleMap[module];

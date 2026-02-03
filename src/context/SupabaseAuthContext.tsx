@@ -15,6 +15,7 @@ import {
   onAuthStateChange,
   AppUserProfile,
 } from '../lib/supabaseAuth';
+import { getSupabaseClient, setSupabaseSession } from '../lib/dbClient';
 import { useAuth } from './AuthContext';
 
 interface SupabaseAuthContextType {
@@ -55,6 +56,73 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     await authContextLogin(userData as any, userProfile.user_segment, userProfile.role);
   }, [authContextLogin]);
 
+  const createLoginLeadIfNeeded = useCallback(async (userProfile: AppUserProfile) => {
+    const ENABLE_LEAD_CAPTURE = true; // TODO: disable after testing
+    if (!ENABLE_LEAD_CAPTURE) return;
+
+    if (userProfile.user_segment !== 'internal') return;
+
+    try {
+      await setSupabaseSession();
+      const supabase = getSupabaseClient();
+      if (!supabase) {
+        console.warn('Supabase client not available for lead capture');
+        return;
+      }
+
+      const { data: existingLead, error: existingError } = await supabase
+        .from('crm_leads')
+        .select('id, stage')
+        .eq('related_user_id', userProfile.user_id)
+        .not('stage', 'in', '("Converted","Disqualified")')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (existingError) {
+        console.warn('Failed to check existing lead:', existingError);
+        return;
+      }
+
+      if (existingLead) {
+        const { error: updateError } = await supabase
+          .from('crm_leads')
+          .update({
+            contact_name: userProfile.name,
+            contact_email: userProfile.email,
+            organization_name: userProfile.organization_name || null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existingLead.id);
+
+        if (updateError) {
+          console.warn('Failed to update login lead:', updateError);
+        }
+        return;
+      }
+
+      const { error: insertError } = await supabase
+        .from('crm_leads')
+        .insert({
+          contact_name: userProfile.name,
+          contact_email: userProfile.email,
+          organization_name: userProfile.organization_name || null,
+          organization_id: null,
+          related_user_id: userProfile.user_id,
+          owner_id: userProfile.user_id,
+          owner_name: userProfile.name,
+          source: 'Login',
+          stage: 'New'
+        });
+
+      if (insertError) {
+        console.warn('Failed to create login lead:', insertError);
+      }
+    } catch (error) {
+      console.warn('Lead capture failed:', error);
+    }
+  }, []);
+
   const refreshProfile = useCallback(async () => {
     if (!supabaseUser) {
       setProfile(null);
@@ -88,6 +156,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           setProfile(userProfile);
           storeUserProfileLocally(userProfile);
           await syncWithAuthContext(userProfile);
+          await createLoginLeadIfNeeded(userProfile);
         }
       } else if (event === 'SIGNED_OUT') {
         setSession(null);
@@ -121,6 +190,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       setProfile(result.profile);
       storeUserProfileLocally(result.profile);
       await syncWithAuthContext(result.profile);
+      await createLoginLeadIfNeeded(result.profile);
     }
 
     setLoading(false);

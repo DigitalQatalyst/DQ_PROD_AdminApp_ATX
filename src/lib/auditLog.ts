@@ -30,6 +30,7 @@ export type ActivityAction =
 export type EntityType =
   | 'content'
   | 'service'
+  | 'lead'
   | 'business'
   | 'zone'
   | 'growth_area'
@@ -197,3 +198,25 @@ export async function logBusinessActivity(
   });
 }
 
+export async function logLeadActivity(
+  action: ActivityAction,
+  leadId: string,
+  details?: Record<string, any>
+): Promise<string | null> {
+  const userId = localStorage.getItem('user_id');
+  const userInfo = localStorage.getItem('azure_user_info');
+  const userName = userInfo ? JSON.parse(userInfo).name : 'Unknown User';
+  const userRole = localStorage.getItem('user_role') || 'unknown';
+  const organizationId = localStorage.getItem('user_organization_id');
+
+  return logActivity({
+    entityType: 'lead',
+    entityId: leadId,
+    action,
+    details,
+    organizationId,
+    userId,
+    userName,
+    userRole
+  });
+}
