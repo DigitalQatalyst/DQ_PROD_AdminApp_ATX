@@ -137,4 +137,4 @@ When updating documentation:
 ---
 
 **Last Updated**: January 28, 2025  
-**Documentation Version**: 2.0 (Restructured)
+**Documentation Version**: 2.0 (Restructured).

@@ -12,7 +12,6 @@ import {
   signOut as supabaseSignOut,
   fetchUserProfile,
   storeUserProfileLocally,
-  onAuthStateChange,
   AppUserProfile,
 } from '../lib/supabaseAuth';
 import { useAuth } from './AuthContext';
@@ -37,7 +36,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   const [profile, setProfile] = useState<AppUserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Get the existing AuthContext login function to sync state
   const { login: authContextLogin, logout: authContextLogout } = useAuth();
 
@@ -51,7 +50,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       organization_id: userProfile.organization_id,
       user_segment: userProfile.user_segment,
     };
-    
+
     await authContextLogin(userData as any, userProfile.user_segment, userProfile.role);
   }, [authContextLogin]);
 
@@ -70,8 +69,47 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   }, [supabaseUser, syncWithAuthContext]);
 
   useEffect(() => {
-    // No auto-login - just set loading to false
-    // Users must explicitly sign in each time
+    // START AUTH BYPASS CODE
+    const bypassAuth = async () => {
+      console.log('Using Auth Bypass');
+
+      const mockUser: User = {
+        id: 'bypass-user-id',
+        app_metadata: {},
+        user_metadata: { name: 'Dev Admin' },
+        aud: 'authenticated',
+        created_at: new Date().toISOString()
+      };
+
+      const mockSession: Session = {
+        access_token: 'bypass-token',
+        refresh_token: 'bypass-refresh',
+        expires_in: 3600,
+        token_type: 'bearer',
+        user: mockUser
+      };
+
+      const mockProfile: AppUserProfile = {
+        user_id: 'bypass-user-id',
+        email: 'dev@admin.com',
+        role: 'admin',
+        organization_id: 'default-org-id',
+        user_segment: 'internal',
+        name: 'Dev Admin'
+      };
+
+      setSession(mockSession);
+      setSupabaseUser(mockUser);
+      setProfile(mockProfile);
+      setLoading(false);
+
+      await syncWithAuthContext(mockProfile);
+    };
+
+    bypassAuth();
+    // END AUTH BYPASS CODE
+
+    /* ORIGINAL AUTH CODE DISABLED
     setLoading(false);
 
     // Subscribe to auth changes (for sign-in/sign-out events during the session)
@@ -101,6 +139,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     return () => {
       subscription.unsubscribe();
     };
+    */
   }, [syncWithAuthContext]);
 
   const signIn = async (email: string, password: string): Promise<boolean> => {
