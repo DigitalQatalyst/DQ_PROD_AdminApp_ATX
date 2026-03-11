@@ -366,7 +366,7 @@ export const GrowthAreasPage: React.FC = () => {
       window.history.replaceState({}, '', url.toString());
     }
   };
-  
+
   // Handle drawer close
   const handleDrawerClose = () => {
     setIsDrawerOpen(false);
@@ -479,9 +479,9 @@ export const GrowthAreasPage: React.FC = () => {
   }
 
   return <PageLayout title="Growth Areas" breadcrumbs={breadcrumbItems}>
-    <SectionContent className="px-0 sm:px-6 pt-4 pb-12">
+    <div className="pb-20">
       {/* Summary Cards */}
-      {loading ? <SkeletonLoader variant="metrics" className="mb-6" /> : <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 px-4 sm:px-0">
+      {loading ? <SkeletonLoader variant="metrics" className="mb-6" /> : <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {summaryData.map(item => <div key={item.id} className="rounded-2xl shadow-sm border border-gray-100 bg-white px-3 py-4 hover:shadow-md transition-all duration-200 ease-in-out">
           <div className="flex items-center">
             <div className={`p-2.5 rounded-full ${item.color} mr-3`}>
@@ -499,7 +499,7 @@ export const GrowthAreasPage: React.FC = () => {
         </div>)}
       </div>}
       {/* Toolbar */}
-      <div className="sticky top-[3.5rem] bg-gray-50 z-20 pb-2 px-4 sm:px-0">
+      <div className="sticky top-[3.5rem] bg-gray-50 z-20 pb-2">
         <div className="bg-white rounded-2xl shadow-sm p-4 mb-4">
           <div className="flex flex-col gap-4">
             {/* Search Bar */}
@@ -651,7 +651,7 @@ export const GrowthAreasPage: React.FC = () => {
         </SectionContent>
       </PageSection>
       {/* Growth Areas Mobile Card View */}
-      <div className="md:hidden space-y-3 mt-2 px-4 sm:px-0">
+      <div className="md:hidden space-y-3 mt-2">
         {loading ? <SkeletonLoader variant="card" count={3} /> : filteredGrowthAreas.length === 0 ? <EmptyState onAction={hasPermission(['admin', 'creator']) ? handleAddNewGrowthArea : undefined} /> : <>
           {/* Mobile header with action button */}
           <div className="flex justify-between items-center mb-3">
@@ -732,7 +732,7 @@ export const GrowthAreasPage: React.FC = () => {
         </>}
       </div>
       {/* Pagination Controls */}
-      {!loading && filteredGrowthAreas.length > 0 && <div className="bg-white rounded-2xl shadow-sm p-3 sm:p-4 mt-4 flex flex-col sm:flex-row items-center justify-between mx-4 sm:mx-0">
+      {!loading && filteredGrowthAreas.length > 0 && <div className="bg-white rounded-2xl shadow-sm p-3 sm:p-4 mt-4 flex flex-col sm:flex-row items-center justify-between">
         <div className="flex items-center mb-4 sm:mb-0">
           <label htmlFor="rows-per-page" className="text-[12px] sm:text-sm text-gray-600 mr-2">
             Rows per page:
@@ -782,12 +782,6 @@ export const GrowthAreasPage: React.FC = () => {
       </div>}
       {/* Confirm Delete Dialog */}
       <ConfirmDialog isOpen={showDeleteDialog} onClose={() => setShowDeleteDialog(false)} onConfirm={handleDeleteConfirm} title="Delete Growth Area" message="Are you sure you want to delete this growth area? This action cannot be undone." confirmLabel="Delete" confirmVariant="danger" />
-      {/* Growth Area Details Drawer */}
-      {selectedArea && <GrowthAreaDetailsDrawer 
-        isOpen={isDrawerOpen} 
-        onClose={handleDrawerClose} 
-        growthArea={selectedArea}
-      />}
-    </SectionContent>
+    </div>
   </PageLayout>;
 };

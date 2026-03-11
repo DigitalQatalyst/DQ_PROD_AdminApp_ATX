@@ -44,17 +44,10 @@ export function useCRUD<T extends { id: string }>(tableName: string): CRUDOperat
   const getSubjectFromTableName = (table: string): Subjects => {
     const tableMap: Record<string, Subjects> = {
       'mktplc_services': 'Service',
-      'mktplc_service_forms': 'ServiceForm',
-      'mktplc_service_form_fields': 'ServiceFormField',
       'cnt_contents': 'Content',
       'eco_business_directory': 'Business',
       'eco_zones': 'Zone',
       'eco_growth_areas': 'GrowthArea',
-      'crm_leads': 'Lead',
-      'crm_service_requests': 'ServiceRequest',
-      'partners': 'Service', // Partners use Service permissions
-      'events': 'Content', // Events use Content permissions
-      'contents': 'Content', // Contents table
     };
     return tableMap[table] || 'Content'; // Return Content as default if not mapped
   };
@@ -128,7 +121,7 @@ export function useCRUD<T extends { id: string }>(tableName: string): CRUDOperat
         
         if (organizationId && userSegment !== 'internal') {
           // Check if table has organization_id column
-      const orgScopedTables = ['cnt_contents', 'eco_business_directory', 'eco_growth_areas', 'mktplc_services'];
+          const orgScopedTables = ['cnt_contents', 'eco_business_directory', 'eco_growth_areas', 'mktplc_services'];
           if (orgScopedTables.includes(tableName)) {
             logger.warn(`⚠️ Applying org filter with organization_id: ${organizationId} - This may filter out records!`);
             query = query.eq('organization_id', organizationId);
@@ -332,21 +325,13 @@ const create = useCallback(
       };
 
       const orgScopedTables = ['cnt_contents', 'eco_business_directory', 'eco_growth_areas', 'mktplc_services'];
-      if (orgScopedTables.includes(tableName) && organizationId) {
+      if (orgScopedTables.includes(tableName) && organizationId && userSegment !== 'internal') {
+        (dataWithTimestamp as any).organization_id = organizationId;
+      } else if (userSegment === 'internal' && organizationId) {
         (dataWithTimestamp as any).organization_id = organizationId;
       }
 
-      const tablesWithCreatedBy = [
-        'cnt_contents',
-        'eco_business_directory',
-        'eco_growth_areas',
-        'mktplc_services',
-        'crm_service_requests',
-      ];
-
-      if (userId && tablesWithCreatedBy.includes(tableName)) {
-        (dataWithTimestamp as any).created_by = userId;
-      }
+      if (userId) (dataWithTimestamp as any).created_by = userId;
 
       // Prefer Supabase; if not configured and table is contents, fallback to API
       if (tableName === 'cnt_contents' && !getSupabaseClient()) {

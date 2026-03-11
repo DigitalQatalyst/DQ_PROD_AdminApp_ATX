@@ -1,8 +1,8 @@
 /**
  * Content Segment Gate
  * 
- * Blocks customer and advisor segments from accessing content management routes
- * Only internal and partner segments are allowed
+ * Blocks customer, advisor, and partner segments from accessing content management routes
+ * Only internal segment is allowed
  * 
  * Usage:
  * ```tsx
@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 interface ContentSegmentGateProps {
@@ -24,21 +25,11 @@ interface ContentSegmentGateProps {
 }
 
 export const ContentSegmentGate: React.FC<ContentSegmentGateProps> = ({ children }) => {
-  const { userSegment, isLoading } = useAuth();
+  const { userSegment } = useAuth();
 
-  // Show loading while auth is initializing
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  // Block customer (enterprise) segments from content management
-  // Only internal (QDB Admin) and partner can access content management
-  // Allow access if userSegment is null (fallback to allow)
-  if (userSegment === 'customer') {
+  // Block customer, advisor, and partner segments from content management
+  // Partners were previously allowed but access has been revoked
+  if (userSegment === 'customer' || userSegment === 'advisor' || userSegment === 'partner') {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
@@ -50,10 +41,10 @@ export const ContentSegmentGate: React.FC<ContentSegmentGateProps> = ({ children
             </div>
             <h3 className="mt-4 text-lg font-medium text-gray-900">Access Denied</h3>
             <p className="mt-2 text-sm text-gray-500">
-              Content management is restricted to QDB Admin and Partner organizations only.
+              Content management is restricted to internal staff only.
             </p>
             <p className="mt-1 text-xs text-gray-400">
-              Your account segment: Enterprise
+              Your account segment: {userSegment}
             </p>
             <div className="mt-6">
               <button
@@ -69,7 +60,7 @@ export const ContentSegmentGate: React.FC<ContentSegmentGateProps> = ({ children
     );
   }
 
-  // Allow access for internal and partner segments
+  // Allow access for internal segment only
   return <>{children}</>;
 };
 

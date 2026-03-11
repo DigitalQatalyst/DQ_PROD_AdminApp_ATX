@@ -1,84 +1,153 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import HomePage from './pages/index';
-import ServiceManagementRoute from './pages/service-management';
-import LeadManagementRoute from './pages/lead-management';
-// Old content management route - replaced by ContentManagementNewRoute
-// import ContentManagementRoute from './pages/content-management';
-import BusinessDirectoryRoute from './pages/business-directory';
-import ZonesClustersRoute from './pages/zones-clusters';
-import GrowthAreasRoute from './pages/growth-areas';
-import ServiceFormRoute from './pages/service-form';
-import LeadFormRoute from './pages/lead-form';
-import CRMServiceRequestsRoute from './pages/crm-service-requests';
-import BusinessFormRoute from './pages/business-form';
-import GrowthAreaFormRoute from './pages/growth-area-form';
-import ZoneFormRoute from './pages/zone-form';
-import ContentFormRoute from './pages/content-form';
-import TaxonomyManagerRoute from './pages/taxonomy-manager';
-import TaxonomyCollectionFormRoute from './pages/taxonomy-collection-form';
-import TaxonomyFacetFormRoute from './pages/taxonomy-facet-form';
-import TaxonomyTagFormRoute from './pages/taxonomy-tag-form';
-import ServiceFormsRoute from './pages/service-forms';
-import ServiceFormBuilderRoute from './pages/service-form-builder';
-import EnhancedServiceFormRoute from './pages/enhanced-service-form';
-import LoginPage from './pages/login';
-import PartnersRoute from './pages/partners';
-import ServiceWizardRoute from './pages/service-wizard';
-import EventsRoute from './pages/events';
-import EventFormRoute from './pages/event-form';
-import ContentManagementNewRoute from './pages/content-management-new';
-import ContentFormNewRoute from './pages/content-form-new';
-import ServiceFormBuilderNewRoute from './pages/service-form-builder-new';
-import ServiceRequestsRoute from './pages/service-requests';
-import EnquiryRoute from './pages/enquiry';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { ContentSegmentGate } from './components/ContentSegmentGate';
-import { AppLayout } from './components/AppLayout';
-import EJPTransactionDashboard from './modules/ejp-transaction-dashboard';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+// DEVELOP-V1: Dashboard removed - only analytics dashboards enabled
+// import HomePage from './pages/index';
+// DEVELOP-V1: All feature routes disabled - only base + analytics enabled
+// import ServiceManagementRoute from './pages/service-management';
+import ContentManagementRoute from "./pages/content-management";
+// import BusinessDirectoryRoute from './pages/business-directory';
+// import ZonesClustersRoute from './pages/zones-clusters';
+// import GrowthAreasRoute from './pages/growth-areas';
+// import ServiceFormRoute from './pages/service-form';
+// import BusinessFormRoute from './pages/business-form';
+// import GrowthAreaFormRoute from './pages/growth-area-form';
+// import ZoneFormRoute from './pages/zone-form';
+import ContentFormRoute from "./pages/content-form";
+import LoginPage from "./pages/login";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { ContentSegmentGate } from "./components/ContentSegmentGate";
+import { AppLayout } from "./components/AppLayout";
+import EJPTransactionDashboard from "./modules/ejp-transaction-dashboard";
+// import TaxonomyManagerRoute from './pages/taxonomy-manager';
+// import TaxonomyCollectionFormRoute from './pages/taxonomy-collection-form';
+// import TaxonomyFacetFormRoute from './pages/taxonomy-facet-form';
+// import TaxonomyTagFormRoute from './pages/taxonomy-tag-form';
+import ServiceDeliveryOverview from "./modules/service-delivery-overview";
+import { useAuth } from "./context/AuthContext";
+import { ChatInterface } from "./modules/chat-support/pages/ChatInterface";
+
+// Component to redirect to appropriate dashboard based on user segment
+const DashboardRedirect = () => {
+  const { userSegment } = useAuth();
+
+  // Redirect based on user segment
+  if (userSegment === "internal") {
+    return <Navigate to="/service-delivery-overview" replace />;
+  } else if (userSegment === "partner") {
+    return <Navigate to="/ejp-transaction-dashboard" replace />;
+  }
+
+  // Default fallback (should not happen if user is properly authenticated)
+  return <Navigate to="/ejp-transaction-dashboard" replace />;
+};
+
 export function AppRouter() {
-  const ENABLE_CRM_SERVICE_REQUESTS = true; // TODO: disable after testing
-  return <BrowserRouter>
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/enquiry" element={<EnquiryRoute />} />
+  return (
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
+      <Routes>
+        {/* Base Routes - Always Enabled */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/chat-support"
+          element={
+            <ProtectedRoute requiredRoles={["admin", "approver", "editor", "viewer"]}
+            requiredSegments={["partner"]}>
+              <AppLayout activeSection="chat-support">
+                <ChatInterface />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Protected Routes - Require Authentication */}
-      <Route path="/" element={
-        <ProtectedRoute>
-          <HomePage />
-        </ProtectedRoute>
-      } />
+        {/* DEVELOP-V1: Dashboard removed - redirect to appropriate dashboard based on user segment */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <DashboardRedirect />
+            </ProtectedRoute>
+          }
+        />
 
+        {/* Redirect /dashboard to appropriate dashboard based on user segment */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardRedirect />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Analytics Dashboards - Enabled in v1 */}
+        {/* Service Delivery Dashboard - Only accessible to Staff (internal segment) */}
+        <Route
+          path="/service-delivery-overview"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+              requiredSegments={["internal"]}
+            >
+              <AppLayout activeSection="service-delivery">
+                <ServiceDeliveryOverview />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Experience Analytics Dashboard - Only accessible to Partners */}
+        <Route
+          path="/ejp-transaction-dashboard"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+              requiredSegments={["partner","internal",]}
+            >
+              <AppLayout activeSection="experience-analytics">
+                <EJPTransactionDashboard />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Redirect legacy dashboard route to correct dashboard */}
+        <Route
+          path="/dashboard/experience-analytics"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+              requiredSegments={["partner"]}
+            >
+              <Navigate to="/ejp-transaction-dashboard" replace />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* DEVELOP-V1: All other feature routes disabled */}
+        {/* 
       <Route path="/service-management" element={
         <ProtectedRoute requiredRoles={['admin', 'approver', 'editor']}>
           <ServiceManagementRoute />
         </ProtectedRoute>
       } />
-
-      <Route path="/lead-management" element={
-        <ProtectedRoute requiredRoles={['admin']}>
-          <LeadManagementRoute />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/content-management" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <ContentManagementNewRoute />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/content-form-new" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <ContentFormNewRoute />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/content-form-new/:contentId" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <ContentFormNewRoute />
-        </ProtectedRoute>
-      } />
-
+*/}
+        <Route
+          path="/content-management"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+            >
+              <ContentSegmentGate>
+                <ContentManagementRoute />
+              </ContentSegmentGate>
+            </ProtectedRoute>
+          }
+        />
+        {/*}
       <Route path="/business-directory" element={
         <ProtectedRoute requiredRoles={['admin', 'approver', 'editor', 'viewer']}>
           <BusinessDirectoryRoute />
@@ -97,27 +166,6 @@ export function AppRouter() {
         </ProtectedRoute>
       } />
 
-      {/* Partners Routes */}
-      <Route path="/partners" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <PartnersRoute />
-        </ProtectedRoute>
-      } />
-
-      {/* Service Wizard Routes */}
-      <Route path="/service-wizard" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <ServiceWizardRoute />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/service-wizard/:serviceId" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <ServiceWizardRoute />
-        </ProtectedRoute>
-      } />
-
-      {/* Form Routes - Require Write Permissions */}
       <Route path="/service-form" element={
         <ProtectedRoute requiredRoles={['admin', 'editor']}>
           <ServiceFormRoute />
@@ -127,64 +175,6 @@ export function AppRouter() {
       <Route path="/service-form/:id" element={
         <ProtectedRoute requiredRoles={['admin', 'editor']}>
           <ServiceFormRoute />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/lead-form" element={
-        <ProtectedRoute requiredRoles={['admin']}>
-          <LeadFormRoute />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/lead-form/:leadId" element={
-        <ProtectedRoute requiredRoles={['admin']}>
-          <LeadFormRoute />
-        </ProtectedRoute>
-      } />
-
-      {ENABLE_CRM_SERVICE_REQUESTS && (
-        <Route path="/crm-service-requests" element={
-          <ProtectedRoute requiredRoles={['admin']}>
-            <CRMServiceRequestsRoute />
-          </ProtectedRoute>
-        } />
-      )}
-
-      {/* Enhanced Service Form Routes */}
-      <Route path="/enhanced-service-form" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <EnhancedServiceFormRoute />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/enhanced-service-form/:serviceId" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <EnhancedServiceFormRoute />
-        </ProtectedRoute>
-      } />
-
-      {/* Service Forms Routes */}
-      <Route path="/service-forms" element={
-        <ProtectedRoute requiredRoles={['admin', 'approver', 'editor', 'viewer']}>
-          <ServiceFormsRoute />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/service-form-builder/new" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <ServiceFormBuilderNewRoute />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/service-form-builder/:formId" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <ServiceFormBuilderNewRoute />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/service-form-builder/:formId/edit" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <ServiceFormBuilderNewRoute />
         </ProtectedRoute>
       } />
 
@@ -207,12 +197,11 @@ export function AppRouter() {
       } />
 
       <Route path="/taxonomy-manager" element={
-        <ProtectedRoute requiredRoles={['admin', 'approver', 'editor']}>
+        <ProtectedRoute requiredRoles={['admin', 'approver', 'editor', 'viewer']}>
           <TaxonomyManagerRoute />
         </ProtectedRoute>
       } />
 
-      {/* Taxonomy Form Routes */}
       <Route path="/taxonomy-manager/collection/new" element={
         <ProtectedRoute requiredRoles={['admin', 'editor']}>
           <TaxonomyCollectionFormRoute />
@@ -266,56 +255,29 @@ export function AppRouter() {
           <ZoneFormRoute />
         </ProtectedRoute>
       } />
+      */}
+        <Route
+          path="/content-form"
+          element={
+            <ProtectedRoute requiredRoles={["admin", "editor"]}>
+              <ContentSegmentGate>
+                <ContentFormRoute />
+              </ContentSegmentGate>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route path="/content-form" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <ContentSegmentGate>
-            <ContentFormRoute />
-          </ContentSegmentGate>
-        </ProtectedRoute>
-      } />
-
-      <Route path="/content-form/:contentId" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <ContentSegmentGate>
-            <ContentFormRoute />
-          </ContentSegmentGate>
-        </ProtectedRoute>
-      } />
-
-      {/* Events Routes - Admin and Partners can access */}
-      <Route path="/events" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <EventsRoute />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/event-form" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <EventFormRoute />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/event-form/:eventId" element={
-        <ProtectedRoute requiredRoles={['admin', 'editor']}>
-          <EventFormRoute />
-        </ProtectedRoute>
-      } />
-
-      {/* Service Requests - All user segments can access (filtered in component) */}
-      <Route path="/service-requests" element={
-        <ProtectedRoute requiredRoles={['admin', 'approver', 'editor', 'viewer']}>
-          <ServiceRequestsRoute />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/ejp-transaction-dashboard" element={
-        <ProtectedRoute requiredRoles={['admin', 'approver', 'editor', 'viewer']}>
-          <AppLayout activeSection="experience-analytics">
-            <EJPTransactionDashboard />
-          </AppLayout>
-        </ProtectedRoute>
-      } />
-    </Routes>
-  </BrowserRouter>;
+        <Route
+          path="/content-form/:contentId"
+          element={
+            <ProtectedRoute requiredRoles={["admin", "editor"]}>
+              <ContentSegmentGate>
+                <ContentFormRoute />
+              </ContentSegmentGate>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
 }

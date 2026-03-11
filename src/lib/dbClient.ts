@@ -8,10 +8,12 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { getSession as getSupabaseAuthSession } from './supabaseAuth';
 import { logger } from '../utils/logger';
 
-const ENV = import.meta.env.VITE_ENVIRONMENT || 'dev';
+// Get environment - check both VITE_ENVIRONMENT and mode (for Vercel/production)
+const ENV = import.meta.env.VITE_ENVIRONMENT || 
+            (import.meta.env.MODE === 'production' ? 'prod' : 
+             import.meta.env.MODE === 'development' ? 'dev' : 'dev');
 const USE_MOCK_AUTH = import.meta.env.VITE_USE_MOCK_AUTH === 'true';
 
 const fetchWithNoStore = (input: RequestInfo, init?: RequestInit) => {
@@ -63,11 +65,7 @@ class SupabaseAdapter implements DatabaseClient {
 
   constructor(url: string, key: string) {
     this.supabaseUrl = url;
-    this.client = createClient(url, key, {
-      global: {
-        fetch: fetchWithNoStore,
-      },
-    });
+    this.client = createClient(url, key);
   }
 
   /**
@@ -150,20 +148,6 @@ class SupabaseAdapter implements DatabaseClient {
    */
   async setSession(): Promise<void> {
     try {
-      const authSession = await getSupabaseAuthSession();
-      if (authSession?.access_token && authSession.refresh_token) {
-        const { error } = await this.client.auth.setSession({
-          access_token: authSession.access_token,
-          refresh_token: authSession.refresh_token,
-        });
-        if (error) {
-          console.warn('Failed to set Supabase session from auth session:', error);
-        } else {
-          console.log('✅ Supabase session set from auth session');
-          return;
-        }
-      }
-
       // Debug: Log all localStorage keys to understand what's available
       const allKeys = Object.keys(localStorage);
       console.log('🔍 All localStorage keys:', allKeys);
@@ -561,49 +545,41 @@ class MockQueryBuilder implements QueryBuilder {
 // Initialize the appropriate database client based on environment
 // Always prefer Supabase if credentials are available, regardless of environment
 function initializeDbClient(): DatabaseClient {
-  console.log('🔧 Initializing database client:', {
-    VITE_ENVIRONMENT: import.meta.env.VITE_ENVIRONMENT,
-    ENV: ENV
-  });
-  
-  // Always try Supabase first if credentials are available
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
-  if (supabaseUrl && supabaseKey && 
-      !supabaseUrl.includes('your-project') && 
-      !supabaseUrl.includes('your-actual')) {
-    console.log('✅ Using SupabaseAdapter');
+  // Log environment configuration for debugging (helpful for Vercel deployments)
+  console.log('🔍 Environment Configuration:', {
+    ENV,
+    MODE: import.meta.env.MODE,
+    PROD: import.meta.env.PROD,
+    DEV: import.meta.env.DEV,
+    hasSupabaseUrl: !!supabaseUrl,
+    hasSupabaseKey: !!supabaseKey,
+    hasApiBaseUrl: !!apiBaseUrl,
+    supabaseUrlPreview: supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'not set',
+    supabaseKeyPreview: supabaseKey ? supabaseKey.substring(0, 20) + '...' : 'not set',
+    viteEnvironment: import.meta.env.VITE_ENVIRONMENT || 'not set'
+  });
+
+  // Priority 1: Use Supabase if credentials are provided (works in all environments)
+  if (supabaseUrl && supabaseKey && !supabaseUrl.includes('your-project') && !supabaseUrl.includes('your-actual')) {
+    console.log('✅ Initializing Supabase client');
     return new SupabaseAdapter(supabaseUrl, supabaseKey);
-  } else {
-    // For production, use env var directly (same normalization as apiConfig)
-    const envUrl = import.meta.env.VITE_API_BASE_URL;
-    let apiBaseUrl = envUrl || '/api';
-    
-    if (envUrl) {
-      if (!/^https?:\/\//i.test(apiBaseUrl) && !apiBaseUrl.startsWith('/')) {
-        apiBaseUrl = '/' + apiBaseUrl;
-      }
-      if (/^https?:\/\//i.test(apiBaseUrl) && !/\/api\/?$/i.test(apiBaseUrl)) {
-        apiBaseUrl = apiBaseUrl.replace(/\/$/, '') + '/api';
-      }
-      if (!/^https?:\/\//i.test(apiBaseUrl) && !apiBaseUrl.startsWith('/api')) {
-        apiBaseUrl = '/api';
-      }
-    }
+  }
 
-    if (!apiBaseUrl || apiBaseUrl === '/api') {
-      console.warn('API base URL not configured. Attempting to use default /api path.');
-    }
-
+  // Priority 2: Use Azure API if API base URL is provided (staging/production)
+  if (apiBaseUrl && (ENV === 'staging' || ENV === 'prod')) {
+    console.log('✅ Initializing Azure API client');
     return new AzureAdapter(apiBaseUrl);
   }
 
-  // Final fallback: mock data mode
+  // Fallback: Mock client if nothing is configured
   console.warn('⚠️ No database credentials configured. Using mock data mode.');
-  console.warn('To connect to Supabase:');
-  console.warn('1. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables');
-  console.warn('2. Restart the application');
+  console.warn('Configuration options:');
+  console.warn('1. For Supabase: Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
+  console.warn('2. For Azure API: Set VITE_API_BASE_URL (requires ENV=staging or prod)');
   return new MockDatabaseClient();
 }
 
@@ -631,31 +607,21 @@ export function getSupabaseClient(): SupabaseClient | null {
     return dbClient.getClient();
   }
   
-  // Even if using AzureAdapter, we may still need Supabase for auth
-  // Try to create a client if Supabase credentials are available
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  // Enhanced error logging for debugging deployment issues
+  const clientType = dbClient instanceof SupabaseAdapter ? 'SupabaseAdapter' :
+                     dbClient instanceof AzureAdapter ? 'AzureAdapter' :
+                     dbClient instanceof MockDatabaseClient ? 'MockDatabaseClient' : 'Unknown';
   
-  if (supabaseUrl && supabaseKey && 
-      !supabaseUrl.includes('your-project') && 
-      !supabaseUrl.includes('your-actual')) {
-    try {
-      return createClient(supabaseUrl, supabaseKey, {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        },
-        global: {
-          fetch: fetchWithNoStore,
-        },
-      });
-    } catch (error) {
-      console.error('Failed to create fallback Supabase client:', error);
-      return null;
-    }
-  }
+  console.error('❌ Supabase client not available. Debug info:', {
+    clientType,
+    ENV,
+    hasSupabaseUrl: !!import.meta.env.VITE_SUPABASE_URL,
+    hasSupabaseKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
+    hasApiBaseUrl: !!import.meta.env.VITE_API_BASE_URL,
+    supabaseUrl: import.meta.env.VITE_SUPABASE_URL ? 'present' : 'missing',
+    supabaseKey: import.meta.env.VITE_SUPABASE_ANON_KEY ? 'present' : 'missing'
+  });
   
-  console.warn('⚠️ Supabase client not available. Ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in your environment variables.');
   return null;
 }
 

@@ -199,7 +199,7 @@ const validateField = (field: FormField, value: any): string | null => {
     }
   }
   if (field.type === 'tel' && value) {
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    const phoneRegex = /^[+]?[1-9][\d]{0,15}$/;
     if (!phoneRegex.test(value.replace(/\s|-/g, ''))) {
       return 'Please enter a valid phone number';
     }
@@ -463,6 +463,8 @@ const FormField: React.FC<{
     }
     return field.options || [];
   }, [field.globalOptionSet, field.options]);
+
+  if (!isVisible) return null;
   const getFieldClasses = () => {
     const baseClasses = 'w-full h-11 px-4 bg-white border rounded-md transition-all duration-200 focus:outline-none focus:ring-2';
     if (error) return `${baseClasses} border-red-500 focus:ring-red-500`;
@@ -480,12 +482,13 @@ const FormField: React.FC<{
     switch (field.type) {
       case 'text':
       case 'email':
-      case 'tel':
+      case 'tel': {
         return <div className="relative">
             <input id={fieldId} type={field.type} value={value || ''} onChange={e => onChange(e.target.value)} onBlur={handleBlur} placeholder={field.placeholder} className={getFieldClasses()} />
             {value && !error && hasBeenTouched && shouldShowSuccessState(field) && <Check className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-green-500" />}
           </div>;
-      case 'password':
+      }
+      case 'password': {
         const strength = getPasswordStrength(value || '');
         return <div className="space-y-2">
             <div className="relative">
@@ -508,15 +511,18 @@ const FormField: React.FC<{
                 </span>
               </div>}
           </div>;
-      case 'number':
+      }
+      case 'number': {
         return <input id={fieldId} type="number" value={value || ''} onChange={e => onChange(e.target.value)} onBlur={handleBlur} placeholder={field.placeholder} min={field.validation?.min} max={field.validation?.max} step={field.validation?.step} className={getFieldClasses()} />;
-      case 'textarea':
+      }
+      case 'textarea': {
         return <div className="space-y-2">
             <textarea id={fieldId} value={value || ''} onChange={e => onChange(e.target.value)} onBlur={handleBlur} placeholder={field.placeholder} rows={4} className={getFieldClasses().replace('h-11', 'min-h-[100px] py-3')} />
             {field.validation?.maxLength && <div className="text-right text-xs text-gray-500">
                 {(value || '').length}/{field.validation.maxLength}
               </div>}
           </div>;
+      }
       case 'select':
         return <CustomSelect id={fieldId} value={value || ''} onChange={onChange} onBlur={handleBlur} options={fieldOptions} placeholder={field.placeholder} error={!!error} success={value && !error && hasBeenTouched && shouldShowSuccessState(field)} />;
       case 'radio':

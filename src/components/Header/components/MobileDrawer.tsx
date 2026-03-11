@@ -1,81 +1,22 @@
 import React, { useState } from 'react';
-import { MenuIcon, XIcon, ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
-import { BuildingIcon, CreditCardIcon, NewspaperIcon, UsersIcon, GraduationCapIcon, TrendingUpIcon, CalendarIcon, SparklesIcon } from 'lucide-react';
+import { MenuIcon, XIcon, ChevronRightIcon } from 'lucide-react';
 interface MobileDrawerProps {
   isCompact?: boolean;
   onSignIn: () => void;
   isSignedIn: boolean;
 }
-const marketplaces = [{
-  id: 'non-financial',
-  name: 'Non-Financial Marketplace',
-  description: 'Business registration, legal advisory, tax, compliance, and SME support services',
-  icon: BuildingIcon,
-  href: '/marketplace/non-financial'
-}, {
-  id: 'finance',
-  name: 'Finance Marketplace',
-  description: 'Funding options, grants, and financial services to help SMEs manage and grow',
-  icon: CreditCardIcon,
-  href: '/marketplace/finance'
-}, {
-  id: 'media',
-  name: 'Media Marketplace',
-  description: "News, articles, and updates on Abu Dhabi's business landscape with industry insights",
-  icon: NewspaperIcon,
-  href: '/marketplace/media'
-}, {
-  id: 'community',
-  name: 'Community Marketplace',
-  description: 'Industry communities for networking, collaboration, and sharing best practices',
-  icon: UsersIcon,
-  href: '/marketplace/community'
-}, {
-  id: 'course',
-  name: 'Course Marketplace',
-  description: 'Training and educational modules to build entrepreneurship skills and enhance businesses',
-  icon: GraduationCapIcon,
-  href: '/marketplace/courses'
-}, {
-  id: 'investment',
-  name: 'Investment Marketplace',
-  description: 'Access to venture capital, crowdfunding, and grants for SME growth',
-  icon: TrendingUpIcon,
-  href: '/marketplace/investment'
-}, {
-  id: 'calendar',
-  name: 'Calendar Marketplace',
-  description: 'Event management, matchmaking, and notifications for upcoming business events',
-  icon: CalendarIcon,
-  href: '/marketplace/calendar'
-}, {
-  id: 'opportunity',
-  name: 'Opportunity Marketplace',
-  description: 'Business opportunities, partnerships, and growth prospects for SMEs',
-  icon: SparklesIcon,
-  href: '/marketplace/opportunities'
-}];
 export function MobileDrawer({
   isCompact = false,
   onSignIn,
   isSignedIn
 }: MobileDrawerProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isExploreExpanded, setIsExploreExpanded] = useState(false);
   const handleSignIn = () => {
     onSignIn();
     setIsDrawerOpen(false);
   };
   const handleCTAClick = (action: string) => {
     console.log(`${action} clicked`);
-    setIsDrawerOpen(false);
-  };
-  const handleMarketplaceClick = (href: string) => {
-    console.log('Navigate to:', href);
-    setIsDrawerOpen(false);
-  };
-  const handleDiscoverClick = () => {
-    console.log('Navigate to: Discover AbuDhabi');
     setIsDrawerOpen(false);
   };
   return <>
@@ -112,44 +53,7 @@ export function MobileDrawer({
               </div>
               {/* Drawer content - scrollable area */}
               <div className={`flex-1 overflow-y-auto ${!isSignedIn ? 'pb-20' : ''}`}>
-                {/* Navigation Section - Show for Mobile only, Tablet has these in header */}
-                <div className="px-4 py-3 md:hidden">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 md:text-[11px] sm:text-[10px]">
-                    Navigation
-                  </h3>
-                  {/* Explore Accordion */}
-                  <div className="mb-1">
-                    <button className="w-full flex items-center justify-between px-3 py-2.5 text-left text-gray-800 hover:bg-gray-100 rounded-lg transition-colors text-sm font-medium tracking-tight md:text-[13px] sm:text-xs md:py-2 sm:py-1.5" onClick={() => setIsExploreExpanded(!isExploreExpanded)} aria-expanded={isExploreExpanded}>
-                      <span>Explore Marketplaces</span>
-                      <ChevronDownIcon size={14} className={`text-gray-500 transition-transform md:w-3 md:h-3 sm:w-3 sm:h-3 ${isExploreExpanded ? 'rotate-180' : ''}`} />
-                    </button>
-                    {isExploreExpanded && <div className="mt-1 ml-3 space-y-0.5">
-                        {marketplaces.map(marketplace => {
-                    const Icon = marketplace.icon;
-                    return <button key={marketplace.id} className="w-full flex items-start px-2.5 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors md:py-1.5 sm:py-1" onClick={() => handleMarketplaceClick(marketplace.href)}>
-                              <div className="flex-shrink-0 mt-0.5">
-                                <Icon size={14} className="text-teal-600 md:w-3 md:h-3 sm:w-3 sm:h-3" />
-                              </div>
-                              <div className="ml-2.5 flex-1 min-w-0">
-                                <p className="text-[13px] font-medium text-gray-900 truncate leading-tight md:text-xs sm:text-[11px]">
-                                  {marketplace.name}
-                                </p>
-                                <p className="text-[11px] text-gray-500 mt-0.5 leading-[1.4] line-clamp-2 md:text-[10px] sm:text-[9px]">
-                                  {marketplace.description}
-                                </p>
-                              </div>
-                            </button>;
-                  })}
-                      </div>}
-                  </div>
-                  {/* Discover AbuDhabi */}
-                  <button className="w-full flex items-center justify-between px-3 py-2.5 text-left text-gray-800 hover:bg-gray-100 rounded-lg transition-colors text-sm font-medium tracking-tight md:text-[13px] sm:text-xs md:py-2 sm:py-1.5" onClick={handleDiscoverClick}>
-                    <span>Discover AbuDhabi</span>
-                    <ChevronRightIcon size={14} className="text-gray-400 md:w-3 md:h-3 sm:w-3 sm:h-3" />
-                  </button>
-                </div>
-                {/* Divider - Only show for mobile */}
-                <div className="border-t border-gray-200 mx-4 my-2 md:hidden"></div>
+                {/* Navigation Section - Removed Explore and Discover AbuDhabi */}
                 {/* Get Started Section - Always visible, contains both CTAs */}
                 <div className="px-4 py-3">
                   <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 md:text-[11px] sm:text-[10px]">
@@ -182,7 +86,7 @@ export function MobileDrawer({
               {isSignedIn && <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
                   <div className="flex items-center">
                     <div className="text-[11px] text-gray-500 md:text-[10px] sm:text-[9px]">
-                      Qatar Development Bank
+                      Enterprise Journey
                     </div>
                   </div>
                 </div>}

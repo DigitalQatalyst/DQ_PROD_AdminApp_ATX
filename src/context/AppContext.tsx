@@ -1,5 +1,5 @@
 import React, { useState, createContext, useContext } from 'react';
-type UserRole = 'admin' | 'editor' | 'approver' | 'viewer';
+type UserRole = 'admin' | 'editor' | 'approver' | 'viewer' | 'advisor';
 interface AppContextType {
   userRole: UserRole;
   setUserRole: (role: UserRole) => void;

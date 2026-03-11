@@ -70,36 +70,100 @@ const ComboLineChart: React.FC<ComboLineChartProps> = ({
     xAxis: {
       type: 'category',
       data: months,
+      name: 'Month',
+      nameLocation: 'middle',
+      nameGap: 30,
+      nameTextStyle: {
+        color: ChartTheme.base.neutralGray,
+        fontSize: 12,
+        fontWeight: 'bold',
+      },
       axisLabel: {
         color: ChartTheme.base.neutralGray,
+      },
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: '#333333',
+          width: 3,
+        },
+        symbol: ['none', 'arrow'],
+        symbolSize: [10, 12],
+      },
+      axisTick: {
+        show: true,
+        lineStyle: {
+          width: 2,
+        },
       },
     },
     yAxis: [
       {
         type: 'value',
         name: 'Retention Rate (%)',
+        nameLocation: 'middle',
+        nameGap: 50,
+        nameTextStyle: {
+          color: ChartTheme.base.neutralGray,
+          fontSize: 12,
+          fontWeight: 'bold',
+        },
         min: 0,
         max: 100,
         position: 'left',
-        show: false,
         axisLabel: {
           formatter: '{value}%',
           color: ChartTheme.base.neutralGray,
+          inside: false,
+        },
+        axisLine: {
+          show: true,
+          onZero: false,
+          lineStyle: {
+            color: '#333333',
+            width: 3,
+          },
+          symbol: ['none', 'arrow'],
+          symbolSize: [10, 12],
+        },
+        axisTick: {
+          show: true,
+          inside: false,
+          lineStyle: {
+            width: 2,
+          },
         },
         splitLine: {
-          show: false,
+          show: true,
+          lineStyle: {
+            color: '#f0f0f0',
+            type: 'dashed',
+          },
         },
       },
       {
         type: 'value',
         name: 'Churn Rate (%)',
+        nameLocation: 'middle',
+        nameGap: 50,
+        nameTextStyle: {
+          color: ChartTheme.base.neutralGray,
+          fontSize: 12,
+          fontWeight: 'bold',
+        },
         min: 0,
         max: 20,
         position: 'right',
-        show: false,
         axisLabel: {
           formatter: '{value}%',
           color: ChartTheme.base.neutralGray,
+          inside: false,
+        },
+        axisLine: {
+          show: false,
+        },
+        axisTick: {
+          show: false,
         },
         splitLine: {
           show: false,
@@ -161,9 +225,9 @@ const ComboLineChart: React.FC<ComboLineChartProps> = ({
       },
     ],
     grid: {
-      left: '3%',
+      left: '12%',
       right: '4%',
-      bottom: showLegend ? '15%' : '3%',
+      bottom: showLegend ? '20%' : '15%',
       top: '10%',
       containLabel: true,
     },

@@ -6,9 +6,9 @@ import { cn } from '../../../utils/cn';
 
 export interface ClusteredBarChartDataPoint {
   month: string;
-  onboarding: number;
+  inquiry: number;
   activation: number;
-  onboardingCount: number;
+  inquiryCount: number;
   activationCount: number;
 }
 
@@ -36,58 +36,107 @@ const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
   showLabels = true,
 }) => {
   const months = data.map((item) => item.month);
-  const onboardingData = data.map((item) => ({ value: item.onboarding, count: item.onboardingCount }));
+  const inquiryData = data.map((item) => ({ value: item.inquiry, count: item.inquiryCount }));
   const activationData = data.map((item) => ({ value: item.activation, count: item.activationCount }));
 
   const option = {
     ...ChartTheme.getEChartsOption(),
     tooltip: {
       ...ChartTheme.getEChartsOption().tooltip,
-      trigger: 'axis',
-      axisPointer: {
-        type: 'shadow',
-      },
+      trigger: 'item',
       formatter: function (params: any) {
-        const month = params[0].axisValue;
-        const onboarding = params.find((p: any) => p.seriesName === 'Onboarding %');
-        const activation = params.find((p: any) => p.seriesName === 'Activation %');
-        return `${month}<br/>
-          ${onboarding?.seriesName}: ${onboarding?.value}% (${onboarding?.data?.count})<br/>
-          ${activation?.seriesName}: ${activation?.value}% (${activation?.data?.count})`;
+        const month = params.name;
+        const seriesName = params.seriesName;
+        const value = params.value;
+        const count = params.data.count;
+        return `${month}<br/>${seriesName}: ${value}% (${count})`;
       },
     },
     legend: showLegend
       ? {
-          data: ['Onboarding %', 'Activation %'],
+          data: ['Inquiry %', 'Activation %'],
           bottom: 0,
         }
       : undefined,
     xAxis: {
       type: 'category',
       data: months,
+      name: 'Month',
+      nameLocation: 'middle',
+      nameGap: 30,
+      nameTextStyle: {
+        color: ChartTheme.base.neutralGray,
+        fontSize: 12,
+        fontWeight: 'bold',
+      },
       axisLabel: {
         color: ChartTheme.base.neutralGray,
+      },
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: '#333333',
+          width: 3,
+        },
+        symbol: ['none', 'arrow'],
+        symbolSize: [10, 12],
+      },
+      axisTick: {
+        show: true,
+        lineStyle: {
+          width: 2,
+        },
       },
     },
     yAxis: {
       type: 'value',
-      name: '%',
+      name: 'Percentage (%)',
+      nameLocation: 'middle',
+      nameGap: 50,
+      nameTextStyle: {
+        color: ChartTheme.base.neutralGray,
+        fontSize: 12,
+        fontWeight: 'bold',
+      },
       min: 0,
       max: 100,
-      show: false,
+      position: 'left',
       axisLabel: {
         formatter: '{value}%',
         color: ChartTheme.base.neutralGray,
+        inside: false,
+      },
+      axisLine: {
+        show: true,
+        onZero: false,
+        lineStyle: {
+          color: '#333333',
+          width: 3,
+        },
+        symbol: ['none', 'arrow'],
+        symbolSize: [10, 12],
+      },
+      axisTick: {
+        show: true,
+        inside: false,
+        lineStyle: {
+          width: 2,
+        },
       },
       splitLine: {
-        show: false,
+        show: true,
+        lineStyle: {
+          color: '#f0f0f0',
+          type: 'dashed',
+        },
       },
     },
     series: [
       {
-        name: 'Onboarding %',
+        name: 'Inquiry %',
         type: 'bar',
-        data: onboardingData,
+        data: inquiryData,
+        barWidth: '10%',
         itemStyle: {
           color: ChartTheme.base.primaryBlue,
         },
@@ -109,6 +158,7 @@ const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
         name: 'Activation %',
         type: 'bar',
         data: activationData,
+        barWidth: '10%',
         itemStyle: {
           color: ChartTheme.base.secondaryTeal,
         },
@@ -128,9 +178,9 @@ const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
       },
     ],
     grid: {
-      left: '0%',
-      right: '4%',
-      bottom: showLegend ? '15%' : '3%',
+      left: '10%',
+      right: '5%',
+      bottom: showLegend ? '20%' : '15%',
       top: '10%',
       containLabel: true,
     },

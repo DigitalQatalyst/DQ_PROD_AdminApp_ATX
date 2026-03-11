@@ -4,42 +4,42 @@
  */
 
 export const ChartTheme = {
-  // Base Theme (Blue/Teal System) - For descriptive and neutral metrics
+  // Base Theme - Exact colors from Growth Areas and other pages
   base: {
-    primaryBlue: '#2563EB',
-    secondaryTeal: '#0D9488',
-    accentIndigo: '#4F46E5',
-    neutralGray: '#64748B',
-    surfaceLight: '#F8FAFC',
-    textAxis: '#1E293B',
-    targetGray: '#94A3B8',
+    primaryBlue: '#2563EB',      // Blue-600 - standard blue for bars
+    secondaryTeal: '#16A34A',    // Green-600 - standard green for bars
+    accentIndigo: '#4F46E5',     // Indigo-600 - for variety
+    neutralGray: '#6B7280',      // Gray-500
+    surfaceLight: '#F9FAFB',     // Gray-50
+    textAxis: '#374151',         // Gray-700
+    targetGray: '#9CA3AF',       // Gray-400
   },
 
-  // Performance Gradient (Green–Red System) - For good → bad outcomes
+  // Performance Gradient - Exact colors from app badges
   performance: {
-    excellent: '#16A34A',      // Top quartile, good SLA, strong retention
-    good: '#4ADE80',           // Acceptable performance
-    moderate: '#FACC15',       // Average or declining trend
-    low: '#FB923C',            // Underperforming metric
-    critical: '#DC2626',       // Drop-off, churn, SLA breach
+    excellent: '#6EE7B7',        // Green-600 - exact match (text-green-600)
+    good: '#10B981',             // Green-500 - lighter green
+    moderate: '#F59E0B',         // Amber-500 - warning color
+    low: '#F97316',              // Orange-500
+    critical: '#EF4444',         // Red-500 - error s error badges
   },
 
-  // Alert Colors
+  // Alert Colors - Matching app's alert/badge system
   alerts: {
     high: {
-      background: '#FEEAEA',    // Light red/pink background
-      text: '#D93025',          // Red text
-      border: '#D93025',        // Red border (Critical deviations)
+      background: '#FEE2E2',     // Red-100
+      text: '#DC2626',           // Red-600
+      border: '#FCA5A5',         // Red-300
     },
     medium: {
-      background: '#FFF3E0',    // Light orange/peach background
-      text: '#E67C00',          // Orange text
-      border: '#E67C00',        // Orange border (Moderate changes)
+      background: '#FEF3C7',     // Amber-100
+      text: '#D97706',           // Amber-600
+      border: '#FCD34D',         // Amber-300
     },
     low: {
-      background: '#E8F5E9',    // Light green background
-      text: '#1E8E3E',          // Green text
-      border: '#1E8E3E',        // Green border (Stable/improving)
+      background: '#D1FAE5',     // Green-100
+      text: '#059669',           // Green-600
+      border: '#6EE7B7',         // Green-300
     },
   },
 

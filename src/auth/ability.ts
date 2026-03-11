@@ -14,8 +14,8 @@
 
 import { AbilityBuilder, createMongoAbility } from '@casl/ability';
 import { UserRole, UserSegment } from '../types';
-import { 
-  Actions as CanonicalActions, 
+import {
+  Actions as CanonicalActions,
   Subjects as CanonicalSubjects,
   RolePermissions,
   type Action,
@@ -73,10 +73,8 @@ export function buildAbility(user: UserContext): AppAbility {
 
   // Apply permissions based on role from shared registry
   // Note: We apply roles directly here to match the canonical permissions
-  
-  const crudSubjects = ['Service', 'ServiceForm', 'ServiceFormField', 'Content', 'Business', 'Zone', 'GrowthArea'] as Subject[];
-  const leadSubject: Subject = 'Lead';
-  const serviceRequestSubject: Subject = 'ServiceRequest';
+
+  const crudSubjects = ['Service', 'Content', 'Business', 'Zone', 'GrowthArea'] as Subject[];
   const conditions = user_segment === 'internal' ? undefined : { organization_id: organizationId };
 
   switch (role) {
@@ -125,6 +123,12 @@ export function buildAbility(user: UserContext): AppAbility {
       can('read', 'all');
       break;
 
+    case 'advisor':
+      // Advisor: Read access with ability to flag content for review
+      can('read', 'all');
+      can('flag', ['Content', 'Service'] as Subject[]);
+      break;
+
     default:
       cannot('manage', 'all');
       break;
@@ -143,30 +147,13 @@ export function buildAbility(user: UserContext): AppAbility {
     cannot('archive', 'all');
     cannot('flag', 'all');
   }
-
-  // Lead Management: Internal users only
-  if (user_segment === 'internal') {
-    switch (role) {
-      case 'admin':
-        can('manage', leadSubject);
-        can('manage', serviceRequestSubject);
-        break;
-      default:
-        cannot('manage', leadSubject);
-        cannot('manage', serviceRequestSubject);
-        break;
-    }
-  } else {
-    cannot('read', leadSubject);
-    cannot('create', leadSubject);
-    cannot('update', leadSubject);
-    cannot('delete', leadSubject);
-    cannot('manage', leadSubject);
-    cannot('read', serviceRequestSubject);
-    cannot('create', serviceRequestSubject);
-    cannot('update', serviceRequestSubject);
-    cannot('delete', serviceRequestSubject);
-    cannot('manage', serviceRequestSubject);
+  if (role === 'advisor') {
+    cannot('create', 'all');
+    cannot('update', 'all');
+    cannot('delete', 'all');
+    cannot('approve', 'all');
+    cannot('publish', 'all');
+    cannot('archive', 'all');
   }
 
   // Segment-specific overrides and special rules
@@ -270,8 +257,6 @@ export function canAccessModule(ability: AppAbility, module: string): boolean {
     'business_directory': 'Business',
     'zones': 'Zone',
     'growth_areas': 'GrowthArea',
-    'leads': 'Lead',
-    'service_requests': 'ServiceRequest',
   };
 
   const subject = moduleMap[module];
@@ -289,7 +274,7 @@ export function canAccessModule(ability: AppAbility, module: string): boolean {
  */
 export function getSubjectPermissions(ability: AppAbility, subject: Subjects): Actions[] {
   const actions: Actions[] = ['create', 'read', 'update', 'delete', 'approve', 'manage'];
-  
+
   return actions.filter(action => ability.can(action, subject));
 }
 
@@ -303,12 +288,12 @@ export function getAccessDeniedMessage(user: UserContext): string {
   if (!user.user_segment) {
     return `Access denied: Missing user segment claim. Please contact support to configure proper Azure claims for your account.`;
   }
-  
+
   const validTypes = ['internal', 'partner', 'customer', 'advisor'];
   if (!validTypes.includes(user.user_segment)) {
     return `Access denied: Invalid user segment "${user.user_segment}". Valid segments: ${validTypes.join(', ')}. Please contact support.`;
   }
-  
+
   return `Access denied: Insufficient permissions. Please contact support if you believe this is an error.`;
 }
 
