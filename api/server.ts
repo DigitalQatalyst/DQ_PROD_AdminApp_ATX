@@ -5,10 +5,11 @@
  * This shows how to integrate all the middleware components.
  */
 
-import express from 'express';
-import fs from 'fs';
-import path from 'path';
+// Load environment variables from .env file
 import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { Pool } from 'pg';
@@ -25,29 +26,6 @@ import servicesRouter from './routes/services';
 import vendureRouter from './routes/vendure';
 import uploadsRouter from './routes/uploads';
 
-// Attempt to load a .env file from the current folder or one of its parents (repo root)
-function loadEnvUpwards(maxDepth = 5) {
-  try {
-    let dir = process.cwd();
-    for (let i = 0; i < maxDepth; i++) {
-      const candidate = path.join(dir, '.env');
-      if (fs.existsSync(candidate)) {
-        dotenv.config({ path: candidate });
-        console.log('[server] Loaded .env from', candidate);
-        return;
-      }
-      const parent = path.dirname(dir);
-      if (parent === dir) break;
-      dir = parent;
-    }
-  } catch (e) {
-    // ignore
-  }
-  // fallback to default behavior (will look in process.cwd())
-  dotenv.config();
-}
-
-loadEnvUpwards();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -106,6 +84,9 @@ app.use('/api/vendure', vendureRouter);
 // Uploads routes (no auth required for file operations)
 app.use('/api/uploads', uploadsRouter);
 
+// CRM Webhook routes are now handled by Vercel serverless function
+// See: api/webhooks/crm/user-provisioning.ts
+
 // API routes with authentication and RBAC (commented out until server starts)
 // app.use('/api/contents', azureAuthMiddleware, rbacMiddleware, contentsRouter);
 // app.use('/api/services', azureAuthMiddleware, rbacMiddleware, servicesRouter);
@@ -118,7 +99,7 @@ app.use('/api/uploads', uploadsRouter);
 // Error handling middleware
 app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('API Error:', error);
-  
+
   if (error.type === 'entity.parse.failed') {
     return res.status(400).json({
       error: 'bad_request',
@@ -126,7 +107,7 @@ app.use((error: any, req: express.Request, res: express.Response, next: express.
       message: 'Invalid JSON in request body'
     });
   }
-  
+
   res.status(500).json({
     error: 'internal_server_error',
     reason: 'server_error',
@@ -147,7 +128,7 @@ app.use((req, res) => {
 app.listen(PORT, () => {
   const USE_MOCK_AUTH = process.env.USE_MOCK_AUTH === 'true';
   const ENVIRONMENT = process.env.NODE_ENV || 'development';
-  
+
   console.log(`🚀 API Server running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
   console.log(`🔐 RBAC middleware enabled`);

@@ -27,15 +27,15 @@ export function Footer({
 }: FooterProps) {
   // Minimal App Footer (Post-login)
   if (isLoggedIn) {
-    return <footer data-id={dataId} className="bg-gray-50 border-t border-gray-100 w-full h-10">
+    return <footer data-id={dataId} className="bg-gray-50 border-t border-gray-100 w-full h-10 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
           <div className="flex items-center space-x-3 text-xs text-gray-500">
-            <span>© 2025 Qatar Development Bank</span>
-            <span className="hidden sm:inline">v2.1.0</span>
+            <span>©  2026 Enterprise Journey powered by Khalifa Fund for Enterprise Development. All rights reserved.</span>
+            {/* <span className="hidden sm:inline">v2.1.0</span> */}
           </div>
-          <a href="#" className="text-xs text-gray-500 hover:text-gray-700 transition-colors">
+          {/* <a href="#" className="text-xs text-gray-500 hover:text-gray-700 transition-colors">
             Support
-          </a>
+          </a> */}
         </div>
       </footer>;
   }
@@ -46,17 +46,17 @@ export function Footer({
         <div className="block lg:hidden">
           {/* Logo */}
           <div className="mb-6">
-            <img 
-              src="/assets/qdb-logo.svg" 
-              alt="Qatar Development Bank" 
-              className="h-12"
-            />
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+              ENTERPRISE
+              <br />
+              JOURNEY
+            </h2>
           </div>
           {/* Newsletter - Mobile Full Width */}
           <div className="mb-8">
-              <p className="text-blue-100 text-sm mb-4 leading-relaxed">
+            <p className="text-blue-100 text-sm mb-4 leading-relaxed">
               Stay updated with the latest business insights, opportunities, and
-              services from Qatar Development Bank.
+              services from Enterprise Journey.
             </p>
             <div className="space-y-3">
               <input type="email" placeholder="Enter your email" className="w-full px-4 py-3 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Email address for newsletter" />
@@ -81,7 +81,7 @@ export function Footer({
                 </li>
                 <li>
                   <a href="#" className="text-blue-100 hover:text-white transition-colors text-sm block">
-                    Discover Qatar
+                    Discover Abu Dhabi
                   </a>
                 </li>
                 <li>
@@ -146,7 +146,7 @@ export function Footer({
           {/* Copyright - Mobile */}
           <div className="border-t border-blue-500 pt-6 text-center">
             <p className="text-blue-100 text-xs">
-              © 2025 Qatar Development Bank. All rights reserved.
+              © 2025 Enterprise Journey. All rights reserved.
             </p>
             <p className="text-blue-100 text-xs mt-1">v2.1.0</p>
           </div>
@@ -158,16 +158,16 @@ export function Footer({
             {/* Logo and Newsletter Section */}
             <div>
               <div className="mb-6">
-                <img 
-                  src="/assets/qdb-logo.svg" 
-                  alt="Qatar Development Bank" 
-                  className="h-16"
-                />
+                <h2 className="text-2xl font-bold tracking-tight">
+                  ENTERPRISE
+                  <br />
+                  JOURNEY
+                </h2>
               </div>
               <div className="mb-6">
                 <p className="text-blue-100 text-sm mb-4 leading-relaxed">
                   Stay updated with the latest business insights, opportunities,
-                  and services from Qatar Development Bank.
+                  and services from Enterprise Journey.
                 </p>
                 <div className="bg-white rounded-md flex items-center justify-between px-4 py-3">
                   <span className="text-gray-600 text-sm">
@@ -185,7 +185,7 @@ export function Footer({
               <ul className="space-y-4">
                 <li>
                   <a href="#" className="text-blue-100 hover:text-white transition-colors text-sm">
-                    About Qatar Development Bank
+                    About Enterprise Journey
                   </a>
                 </li>
                 <li>
@@ -195,7 +195,7 @@ export function Footer({
                 </li>
                 <li>
                   <a href="#" className="text-blue-100 hover:text-white transition-colors text-sm">
-                    Discover Qatar
+                    Discover Abu Dhabi
                   </a>
                 </li>
                 <li>
@@ -264,7 +264,7 @@ export function Footer({
           {/* Copyright - Desktop */}
           <div className="border-t border-blue-500 pt-6 flex items-center justify-between">
             <p className="text-blue-100 text-sm">
-              © 2025 Qatar Development Bank. All rights reserved.
+              © 2025 Enterprise Journey. All rights reserved.
             </p>
             <p className="text-blue-100 text-sm">v2.1.0</p>
           </div>

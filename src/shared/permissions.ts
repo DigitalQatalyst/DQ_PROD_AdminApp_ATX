@@ -54,8 +54,6 @@ export const Subjects = [
   'Organization',
   'Content',
   'Service',
-  'ServiceForm',
-  'ServiceFormField',
   'Business',
   'Zone',
   'GrowthArea',
@@ -81,6 +79,7 @@ export type Subject = typeof Subjects[number];
  * - editor: Content creation and lifecycle management (create, update, publish, flag)
  * - approver: Workflow validation and publishing (read, approve, publish)
  * - viewer: Read-only access
+ * - advisor: Advisory role with read access and ability to flag content for review
  */
 export const RolePermissions = {
   admin: {
@@ -89,7 +88,7 @@ export const RolePermissions = {
   },
   editor: {
     can: [
-      [['create', 'read', 'update'], ['Content', 'Service', 'ServiceForm', 'ServiceFormField', 'Business', 'Zone', 'GrowthArea']],
+      [['create', 'read', 'update'], ['Content', 'Service', 'Business', 'Zone', 'GrowthArea']],
       ['publish', 'Content'],  // Can publish/unpublish (bidirectional)
       ['flag', 'Content']
     ],
@@ -112,7 +111,17 @@ export const RolePermissions = {
   viewer: {
     can: [['read', 'all']],
     cannot: [
-      ['create', 'update', 'delete', 'approve', 'publish', 'archive', 'flag'], 
+      ['create', 'update', 'delete', 'approve', 'publish', 'archive', 'flag'],
+      'all'
+    ]
+  },
+  advisor: {
+    can: [
+      ['read', 'all'],
+      ['flag', ['Content', 'Service']]  // Advisors can flag content for review
+    ],
+    cannot: [
+      ['create', 'update', 'delete', 'approve', 'publish', 'archive'],
       'all'
     ]
   }

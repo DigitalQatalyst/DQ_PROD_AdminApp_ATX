@@ -8,11 +8,11 @@ interface AccessDeniedErrorProps {
   onRetry?: () => void;
 }
 
-export const AccessDeniedError: React.FC<AccessDeniedErrorProps> = ({ 
-  error, 
-  message, 
+export const AccessDeniedError: React.FC<AccessDeniedErrorProps> = ({
+  error,
+  message,
   email,
-  onRetry 
+  onRetry
 }) => {
   const getErrorMessage = () => {
     switch (error) {
@@ -46,15 +46,15 @@ export const AccessDeniedError: React.FC<AccessDeniedErrorProps> = ({
           <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
             <AlertCircleIcon className="h-6 w-6 text-red-600" />
           </div>
-          
+
           {/* Title */}
           <h3 className="mt-4 text-lg font-medium text-gray-900">Access Denied</h3>
-          
+
           {/* Error Message */}
           <p className="mt-2 text-sm text-gray-600">
             {getErrorMessage()}
           </p>
-          
+
           {/* Email Display */}
           {email && (
             <div className="mt-3 text-sm text-left bg-gray-50 p-3 rounded">
@@ -62,12 +62,12 @@ export const AccessDeniedError: React.FC<AccessDeniedErrorProps> = ({
               <p className="text-gray-700">{email}</p>
             </div>
           )}
-          
+
           {/* Additional Info */}
           <div className="mt-4 text-sm text-gray-500">
             <p>If you believe this is an error, please contact your administrator.</p>
           </div>
-          
+
           {/* Action Buttons */}
           <div className="mt-6 space-y-3">
             {/* Try Again Button (if onRetry provided) */}
@@ -79,7 +79,7 @@ export const AccessDeniedError: React.FC<AccessDeniedErrorProps> = ({
                 Try Again
               </button>
             )}
-            
+
             {/* Clear State and Return to Login */}
             <button
               onClick={handleClearState}

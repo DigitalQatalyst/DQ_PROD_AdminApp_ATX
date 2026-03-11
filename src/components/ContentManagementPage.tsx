@@ -342,24 +342,6 @@ export const ContentManagementPage: React.FC = () => {
       loadContent();
     }
   }, [list, authLoading]);
-
-  // Show toast if navigated here after a successful save
-  useEffect(() => {
-    if (authLoading) return;
-    try {
-      const raw = sessionStorage.getItem('content-save-success');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.message) {
-          setToast({ type: parsed.type === 'error' ? 'error' : 'success', message: parsed.message });
-        }
-        sessionStorage.removeItem('content-save-success');
-      }
-    } catch (e) {
-      // ignore parse errors
-      try { sessionStorage.removeItem('content-save-success'); } catch {}
-    }
-  }, [authLoading]);
   
   // Also listen for focus events (user returning to tab) to refresh stale data
   useEffect(() => {

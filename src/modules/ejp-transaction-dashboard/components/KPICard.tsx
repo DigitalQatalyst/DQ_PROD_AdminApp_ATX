@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Icon from '../../../components/ui/AppIcon';
 import { KPICardProps } from '../../../types';
+import KPIDetailModal from './KPIDetailModal';
 
 interface ExtendedKPICardProps extends KPICardProps {
   sparklineData?: number[];
@@ -21,6 +22,7 @@ const KPICard: React.FC<ExtendedKPICardProps> = ({
   target,
   targetStatus = 'on-track'
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // Threshold-based coloring
   const getThresholdColor = () => {
     switch (threshold) {
@@ -111,7 +113,14 @@ const KPICard: React.FC<ExtendedKPICardProps> = ({
   };
 
   return (
-    <div className={`p-6 rounded-xl border shadow-sm transition-all duration-200 hover:shadow-md ${getThresholdColor()}`}>
+    <>
+      <div 
+        className={`p-6 rounded-xl border shadow-sm transition-all duration-200 hover:shadow-lg hover:scale-[1.02] cursor-pointer ${getThresholdColor()}`}
+        onClick={() => setIsModalOpen(true)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === 'Enter' && setIsModalOpen(true)}
+      >
       {/* Header with Icon and Sparkline */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -195,6 +204,22 @@ const KPICard: React.FC<ExtendedKPICardProps> = ({
         )}
       </div>
     </div>
+
+    <KPIDetailModal
+      isOpen={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+      title={title}
+      value={value}
+      unit={unit}
+      description={description}
+      trend={trend}
+      trendValue={trendValue}
+      target={target}
+      sparklineData={sparklineData}
+      icon={icon}
+      threshold={threshold}
+    />
+    </>
   );
 };
 

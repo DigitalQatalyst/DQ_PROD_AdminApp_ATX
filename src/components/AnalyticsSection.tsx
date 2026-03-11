@@ -168,7 +168,7 @@ export const AnalyticsSection: React.FC = () => {
                       name,
                       percent
                     }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
-                          {deviceData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                          {deviceData.map((_entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                         </Pie>
                         <Tooltip />
                         <Legend />
@@ -177,7 +177,7 @@ export const AnalyticsSection: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <TableSection title="Key Metrics" columns={analyticsColumns} data={analyticsData} rowsPerPage={10} onAdd={() => {}} onEdit={() => {}} onDelete={() => {}} />
+              <TableSection title="Key Metrics" columns={analyticsColumns} data={analyticsData} rowsPerPage={10} onAdd={() => { /* TODO: Implement add functionality */ }} onEdit={() => { /* TODO: Implement edit functionality */ }} onDelete={() => { /* TODO: Implement delete functionality */ }} />
             </div>}
           {activeTabIndex === 1 && <div>
               <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -223,7 +223,7 @@ export const AnalyticsSection: React.FC = () => {
                   </ResponsiveContainer>
                 </div>
               </div>
-              <TableSection title="User Engagement" columns={analyticsColumns} data={analyticsData.filter(item => ['Unique Visitors', 'Avg. Session Duration', 'Bounce Rate'].includes(item.metric))} rowsPerPage={10} onAdd={() => {}} onEdit={() => {}} onDelete={() => {}} />
+              <TableSection title="User Engagement" columns={analyticsColumns} data={analyticsData.filter(item => ['Unique Visitors', 'Avg. Session Duration', 'Bounce Rate'].includes(item.metric))} rowsPerPage={10} onAdd={() => { /* TODO: Implement add functionality */ }} onEdit={() => { /* TODO: Implement edit functionality */ }} onDelete={() => { /* TODO: Implement delete functionality */ }} />
             </div>}
           {activeTabIndex === 2 && <div>
               <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -248,7 +248,7 @@ export const AnalyticsSection: React.FC = () => {
                   </ResponsiveContainer>
                 </div>
               </div>
-              <TableSection title="Conversion Metrics" columns={analyticsColumns} data={analyticsData.filter(item => ['Page Views', 'Conversion Rate'].includes(item.metric))} rowsPerPage={10} onAdd={() => {}} onEdit={() => {}} onDelete={() => {}} />
+              <TableSection title="Conversion Metrics" columns={analyticsColumns} data={analyticsData.filter(item => ['Page Views', 'Conversion Rate'].includes(item.metric))} rowsPerPage={10} onAdd={() => { /* TODO: Implement add functionality */ }} onEdit={() => { /* TODO: Implement edit functionality */ }} onDelete={() => { /* TODO: Implement delete functionality */ }} />
             </div>}
         </div>
       </div>

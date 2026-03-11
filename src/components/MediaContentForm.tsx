@@ -209,8 +209,7 @@ export const MediaContentForm: React.FC = () => {
     );
   };
 
-  // After success animation completes, navigate back and notify list to show a toast
-  const handleSuccessAndNavigate = () => {
+  const handleSuccessComplete = () => {
     // Log navigation completion for the save flow with minimal context
     logSaveFlow('NAVIGATE_BACK', {
       contentId: routeContentId,
@@ -218,14 +217,6 @@ export const MediaContentForm: React.FC = () => {
       userId: (window as any).__USER_ID__ || 'unknown',
       tenantId: (window as any).__TENANT_ID__ || 'unknown',
     });
-
-    try {
-      const message = isEditing ? 'Content updated successfully!' : 'Content created successfully!';
-      sessionStorage.setItem('content-save-success', JSON.stringify({ message, type: 'success' }));
-    } catch (e) {
-      // ignore
-    }
-    handleNavigateBack();
   };
 
   // Unicode-safe base64 encoding helper
@@ -258,7 +249,7 @@ export const MediaContentForm: React.FC = () => {
       {showSuccess && (
         <SuccessAnimation
           message={isEditing ? 'Content updated successfully!' : 'Content created successfully!'}
-          onComplete={handleSuccessAndNavigate}
+          onComplete={handleSuccessComplete}
         />
       )}
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogOutIcon, BellIcon, ChevronDownIcon, UserIcon } from 'lucide-react';
+import { LogOutIcon, ChevronDownIcon, UserIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { AzureLogout } from '../AzureLogout';
 interface ProfileDropdownProps {
@@ -99,26 +99,17 @@ export function ProfileDropdown({
                 </div>
               </button>
             </div>
-            <div className="py-1">
-              <button className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={e => {
-            e.preventDefault();
-            closeDropdown();
-            onViewNotifications();
-          }}>
-                <BellIcon size={16} className="mr-3 text-gray-500" />
-                <span>Notifications</span>
-                {unreadNotifications > 0 && <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-5 min-w-5 px-1.5 flex items-center justify-center">
-                    {unreadNotifications}
-                  </span>}
-              </button>
-            </div>
             <div className="py-1 border-t border-gray-200">
-              <button
-                className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                onClick={handleLogout}
+              <button 
+                className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  closeDropdown();
+                  showLogoutConfirm();
+                }}
               >
-                <LogOutIcon size={16} className="mr-3" />
-                <span>Sign Out</span>
+                <LogOutIcon size={16} className="mr-3 text-red-500" />
+                <span>Log Out</span>
               </button>
             </div>
           </div>

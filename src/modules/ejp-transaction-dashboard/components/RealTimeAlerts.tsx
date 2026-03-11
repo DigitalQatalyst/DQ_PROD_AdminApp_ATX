@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/ui/AppIcon';
+import { fetchPartnerLeadAlerts } from '../../../api/analytics/partnerAnalytics';
 
 interface AlertRule {
   id: string;
@@ -68,53 +69,31 @@ const RealTimeAlerts: React.FC = () => {
     }
   ];
 
-  const [alerts, setAlerts] = useState<Alert[]>([
-    {
-      id: 1,
-      type: 'sla-breach',
-      severity: 'high',
-      title: 'SLA Breach Alert: Service Success Rate',
-      description: 'Service Success Rate dropped to 78.5% (below 80% threshold)',
-      timestamp: '2 minutes ago',
-      status: 'active',
-      ruleId: 'sla-breach',
-      value: 78.5,
-      threshold: 80
-    },
-    {
-      id: 2,
-      type: 'escalation-spike',
-      severity: 'high',
-      title: 'Escalation Rate Spike Detected',
-      description: 'Ticket escalation rate increased to 12.3% (above 10% threshold)',
-      timestamp: '5 minutes ago',
-      status: 'investigating',
-      ruleId: 'escalation-spike',
-      value: 12.3,
-      threshold: 10
-    },
-    {
-      id: 3,
-      type: 'activation-dip',
-      severity: 'medium',
-      title: 'Activation Rate Decline Warning',
-      description: 'Service activation rate decreased by 6.2% over the last month',
-      timestamp: '15 minutes ago',
-      status: 'monitoring',
-      ruleId: 'activation-dip',
-      value: 6.2,
-      threshold: 5
-    },
-    {
-      id: 4,
-      type: 'system-performance',
-      severity: 'medium',
-      title: 'System Performance Warning',
-      description: 'Response time increased by 20% in the last hour',
-      timestamp: '12 minutes ago',
-      status: 'resolved'
-    }
-  ]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadAlerts = async () => {
+      try {
+        const data = await fetchPartnerLeadAlerts();
+        const mappedAlerts = data.map((alert: any, index: number) => ({
+          id: index + 1,
+          type: alert.severity.toLowerCase(),
+          severity: alert.severity.toLowerCase() as 'high' | 'medium' | 'low',
+          title: alert.title,
+          description: alert.description,
+          timestamp: alert.timestamp,
+          status: alert.severity === 'High' ? 'active' : alert.severity === 'Medium' ? 'monitoring' : 'resolved' as 'active' | 'monitoring' | 'investigating' | 'resolved'
+        }));
+        setAlerts(mappedAlerts);
+      } catch (error) {
+        console.error('Failed to load alerts:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAlerts();
+  }, []);
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -157,99 +136,7 @@ const RealTimeAlerts: React.FC = () => {
     }
   };
 
-  // Simulate real-time updates with alert rule triggers
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAlerts(prev => {
-        // Simulate alert rule triggers based on random conditions
-        const randomValue = Math.random();
-        
-        if (randomValue < 0.05) { // 5% chance of SLA breach
-          const newAlert: Alert = {
-            id: Date.now(),
-            type: 'sla-breach',
-            severity: 'high',
-            title: 'SLA Breach Alert: Service Success Rate',
-            description: `Service Success Rate dropped to ${(75 + Math.random() * 5).toFixed(1)}% (below 80% threshold)`,
-            timestamp: 'Just now',
-            status: 'active',
-            ruleId: 'sla-breach',
-            value: 75 + Math.random() * 5,
-            threshold: 80
-          };
-          return [newAlert, ...prev.slice(0, 3)];
-        }
-        
-        if (randomValue < 0.08) { // 3% chance of escalation spike
-          const newAlert: Alert = {
-            id: Date.now(),
-            type: 'escalation-spike',
-            severity: 'high',
-            title: 'Escalation Rate Spike Detected',
-            description: `Ticket escalation rate increased to ${(10 + Math.random() * 5).toFixed(1)}% (above 10% threshold)`,
-            timestamp: 'Just now',
-            status: 'investigating',
-            ruleId: 'escalation-spike',
-            value: 10 + Math.random() * 5,
-            threshold: 10
-          };
-          return [newAlert, ...prev.slice(0, 3)];
-        }
-        
-        if (randomValue < 0.12) { // 4% chance of activation dip
-          const newAlert: Alert = {
-            id: Date.now(),
-            type: 'activation-dip',
-            severity: 'medium',
-            title: 'Activation Rate Decline Warning',
-            description: `Service activation rate decreased by ${(5 + Math.random() * 3).toFixed(1)}% over the last month`,
-            timestamp: 'Just now',
-            status: 'monitoring',
-            ruleId: 'activation-dip',
-            value: 5 + Math.random() * 3,
-            threshold: 5
-          };
-          return [newAlert, ...prev.slice(0, 3)];
-        }
-        
-        if (randomValue < 0.15) { // 3% chance of system uptime warning
-          const newAlert: Alert = {
-            id: Date.now(),
-            type: 'system-uptime',
-            severity: 'high',
-            title: 'System Uptime Warning',
-            description: `System uptime dropped to ${(98 + Math.random() * 1).toFixed(1)}% (below 99% threshold)`,
-            timestamp: 'Just now',
-            status: 'active',
-            ruleId: 'system-uptime',
-            value: 98 + Math.random() * 1,
-            threshold: 99
-          };
-          return [newAlert, ...prev.slice(0, 3)];
-        }
-        
-        if (randomValue < 0.18) { // 3% chance of error rate increase
-          const newAlert: Alert = {
-            id: Date.now(),
-            type: 'error-rate',
-            severity: 'medium',
-            title: 'Error Rate Increase Alert',
-            description: `Error rate increased to ${(2 + Math.random() * 1).toFixed(1)}% (above 2% threshold)`,
-            timestamp: 'Just now',
-            status: 'monitoring',
-            ruleId: 'error-rate',
-            value: 2 + Math.random() * 1,
-            threshold: 2
-          };
-          return [newAlert, ...prev.slice(0, 3)];
-        }
-        
-        return prev;
-      });
-    }, 30000);
 
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div className="bg-white border border-border rounded-xl p-6">

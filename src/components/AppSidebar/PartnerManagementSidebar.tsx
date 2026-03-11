@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { X, ChevronDown, Info, Lock, Home, Users, UserCheck, List, FileEdit, FileText, Target, DollarSign, CreditCard, Receipt, BarChart3, FolderOpen, BookOpen, Image, MessageSquare, Settings, HelpCircle, Plus, Check } from 'lucide-react';
+import { X, ChevronDown, Info, Home, Users, UserCheck, List, FileEdit, FileText, Target, DollarSign, CreditCard, Receipt, BarChart3, FolderOpen, BookOpen, Image, MessageSquare, Settings, HelpCircle, Plus, Check } from 'lucide-react';
 interface Company {
   id: string;
   name: string;
@@ -31,7 +31,6 @@ export const PartnerManagementSidebar: React.FC<PartnerManagementSidebarProps> =
   isLoggedIn = true,
   'data-id': dataId
 }) => {
-  const [tooltipItem, setTooltipItem] = useState<string | null>(null);
   const [companyDropdownOpen, setCompanyDropdownOpen] = useState(false);
   const [focusedMenuIndex, setFocusedMenuIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -91,6 +90,7 @@ export const PartnerManagementSidebar: React.FC<PartnerManagementSidebarProps> =
         label: 'Partner Onboarding',
         icon: <Users size={20} />
       });
+      return items;
     } else {
       items.push({
         id: 'dashboard',
@@ -276,26 +276,19 @@ export const PartnerManagementSidebar: React.FC<PartnerManagementSidebarProps> =
                 </div>
               </div>;
         }
-        const isDisabled = !onboardingComplete && item.id !== 'onboarding';
+        
         const isActive = activeSection === item.id;
         const menuItemIndex = getPartnerMenuItems().filter((i: any) => i.category !== 'category').findIndex((i: any) => i.id === item.id);
-        return <div key={item.id} ref={el => menuItemsRef.current[menuItemIndex] = el} className={`flex items-center px-4 py-3 relative transition-colors ${isActive ? 'bg-blue-700 text-white' : isDisabled ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-200 cursor-pointer'}`} onClick={() => !isDisabled && onSectionChange?.(item.id)} onMouseEnter={() => isDisabled && setTooltipItem(item.id)} onMouseLeave={() => setTooltipItem(null)} onKeyDown={e => {
+        return <div key={item.id} ref={el => menuItemsRef.current[menuItemIndex] = el} className={`flex items-center px-4 py-3 relative transition-colors ${isActive ? 'bg-blue-700 text-white' : 'text-gray-700 hover:bg-gray-200 cursor-pointer'}`} onClick={() => onSectionChange?.(item.id)} onKeyDown={e => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            !isDisabled && onSectionChange?.(item.id);
+            onSectionChange?.(item.id);
           }
-        }} tabIndex={0} role="button" aria-label={`Navigate to ${item.label}`} aria-disabled={isDisabled}>
+        }} tabIndex={0} role="button" aria-label={`Navigate to ${item.label}`}>
               <span className="w-8 flex items-center justify-center flex-shrink-0">
-                {isDisabled && !isActive ? <div className="relative">
-                    {item.icon}
-                    <Lock size={10} className="absolute -top-1 -right-1 text-gray-400" />
-                  </div> : item.icon}
+                {item.icon}
               </span>
               <span className="flex-1 ml-3">{item.label}</span>
-              {tooltipItem === item.id && <div className="absolute left-full ml-2 bg-gray-800 text-white text-xs py-2 px-3 rounded-md w-48 z-50">
-                  Complete partner onboarding to unlock this section
-                  <div className="absolute top-1/2 -left-1 transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
-                </div>}
             </div>;
       })}
       </nav>

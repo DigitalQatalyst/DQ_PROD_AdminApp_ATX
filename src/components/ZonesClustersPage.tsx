@@ -7,6 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import { Zone } from '../types';
 import { Toast } from './ui/Toast';
 
+
+
 // Mock data removed - using Supabase with RLS instead
 /*
 const mockZones = [{
@@ -1075,7 +1077,7 @@ export const ZonesClustersPage: React.FC = () => {
     );
   }
 
-  return <div className="px-3 py-3 bg-gray-50 min-h-screen">
+  return <div className="px-4 sm:px-6 pt-4 pb-20 bg-gray-50 min-h-screen">
     {/* Page Header */}
     <div className="mb-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-1">

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { ExploreDropdown } from './components/ExploreDropdown';
 import { DemoMobileDrawer } from './components/DemoMobileDrawer';
 interface DemoHeaderProps {
   toggleSidebar?: () => void;
@@ -25,20 +24,15 @@ export function DemoHeader({
       <header className={`flex items-center w-full transition-all duration-300 ${isSticky ? 'fixed top-0 left-0 right-0 z-40 shadow-lg backdrop-blur-sm bg-gradient-to-r from-teal-500/95 via-blue-500/95 to-purple-600/95' : 'relative bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600'}`} data-id={dataId}>
         {/* Logo Section */}
         <div className={`bg-gradient-to-r from-teal-600 to-teal-500 text-white py-2 px-4 flex items-center transition-all duration-300 ${isSticky ? 'h-12' : 'h-16'}`}>
-          <img 
-            src="/assets/qdb-logo.svg" 
-            alt="Qatar Development Bank" 
-            className={`transition-all duration-300 ${isSticky ? 'h-8' : 'h-12'}`}
-          />
+          <div className={`font-bold leading-tight transition-all duration-300 ${isSticky ? 'text-sm' : ''}`}>
+            <div>ENTERPRISE</div>
+            <div>JOURNEY</div>
+          </div>
         </div>
         {/* Main Navigation */}
         <div className={`flex-1 flex justify-between items-center bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600 text-white px-4 transition-all duration-300 ${isSticky ? 'h-12' : 'h-16'}`}>
           {/* Left Navigation - Desktop and Tablet */}
           <div className="hidden md:flex items-center space-x-8">
-            <ExploreDropdown isCompact={isSticky} />
-            <div className={`hover:text-gray-200 transition-colors duration-200 cursor-pointer ${isSticky ? 'text-sm' : ''}`}>
-              Discover Qatar
-            </div>
           </div>
           {/* Right Side - CTAs without authentication */}
           <div className="flex items-center ml-auto space-x-2 relative">
