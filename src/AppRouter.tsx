@@ -24,6 +24,7 @@ import EJPTransactionDashboard from "./modules/ejp-transaction-dashboard";
 import ServiceDeliveryOverview from "./modules/service-delivery-overview";
 import { useAuth } from "./context/AuthContext";
 import { ChatInterface } from "./modules/chat-support/pages/ChatInterface";
+import ContactsPage from "./pages/contacts";
 
 // Component to redirect to appropriate dashboard based on user segment
 const DashboardRedirect = () => {
@@ -55,7 +56,7 @@ export function AppRouter() {
           path="/chat-support"
           element={
             <ProtectedRoute requiredRoles={["admin", "approver", "editor", "viewer"]}
-            requiredSegments={["partner"]}>
+              requiredSegments={["partner"]}>
               <AppLayout activeSection="chat-support">
                 <ChatInterface />
               </AppLayout>
@@ -105,7 +106,7 @@ export function AppRouter() {
           element={
             <ProtectedRoute
               requiredRoles={["admin", "approver", "editor", "viewer"]}
-              requiredSegments={["partner","internal",]}
+              requiredSegments={["partner", "internal",]}
             >
               <AppLayout activeSection="experience-analytics">
                 <EJPTransactionDashboard />
@@ -256,6 +257,18 @@ export function AppRouter() {
         </ProtectedRoute>
       } />
       */}
+        {/* Contact Management */}
+        <Route
+          path="/contacts"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+            >
+              <ContactsPage />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/content-form"
           element={

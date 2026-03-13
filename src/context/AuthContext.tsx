@@ -12,12 +12,8 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { User, UserRole, RolePermissions } from '../types';
 import { buildAbility, AppAbility, UserContext, debugUserAbilities } from '../auth/ability';
 import { createMongoAbility } from '@casl/ability';
-<<<<<<< HEAD
-// import { getInternalJWT, parseInternalJWT, isInternalJWTExpired } from '../lib/federatedAuth';
-=======
 import { getInternalJWT, parseInternalJWT, isInternalJWTExpired } from '../lib/federatedAuth';
 import { setSupabaseUserContext, clearSupabaseUserContext } from '../lib/client';
->>>>>>> 8d427317b5ee0d707dd5ca9d5e7c0d191390ade3
 
 interface AuthContextType {
   user: User | null;
@@ -46,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userSegment, setUserSegment] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   // Initialize ability immediately with a minimal empty ability
-  const [ability, setAbility] = useState<AppAbility>(createMongoAbility([]));
+  const [ability, setAbility] = useState<AppAbility>(createMongoAbility<AppAbility>([]));
 
   useEffect(() => {
     // START AUTH BYPASS CODE
@@ -180,7 +176,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       roleValue
     });
 
-    const userRole = roleValue || userData.role || 'viewer';
+    const userRole = (roleValue as UserRole) || userData.role || 'viewer';
     const segment = userSegmentValue || userData.user_segment || null;
 
     setUser(userData);
@@ -213,15 +209,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Store in localStorage
     localStorage.setItem('platform_admin_user', JSON.stringify(userData));
     localStorage.setItem('user_role', userRole);
-    localStorage.setItem('user_segment', segment);
-<<<<<<< HEAD
+    localStorage.setItem('user_segment', segment || '');
 
-=======
-    
     // Sync Supabase user context for Chat Support module
     await setSupabaseUserContext(userData.id, userData.email || '');
-    
->>>>>>> 8d427317b5ee0d707dd5ca9d5e7c0d191390ade3
+
     console.log('🔐 AuthContext state set:', {
       user: userData,
       role: userRole,
@@ -244,7 +236,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setRole('viewer');
     setUserSegment(null);
-    setAbility(createMongoAbility([]));
+    setAbility(createMongoAbility<AppAbility>([]));
     localStorage.removeItem('platform_admin_user');
     localStorage.removeItem('user_role');
     localStorage.removeItem('user_segment');

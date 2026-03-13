@@ -1,4 +1,4 @@
-import React, { useEffect, useState, createContext, useContext } from 'react';
+import React, { useEffect, useState, createContext, useContext, ReactNode } from 'react';
 interface User {
   id: string;
   name: string;
@@ -42,8 +42,8 @@ export function AuthProvider({
     login,
     logout
   }}>
-      {children}
-    </AuthContext.Provider>;
+    {children}
+  </AuthContext.Provider>;
 }
 export function useAuth() {
   const context = useContext(AuthContext);
