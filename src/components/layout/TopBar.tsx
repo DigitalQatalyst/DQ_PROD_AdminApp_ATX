@@ -1,4 +1,4 @@
-import { ChevronDown, Layers, User } from "lucide-react";
+import { ChevronDown, Layers, User, Settings } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../ui/ButtonComponent";
 import { Badge } from "../ui/Badge";
@@ -34,8 +34,9 @@ export function TopBar() {
         </div>
       </div>
 
-      {/* Center Section - Organization */}
+      {/* Center Section - Tenant & Stream Controls */}
       <div className="flex items-center gap-3">
+        {/* Tenant Switch */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -50,7 +51,7 @@ export function TopBar() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="center" className="w-56">
-            <DropdownMenuLabel>Organization</DropdownMenuLabel>
+            <DropdownMenuLabel>Tenant</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="flex items-center gap-2">
               <div className="w-6 h-6 rounded bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">
@@ -63,9 +64,33 @@ export function TopBar() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Stream Switch */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              className="h-9 px-3 gap-2 bg-accent/10 border-accent/30 hover:bg-accent/20 text-accent"
+            >
+              <Layers className="w-4 h-4" />
+              <span className="text-sm font-medium">Default Stream</span>
+              <ChevronDown className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="center" className="w-48">
+            <DropdownMenuLabel>Data Stream</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <span className="text-sm">Default Stream</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <span className="text-sm">CRM Stream</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      {/* Right Section - User & Segment */}
+      {/* Right Section - User & Controls */}
       <div className="flex items-center gap-3">
         {/* Segment Badge */}
         <Badge
@@ -78,6 +103,18 @@ export function TopBar() {
         >
           {userSegment === "internal" ? "Staff" : "Partner"}
         </Badge>
+
+        {/* Settings Control */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          onClick={() => {
+            /* Handle settings */
+          }}
+        >
+          <Settings className="w-4 h-4" />
+        </Button>
 
         {/* Theme Toggle */}
         <ModeToggle />

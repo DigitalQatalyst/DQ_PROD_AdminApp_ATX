@@ -13,6 +13,8 @@ import ContentManagementRoute from "./pages/content-management";
 // import ZoneFormRoute from './pages/zone-form';
 import ContentFormRoute from "./pages/content-form";
 import AccountsPage from "./pages/accounts";
+import ContactsPage from "./pages/contacts";
+import LeadsPage from "./pages/leads";
 import LoginPage from "./pages/login";
 import SettingsPage from "./pages/settings";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -154,6 +156,32 @@ export function AppRouter() {
             >
               <AppShell>
                 <AccountsPage />
+              </AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/contacts"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+              requiredSegments={["internal"]}
+            >
+              <AppShell>
+                <ContactsPage />
+              </AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/leads"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+              requiredSegments={["internal"]}
+            >
+              <AppShell>
+                <LeadsPage />
               </AppShell>
             </ProtectedRoute>
           }

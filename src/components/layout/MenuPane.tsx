@@ -8,6 +8,9 @@ import {
   FileCheck,
   Briefcase,
   MessageSquare,
+  User,
+  Target,
+  Building,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 import { useAuth } from "../../context/AuthContext";
@@ -27,6 +30,7 @@ export function MenuPane() {
   const navigate = useNavigate();
   const { userSegment } = useAuth();
   const [expandedSections, setExpandedSections] = useState<string[]>([
+    "crm",
     "analytics",
   ]);
 
@@ -39,6 +43,34 @@ export function MenuPane() {
   };
 
   const navigationItems: NavigationItem[] = [
+    {
+      id: "crm",
+      name: "CRM Modules",
+      icon: Briefcase,
+      children: [
+        {
+          id: "contacts",
+          name: "Contacts",
+          icon: User,
+          path: "/contacts",
+          requiredSegments: ["internal"],
+        },
+        {
+          id: "leads",
+          name: "Leads",
+          icon: Target,
+          path: "/leads",
+          requiredSegments: ["internal"],
+        },
+        {
+          id: "accounts",
+          name: "Accounts",
+          icon: Building,
+          path: "/accounts",
+          requiredSegments: ["internal"],
+        },
+      ],
+    },
     {
       id: "analytics",
       name: "Analytics & Monitoring",
@@ -63,13 +95,6 @@ export function MenuPane() {
           name: "Content Management",
           icon: FileCheck,
           path: "/content-management",
-          requiredSegments: ["internal"],
-        },
-        {
-          id: "accounts",
-          name: "Accounts (LVE Shell)",
-          icon: Briefcase,
-          path: "/accounts",
           requiredSegments: ["internal"],
         },
       ],

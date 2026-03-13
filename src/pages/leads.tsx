@@ -6,48 +6,51 @@ import {
 
 const defaultTabs: LVETab[] = [
   {
-    id: "accounts-home",
-    label: "Accounts Workspace",
+    id: "leads-home",
+    label: "Leads Workspace",
     isActive: true,
   },
 ];
 
-const AccountsPage: React.FC = () => {
+const LeadsPage: React.FC = () => {
   return (
     <div className="h-full">
       <LVEWorkspaceLayout
-        headerTitle="Account Management"
+        headerTitle="Lead Management"
         tenantLabel="Demo Tenant"
-        streamLabel="Accounts Stream"
+        streamLabel="Leads Stream"
         tabs={defaultTabs}
         menuPane={
           <div className="p-4 space-y-2 text-xs text-muted-foreground">
             <div className="font-semibold text-foreground text-[11px] tracking-wide uppercase">
-              Account Actions
+              Lead Pipeline
             </div>
             <ul className="space-y-1">
               <li className="rounded-md px-2 py-1 bg-accent text-foreground text-xs">
-                All Accounts
+                All Leads
               </li>
               <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                New Account
+                New Lead
               </li>
               <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                Import Accounts
+                Import Leads
+              </li>
+              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
+                Lead Conversion
               </li>
             </ul>
             <div className="font-semibold text-foreground text-[11px] tracking-wide uppercase mt-4">
-              Account Views
+              Lead Stages
             </div>
             <ul className="space-y-1">
               <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                Active Accounts
+                Qualified
               </li>
               <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                Recent Activity
+                Contacted
               </li>
               <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                High Value
+                Opportunity
               </li>
             </ul>
           </div>
@@ -56,25 +59,25 @@ const AccountsPage: React.FC = () => {
           <div className="p-4 text-xs text-muted-foreground">
             <div className="mb-2 flex items-center justify-between">
               <div className="font-semibold text-foreground text-[11px] tracking-wide uppercase">
-                Account List
+                Lead Queue
               </div>
               <span className="text-[10px] text-muted-foreground">
                 MVP Placeholder
               </span>
             </div>
             <p className="text-muted-foreground mb-3">
-              Account list with search, filters, and account records will be
-              implemented here.
+              Lead list with lifecycle stages, activity timeline, and conversion
+              workflow will be implemented here.
             </p>
             <div className="space-y-2">
               <div className="text-[10px] text-muted-foreground">
-                • Account overview and details
+                • Lead scoring and qualification
               </div>
               <div className="text-[10px] text-muted-foreground">
-                • Associated contacts and opportunities
+                • Stage progression tracking
               </div>
               <div className="text-[10px] text-muted-foreground">
-                • Activity history and notes
+                • Activity and follow-up management
               </div>
             </div>
           </div>
@@ -83,33 +86,17 @@ const AccountsPage: React.FC = () => {
           <div className="p-6 text-center">
             <div className="max-w-md mx-auto">
               <h3 className="text-lg font-semibold text-foreground mb-2">
-                Account Workspace
+                Lead Workspace
               </h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Select an account from the list to view details with Overview,
-                Contacts, Deals, Activity, and Notes tabs.
+                Select a lead from the queue to view details, update stage, log
+                activities, or convert to opportunity.
               </p>
               <div className="bg-card border border-border rounded-lg p-4">
-                <p className="text-xs text-muted-foreground mb-3">
-                  Account detail tabs will include:
+                <p className="text-xs text-muted-foreground">
+                  Lead detail view, stage management, activity timeline, and
+                  conversion forms will appear here.
                 </p>
-                <div className="space-y-1 text-left">
-                  <div className="text-[10px] text-muted-foreground">
-                    • Overview - Account summary and key information
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    • Contacts - Associated contact records
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    • Deals - Related opportunities and deals
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    • Activity - Timeline and interaction history
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    • Notes - Account notes and documentation
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -117,31 +104,30 @@ const AccountsPage: React.FC = () => {
         popPane={
           <div className="p-4 text-xs text-muted-foreground">
             <div className="font-semibold text-foreground text-[11px] tracking-wide uppercase mb-2">
-              Account Context
+              Lead Context
             </div>
             <p className="text-muted-foreground mb-3">
-              Related activities, contacts, and opportunities without losing
-              main workspace context.
+              Lead activities, conversion history, and related opportunities.
             </p>
             <div className="space-y-2">
               <div className="text-[10px] text-muted-foreground">
-                • Recent Activities
+                • Activity Timeline
               </div>
               <div className="text-[10px] text-muted-foreground">
-                • Key Contacts
+                • Lead Source
               </div>
               <div className="text-[10px] text-muted-foreground">
-                • Open Opportunities
+                • Conversion Tracking
               </div>
               <div className="text-[10px] text-muted-foreground">
-                • Account Health
+                • Related Opportunities
               </div>
             </div>
           </div>
         }
         footer={
           <span>
-            Account Management MVP - LVE workspace with tabbed detail views
+            Lead Management MVP - LVE workspace with lifecycle tracking
           </span>
         }
       />
@@ -149,4 +135,4 @@ const AccountsPage: React.FC = () => {
   );
 };
 
-export default AccountsPage;
+export default LeadsPage;
