@@ -12,6 +12,8 @@ import ContentManagementRoute from "./pages/content-management";
 // import GrowthAreaFormRoute from './pages/growth-area-form';
 // import ZoneFormRoute from './pages/zone-form';
 import ContentFormRoute from "./pages/content-form";
+import LeadManagementPage from "./pages/lead-management";
+import LeadManagementTest from "./pages/lead-management-test";
 import LoginPage from "./pages/login";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ContentSegmentGate } from "./components/ContentSegmentGate";
@@ -144,6 +146,19 @@ export function AppRouter() {
               <ContentSegmentGate>
                 <ContentManagementRoute />
               </ContentSegmentGate>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/lead-management"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+              requiredSegments={["internal", "partner"]}
+            >
+              <AppLayout activeSection="lead-management">
+                <LeadManagementTest />
+              </AppLayout>
             </ProtectedRoute>
           }
         />
