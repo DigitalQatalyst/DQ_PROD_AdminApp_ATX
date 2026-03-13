@@ -214,16 +214,11 @@ export const ServiceDetailsDrawer: React.FC<ServiceDetailsDrawerProps> = ({
   // Helper to safely access nested properties
   const safeGet = (obj: any, ...keys: string[]) => {
     for (const key of keys) {
-      if (obj && obj[key] !== undefined && obj[key] !== null && obj[key] !== '') {
+      if (obj && obj[key] !== undefined) {
         return obj[key];
       }
     }
     return undefined;
-  };
-
-  // Get normalized service type
-  const getServiceType = () => {
-    return service.service_type || service.type || 'Business';
   };
 
   const isPublished = service.status === 'Published';
@@ -319,7 +314,7 @@ export const ServiceDetailsDrawer: React.FC<ServiceDetailsDrawerProps> = ({
   };
   // Render approval flow tracker
   const renderApprovalFlow = () => {
-    if (getServiceType() === 'Financial') {
+    if (service.type === 'Financial') {
       return <div className="mb-6">
         <h3 className="text-sm font-medium text-gray-700 mb-3">
           Approval Flow
@@ -388,11 +383,11 @@ export const ServiceDetailsDrawer: React.FC<ServiceDetailsDrawerProps> = ({
 
   // Render financial service details
   const renderFinancialDetails = () => {
-    const eligibility = safeGet(service, 'eligibility', 'eligibility_requirements') || [];
-    const applicationRequirements = safeGet(service, 'applicationRequirements', 'application_requirements', 'application_process') || [];
-    const processingTime = safeGet(service, 'processingTime', 'processing_time', 'service_processing_time') || 'N/A';
-    const fee = safeGet(service, 'fee', 'service_amount') || 'N/A';
-    const documentsRequired = safeGet(service, 'documentsRequired', 'documents_required', 'required_documents') || [];
+    const eligibility = safeGet(service, 'eligibility') || [];
+    const applicationRequirements = safeGet(service, 'applicationRequirements', 'application_requirements') || [];
+    const processingTime = safeGet(service, 'processingTime', 'processing_time') || 'N/A';
+    const fee = safeGet(service, 'fee') || 'N/A';
+    const documentsRequired = safeGet(service, 'documentsRequired', 'documents_required') || [];
     const keyTermsOfService = safeGet(service, 'keyTermsOfService', 'key_terms_of_service') || safeGet(service, 'regulatoryCategory', 'regulatory_category') || '';
     const additionalTermsOfService = safeGet(service, 'additionalTermsOfService', 'additional_terms_of_service') || '';
 
@@ -492,7 +487,7 @@ export const ServiceDetailsDrawer: React.FC<ServiceDetailsDrawerProps> = ({
               Service Type
             </h3>
           </div>
-          <p className="text-gray-900 font-semibold text-base">{getServiceType()}</p>
+          <p className="text-gray-900 font-semibold text-base">{service.type || 'N/A'}</p>
         </div>
       </div>
 
@@ -571,9 +566,9 @@ export const ServiceDetailsDrawer: React.FC<ServiceDetailsDrawerProps> = ({
   };
   // Render non-financial service details
   const renderNonFinancialDetails = () => {
-    const eligibility = safeGet(service, 'eligibility', 'eligibility_requirements') || [];
-    const processingTime = safeGet(service, 'processingTime', 'processing_time', 'service_processing_time') || 'N/A';
-    const fee = safeGet(service, 'fee', 'service_amount') || 'N/A';
+    const eligibility = safeGet(service, 'eligibility') || [];
+    const processingTime = safeGet(service, 'processingTime', 'processing_time') || 'N/A';
+    const fee = safeGet(service, 'fee') || 'N/A';
     const outcome = safeGet(service, 'outcome') || '';
     const keyTermsOfService = safeGet(service, 'keyTermsOfService', 'key_terms_of_service') || '';
     const additionalTermsOfService = safeGet(service, 'additionalTermsOfService', 'additional_terms_of_service') || outcome || '';
@@ -715,7 +710,7 @@ export const ServiceDetailsDrawer: React.FC<ServiceDetailsDrawerProps> = ({
               Service Type
             </h3>
           </div>
-          <p className="text-gray-900 font-semibold text-base">{getServiceType()}</p>
+          <p className="text-gray-900 font-semibold text-base">{service.type || 'N/A'}</p>
         </div>
       </div>
     </div>;
@@ -788,8 +783,8 @@ export const ServiceDetailsDrawer: React.FC<ServiceDetailsDrawerProps> = ({
   };
   // Render provider details tab
   const renderProviderDetails = () => {
-    const partnerInfo = safeGet(service, 'partnerInfo', 'partner_info', 'partner') || {};
-    const partnerName = safeGet(service, 'partner', 'partner_name') || partnerInfo?.name || 'No Partner Assigned';
+    const partnerInfo = safeGet(service, 'partnerInfo', 'partner_info') || {};
+    const partnerName = safeGet(service, 'partner', 'partner_name') || partnerInfo.name || 'N/A';
 
     return <div className="px-6 lg:px-8">
       <div className="mb-8">
@@ -1211,7 +1206,7 @@ export const ServiceDetailsDrawer: React.FC<ServiceDetailsDrawerProps> = ({
     const activeTabId = getActiveTabId();
     switch (activeTabId) {
       case 'details':
-        return getServiceType() === 'Financial' ? renderFinancialDetails() : renderNonFinancialDetails();
+        return service.type === 'Financial' ? renderFinancialDetails() : renderNonFinancialDetails();
       case 'review':
         return renderReviewAndComments();
       case 'provider':
@@ -1219,7 +1214,7 @@ export const ServiceDetailsDrawer: React.FC<ServiceDetailsDrawerProps> = ({
       case 'insights':
         return renderServiceInsights();
       default:
-        return getServiceType() === 'Financial' ? renderFinancialDetails() : renderNonFinancialDetails();
+        return service.type === 'Financial' ? renderFinancialDetails() : renderNonFinancialDetails();
     }
   };
   return <div className="fixed inset-0 overflow-hidden z-50">

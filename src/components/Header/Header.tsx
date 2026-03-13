@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { ExploreDropdown } from './components/ExploreDropdown';
 import { MobileDrawer } from './components/MobileDrawer';
 import { ProfileDropdown } from './ProfileDropdown';
 import { NotificationsMenu } from './notifications/NotificationsMenu';
@@ -64,23 +63,21 @@ export function Header({
     }
   }, [user]);
   return <>
-    <header className={`flex items-center w-full transition-all duration-300 ${isSticky ? 'fixed top-0 left-0 right-0 z-40 shadow-lg backdrop-blur-sm bg-gradient-to-r from-teal-500/95 via-[#2596be]/95 to-purple-600/95' : 'relative bg-gradient-to-r from-teal-500 via-[#2596be] to-purple-600'}`} data-id={dataId}>
+    <header className={`flex items-center w-full transition-all duration-300 ${isSticky ? 'fixed top-0 left-0 right-0 z-40 shadow-lg backdrop-blur-sm bg-gradient-to-r from-teal-500/95 via-blue-500/95 to-purple-600/95' : 'relative bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600'}`} data-id={dataId}>
       {/* Logo Section */}
-      <div className={`bg-gradient-to-r from-teal-600 to-teal-500 text-white py-2 px-4 flex items-center transition-all duration-300 ${isSticky ? 'h-12' : 'h-16'}`}>
-        <img
-          src="/assets/dq-logo.png"
-          alt="Digital Qatalyst"
-          className={`transition-all duration-300 ${isSticky ? 'h-8' : 'h-12'}`}
-        />
-      </div>
+      <a
+        href="https://mzn-ejp-v2-git-develop-digitalqatalysts-projects.vercel.app/"
+        className={`bg-gradient-to-r from-teal-600 to-teal-500 text-white py-2 px-4 flex items-center transition-all duration-300 cursor-pointer hover:from-teal-700 hover:to-teal-600 ${isSticky ? 'h-12' : 'h-16'}`}
+      >
+        <div className={`font-bold leading-tight transition-all duration-300 ${isSticky ? 'text-sm' : ''}`}>
+          <div>ENTERPRISE</div>
+          <div>JOURNEY</div>
+        </div>
+      </a>
       {/* Main Navigation */}
-      <div className={`flex-1 flex justify-between items-center bg-gradient-to-r from-teal-500 via-[#2596be] to-purple-600 text-white px-4 transition-all duration-300 ${isSticky ? 'h-12' : 'h-16'}`}>
+      <div className={`flex-1 flex justify-between items-center bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600 text-white px-4 transition-all duration-300 ${isSticky ? 'h-12' : 'h-16'}`}>
         {/* Left Navigation - Desktop and Tablet */}
         <div className="hidden md:flex items-center space-x-8">
-          <ExploreDropdown isCompact={isSticky} />
-          <div className={`hover:text-gray-200 transition-colors duration-200 cursor-pointer ${isSticky ? 'text-sm' : ''}`}>
-            Discover DigitalQatalyst
-          </div>
         </div>
         {/* Right Side - Conditional based on auth state and screen size */}
         <div className="flex items-center ml-auto space-x-2 relative">

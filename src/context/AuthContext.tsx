@@ -12,7 +12,12 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { User, UserRole, RolePermissions } from '../types';
 import { buildAbility, AppAbility, UserContext, debugUserAbilities } from '../auth/ability';
 import { createMongoAbility } from '@casl/ability';
+<<<<<<< HEAD
 // import { getInternalJWT, parseInternalJWT, isInternalJWTExpired } from '../lib/federatedAuth';
+=======
+import { getInternalJWT, parseInternalJWT, isInternalJWTExpired } from '../lib/federatedAuth';
+import { setSupabaseUserContext, clearSupabaseUserContext } from '../lib/client';
+>>>>>>> 8d427317b5ee0d707dd5ca9d5e7c0d191390ade3
 
 interface AuthContextType {
   user: User | null;
@@ -77,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     /* ORIGINAL LOGIC DISABLED
     // Load user from localStorage (simulating session persistence)
-    const loadUser = () => {
+    const loadUser = async () => {
       try {
         // Check for internal JWT first (federated identity pattern)
         const internalJWT = getInternalJWT();
@@ -115,6 +120,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               
               const userAbility = buildAbility(userContext);
               setAbility(userAbility);
+              
+              // Sync Supabase user context for Chat Support module
+              await setSupabaseUserContext(internalClaims.user_id, userData.email || '');
               
               console.log('✅ Loaded federated identity context from internal JWT');
               return;
@@ -206,7 +214,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('platform_admin_user', JSON.stringify(userData));
     localStorage.setItem('user_role', userRole);
     localStorage.setItem('user_segment', segment);
+<<<<<<< HEAD
 
+=======
+    
+    // Sync Supabase user context for Chat Support module
+    await setSupabaseUserContext(userData.id, userData.email || '');
+    
+>>>>>>> 8d427317b5ee0d707dd5ca9d5e7c0d191390ade3
     console.log('🔐 AuthContext state set:', {
       user: userData,
       role: userRole,
@@ -236,6 +251,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('azure_user_info');
     localStorage.removeItem('user_organization_id');
     localStorage.removeItem('azure_organisation_name');
+    // Clear Supabase user context for Chat Support module
+    clearSupabaseUserContext();
   };
 
   const updateRole = (newRole: UserRole) => {

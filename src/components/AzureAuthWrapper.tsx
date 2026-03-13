@@ -18,11 +18,11 @@ export const AzureAuthWrapper: React.FC<AzureAuthWrapperProps> = ({ children }) 
   const { login, isAuthenticated } = useAuth();
   const [isInitialized, setIsInitialized] = useState(false);
   const [authError, setAuthError] = useState<any>(null); // Store error state
-  
+
   // Auth mode configuration
   const USE_MOCK_AUTH = import.meta.env.VITE_USE_MOCK_AUTH === 'true';
   const ENVIRONMENT = import.meta.env.VITE_ENVIRONMENT || 'local';
-  
+
   // In mock mode, skip MSAL initialization entirely but still render DevLogin later
   // IMPORTANT: MSAL instance is already initialized when created in msalConfig.ts
   // We only need to handle the redirect response and check existing accounts
@@ -49,16 +49,16 @@ export const AzureAuthWrapper: React.FC<AzureAuthWrapperProps> = ({ children }) 
           }
         } catch (redirectError: any) {
           console.error('❌ Redirect handling error:', redirectError);
-          
+
           // Check if it's a redirect URI mismatch error (400 Bad Request)
           const errorMessage = redirectError?.message || redirectError?.errorCode || '';
-          const isRedirectUriError = 
+          const isRedirectUriError =
             redirectError?.errorCode === 'redirect_uri_mismatch' ||
             errorMessage.includes('redirect_uri') ||
             errorMessage.includes('AADSTS50011') ||
             errorMessage.includes('redirect URI') ||
             redirectError?.status === 400;
-          
+
           if (isRedirectUriError) {
             const currentRedirectUri = import.meta.env.VITE_AZURE_REDIRECT_URI_CUSTOM || window.location.origin;
             console.error('❌ Redirect URI mismatch error detected!');
@@ -66,7 +66,7 @@ export const AzureAuthWrapper: React.FC<AzureAuthWrapperProps> = ({ children }) 
             console.error('❌ Error details:', redirectError);
             console.error('❌ ACTION REQUIRED: Make sure the redirect URI is EXACTLY registered in Azure AD app registration.');
             console.error('❌ The redirect URI must match exactly, including protocol (http/https) and path.');
-            
+
             setAuthError({
               type: 'redirect_uri_mismatch',
               message: `Redirect URI mismatch. Current URI: ${currentRedirectUri}. Please ensure this URI is exactly registered in your Azure AD app registration.`,
@@ -129,7 +129,7 @@ export const AzureAuthWrapper: React.FC<AzureAuthWrapperProps> = ({ children }) 
   const handleUserLogin = async (account: AccountInfo) => {
     // Clear any previous error state when attempting new login
     setAuthError(null);
-    
+
     try {
       // Get user profile information and ID token
       const response = await instance.acquireTokenSilent({
@@ -138,7 +138,7 @@ export const AzureAuthWrapper: React.FC<AzureAuthWrapperProps> = ({ children }) 
       });
 
       const idToken = response.idToken;
-      
+
       console.log('🔐 Got Azure ID token, getting authorization from Supabase...');
 
       // Exchange Azure token for authorization context (direct Supabase query)
@@ -177,7 +177,16 @@ export const AzureAuthWrapper: React.FC<AzureAuthWrapperProps> = ({ children }) 
       if (authContext.organization_name) {
         localStorage.setItem('azure_organisation_name', authContext.organization_name);
       }
-      
+
+      // Store Azure user info for API calls
+      localStorage.setItem('azure_user_info', JSON.stringify({
+        localAccountId: account.localAccountId,
+        homeAccountId: account.homeAccountId,
+        username: account.username,
+        name: account.name,
+        tenantId: account.tenantId
+      }));
+
       console.log('💾 Stored authorization context:', {
         'organization_id': authContext.organization_id,
         'role': authContext.role,
@@ -186,27 +195,28 @@ export const AzureAuthWrapper: React.FC<AzureAuthWrapperProps> = ({ children }) 
       });
 
       // Update the auth context with authorization context
-      await login(userInfo, authContext.user_segment, authContext.role, authContext.organization_id);
-      
-      console.log('🎉 Federated identity login successful:', { 
+      await login(userInfo, authContext.user_segment, authContext.role);
+
+      console.log('🎉 Federated identity login successful:', {
         user_id: userInfo.id,
         organization_id: userInfo.organization_id,
         role: userInfo.role,
         user_segment: authContext.user_segment
       });
-      
+
       // Redirect to dashboard after successful login
       if (window.location.pathname === '/login') {
         window.location.href = '/';
       }
     } catch (error: any) {
       console.error('❌ Federated identity login failed:', error);
-      
+
       // Store error state for error page display
       setAuthError({
         type: error?.error || 'generic',
         message: error?.message || 'Login failed. Please try again or contact support.',
-        email: account.username
+        email: account.username,
+        user_details: error?.user_details // Pass through user details from backend
       });
     }
   };
@@ -215,26 +225,26 @@ export const AzureAuthWrapper: React.FC<AzureAuthWrapperProps> = ({ children }) 
   const extractRoleFromClaims = (claims: any): string => {
     // Allowed customer types that can access the platform
     const ALLOWED_CUSTOMER_TYPES = ['staff', 'admin', 'internal', 'partner'];
-    
+
     // Get customerType and userRole from claims (check multiple key variations)
     const customerType = claims?.extension_customerType || claims?.customerType || claims?.CustomerType;
     const userRole = claims?.extension_userRole || claims?.UserRole || claims?.userRole || claims["User Role"];
-    
+
     console.log('🔍 Role extraction - Claims received:', { customerType, userRole });
     console.log('🔍 Role extraction - All available claims:', claims);
-    
+
     // First validation: Check if customerType is allowed
     if (!customerType || !ALLOWED_CUSTOMER_TYPES.includes(customerType.toLowerCase())) {
       console.warn(`❌ Access denied: Invalid customerType "${customerType}". Must be one of: ${ALLOWED_CUSTOMER_TYPES.join(', ')}`);
       return 'unauthorized'; // This will prevent access via RBAC
     }
-    
+
     console.log(`✅ Valid customerType: "${customerType}"`);
-    
+
     // Second step: Map userRole to application permissions
     if (userRole) {
       const roleLower = userRole.toLowerCase();
-      
+
       // Direct role mapping with normalization
       // Note: creator and contributor are normalized to 'editor'
       const roleMap: Record<string, string> = {
@@ -248,15 +258,16 @@ export const AzureAuthWrapper: React.FC<AzureAuthWrapperProps> = ({ children }) 
         'member': 'editor',
         'viewer': 'viewer',
         'reader': 'viewer',
+        'advisor': 'advisor',     // Advisor maps to itself
       };
-      
+
       const mappedRole = roleMap[roleLower];
       if (mappedRole) {
         console.log(`✅ Role mapped: ${userRole} -> ${mappedRole}`);
         return mappedRole;
       }
     }
-    
+
     // Fallback: If customerType is valid but userRole is missing/unknown
     console.warn(`⚠️ Valid customerType "${customerType}" but unknown userRole "${userRole}". Defaulting to viewer.`);
     return 'viewer';
@@ -267,7 +278,7 @@ export const AzureAuthWrapper: React.FC<AzureAuthWrapperProps> = ({ children }) 
     if (claims?.extension_OrganizationId) {
       return claims.extension_OrganizationId;
     }
-    
+
     return 'default-org';
   };
 
@@ -276,11 +287,60 @@ export const AzureAuthWrapper: React.FC<AzureAuthWrapperProps> = ({ children }) 
     if (claims?.picture) {
       return claims.picture;
     }
-    
+
     return '';
   };
 
-  // Skip Azure authentication - using simple login instead
-  // Always render children (authentication handled by ProtectedRoute)
+  // Show loading state while initializing
+  // Show error page if authentication failed
+  if (authError) {
+    return (
+      <AccessDeniedError
+        error={authError.type}
+        message={authError.message}
+        email={authError.email}
+        user_details={authError.user_details}
+        onRetry={() => {
+          // Clear error and re-attempt login
+          setAuthError(null);
+          if (accounts.length > 0) {
+            handleUserLogin(accounts[0]);
+          }
+        }}
+      />
+    );
+  }
+
+  if (!isInitialized || inProgress === 'login') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Initializing authentication...</p>
+          {USE_MOCK_AUTH && (
+            <p className="mt-2 text-sm text-yellow-600">🧪 Mock RBAC mode active</p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // In mock mode, show DevLogin component instead of children
+  if (USE_MOCK_AUTH) {
+    return (
+      <>
+        <DevLogin />
+        {children}
+      </>
+    );
+  }
+
+  // In live Azure mode, check if user is authenticated (already got isAuthenticated from useAuth above)
+
+  // If not authenticated in live mode, show Azure login
+  if (!isAuthenticated) {
+    return <AzureLogin />;
+  }
+
   return <>{children}</>;
 };

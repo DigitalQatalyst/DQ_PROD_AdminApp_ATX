@@ -8,7 +8,7 @@
 import { useContext } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { AppAbility } from '../auth/ability';
-import { createMongoAbility } from '@casl/ability';
+import { createMongoAbility } from '@casl/ability'
 
 /**
  * Hook to access the current user's ability instance

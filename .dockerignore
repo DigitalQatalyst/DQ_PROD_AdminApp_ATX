@@ -1,0 +1,19 @@
+# Ignore node modules and build artifacts
+node_modules
+dist
+
+# Ignore version control and logs
+.git
+.gitignore
+*.log
+logs
+
+# Ignore environment and config files
+.env
+.env.*
+Dockerfile
+docker-compose.yml
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db

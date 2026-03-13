@@ -38,15 +38,16 @@ export function normalizeRole(databaseRole: string): UserRole {
     'creator': 'editor',      // Normalize to editor
     'contributor': 'editor',  // Normalize to editor
     'editor': 'editor',
-    'viewer': 'viewer'
+    'viewer': 'viewer',
+    'advisor': 'advisor'      // Advisor maps to itself
   };
-  
+
   const normalized = roleMap[databaseRole.toLowerCase()] || 'viewer';
-  
+
   if (normalized !== databaseRole.toLowerCase() && roleMap[databaseRole.toLowerCase()]) {
     logger.debug(`Role normalized: "${databaseRole}" → "${normalized}"`);
   }
-  
+
   return normalized;
 }
 
@@ -82,10 +83,10 @@ export function normalizeClaims(payload: Record<string, any>): NormalizedClaims 
     null;
 
   // Extract user role from various possible claim keys
-  const userRoleRaw = 
-    payload["User Role"] ?? 
+  const userRoleRaw =
+    payload["User Role"] ??
     payload.UserRole ??      // Common Azure CIAM format
-    payload.userRole ?? 
+    payload.userRole ??
     payload.extension_Role ??
     payload.extension_role ??
     payload.role ??
@@ -96,8 +97,8 @@ export function normalizeClaims(payload: Record<string, any>): NormalizedClaims 
 
   // Extract customer type from various possible claim keys
   // DO NOT USE INFERENCE - only use explicit claims
-  const customerTypeRaw = 
-    payload.customerType ?? 
+  const customerTypeRaw =
+    payload.customerType ??
     payload.CustomerType ??      // Common Azure CIAM format
     payload.extension_CustomerType ??
     payload.extension_customerType ??

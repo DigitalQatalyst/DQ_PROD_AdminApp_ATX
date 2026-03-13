@@ -76,22 +76,74 @@ const LineChartWithRange: React.FC<LineChartWithRangeProps> = ({
     xAxis: {
       type: 'category' as const,
       data: months,
+      name: 'Month',
+      nameLocation: 'middle',
+      nameGap: 30,
+      nameTextStyle: {
+        color: ChartTheme.base.neutralGray,
+        fontSize: 12,
+        fontWeight: 'bold',
+      },
       axisLabel: {
         color: ChartTheme.base.neutralGray,
+      },
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: '#333333',
+          width: 3,
+        },
+        symbol: ['none', 'arrow'],
+        symbolSize: [10, 12],
+      },
+      axisTick: {
+        show: true,
+        lineStyle: {
+          width: 2,
+        },
       },
     },
     yAxis: {
       type: 'value' as const,
       name: 'Days',
+      nameLocation: 'middle',
+      nameGap: 50,
+      nameTextStyle: {
+        color: ChartTheme.base.neutralGray,
+        fontSize: 12,
+        fontWeight: 'bold',
+      },
       min: 0,
       max: 3,
-      show: false,
+      position: 'left',
       axisLabel: {
         formatter: '{value}d',
         color: ChartTheme.base.neutralGray,
+        inside: false,
+      },
+      axisLine: {
+        show: true,
+        onZero: false,
+        lineStyle: {
+          color: '#333333',
+          width: 3,
+        },
+        symbol: ['none', 'arrow'],
+        symbolSize: [10, 12],
+      },
+      axisTick: {
+        show: true,
+        inside: false,
+        lineStyle: {
+          width: 2,
+        },
       },
       splitLine: {
-        show: false,
+        show: true,
+        lineStyle: {
+          color: '#f0f0f0',
+          type: 'dashed',
+        },
       },
     },
     series: [
@@ -163,10 +215,10 @@ const LineChartWithRange: React.FC<LineChartWithRangeProps> = ({
       },
     ],
     grid: {
-      left: '3%',
-      right: '4%',
-      bottom: showLegend ? '15%' : '3%',
-      top: '15%',
+      left: '10%',
+      right: '5%',
+      bottom: showLegend ? '20%' : '15%',
+      top: '10%',
       containLabel: true,
     },
   };

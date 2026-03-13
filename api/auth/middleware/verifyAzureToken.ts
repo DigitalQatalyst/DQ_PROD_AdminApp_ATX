@@ -13,6 +13,10 @@ interface FederatedIdentityClaims {
   azureOid: string; // oid from Azure token (PRIMARY identifier, stable across apps)
   email: string;
   azureSub?: string; // sub kept for legacy compatibility
+  name?: string; // Display name from Azure
+  givenName?: string; // First name
+  familyName?: string; // Last name
+  upn?: string; // User Principal Name
 }
 
 interface AuthenticatedRequest extends Request {
@@ -29,19 +33,19 @@ interface AuthenticatedRequest extends Request {
  * @param next Express next function
  */
 export async function verifyAzureToken(
-  req: AuthenticatedRequest, 
-  res: Response, 
+  req: AuthenticatedRequest,
+  res: Response,
   next: NextFunction
 ): Promise<void> {
   try {
     const AUTH_MODE = process.env.AUTH_MODE || process.env.MOCK_MODE;
-    
+
     // In mock mode, extract minimal claims for testing
     if (AUTH_MODE === 'mock' || AUTH_MODE === 'true') {
       console.log('🧪 Mock mode: Using mock Azure authentication');
-      
+
       let claims;
-      
+
       // Try to get claims from request body first
       if (req.body && typeof req.body === 'object' && req.body.sub) {
         claims = req.body;
@@ -51,7 +55,7 @@ export async function verifyAzureToken(
         const authHeader = req.headers.authorization;
         if (authHeader.startsWith('Bearer ')) {
           const token = authHeader.substring(7);
-          
+
           // For mock mode, accept the token as the sub
           claims = {
             sub: token,
@@ -68,13 +72,18 @@ export async function verifyAzureToken(
           email: 'mock@example.com'
         };
       }
-      
+
       req.user = {
         azureOid: claims.oid, // PRIMARY: oid is stable across all app registrations
         email: claims.email || claims.preferred_username || '',
-        azureSub: claims.sub // Keep sub for legacy reference
+        azureSub: claims.sub, // Keep sub for legacy reference
+        name: claims.name || claims.displayName,
+        givenName: claims.given_name || claims.givenName,
+        familyName: claims.family_name || claims.familyName || claims.surname,
+        upn: claims.upn
       };
-      
+
+
       return next();
     }
 
@@ -88,38 +97,52 @@ export async function verifyAzureToken(
     }
 
     const token = authHeader.substring(7);
-    
+
     try {
       // TODO: Implement real Azure JWT verification with JWKS
       // For now, we'll decode without verification (INSECURE - replace in production)
       const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-      
+
       // Extract only immutable identifiers - oid is PRIMARY
       const azureOid = decoded.oid;
       const email = decoded.email || decoded.preferred_username || decoded.upn || '';
       const azureSub = decoded.sub; // Keep for legacy
-      
+
+      // Extract additional user information for error reporting
+      const name = decoded.name || decoded.displayName;
+      const givenName = decoded.given_name || decoded.givenName;
+      const familyName = decoded.family_name || decoded.familyName || decoded.surname;
+      const upn = decoded.upn;
+
       if (!azureOid) {
         return res.status(401).json({
           error: 'unauthorized',
           message: 'Token missing required claim: oid (Object ID)'
         });
       }
-      
+
       req.user = {
         azureOid,
         email,
-        azureSub
+        azureSub,
+        name,
+        givenName,
+        familyName,
+        upn
       };
-      
+
       console.log('🔐 Azure token verified (authenticated only):', {
         azureOid,
         email,
-        azureSub
+        azureSub,
+        name,
+        givenName,
+        familyName,
+        upn
       });
-      
+
       next();
-      
+
     } catch (jwtError) {
       console.error('JWT verification failed:', jwtError);
       return res.status(401).json({
@@ -130,7 +153,7 @@ export async function verifyAzureToken(
 
   } catch (error) {
     console.error('Token verification error:', error);
-    
+
     return res.status(500).json({
       status: 'error',
       error: 'internal_server_error',

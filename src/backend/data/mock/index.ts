@@ -169,7 +169,7 @@ export const generateServiceAdoptionMetrics = (): ServiceAdoptionMetric[] => {
       trend: 'up',
       trendValue: '+5%',
       threshold: 'excellent',
-      description: 'Total enterprises interacting with services.',
+      description: 'Enterprises that used or interacted with your services.',
       icon: 'Users',
       sparklineData: months.map(() => faker.number.int({ min: engaged - 200, max: engaged + 50 })),
       target: (engaged - 50).toLocaleString(),
@@ -181,7 +181,7 @@ export const generateServiceAdoptionMetrics = (): ServiceAdoptionMetric[] => {
       trend: 'up',
       trendValue: '+2%',
       threshold: 'good',
-      description: 'Percentage of onboarded enterprises activated.',
+      description: 'Percentage of your requests that were accepted.',
       icon: 'Zap',
       sparklineData: months.map(() => faker.number.int({ min: activation - 6, max: activation })),
       target: `${activation - 5}%`,
@@ -189,14 +189,14 @@ export const generateServiceAdoptionMetrics = (): ServiceAdoptionMetric[] => {
     {
       title: 'Average Usage per Enterprise',
       value: usage,
-      unit: 'events',
+      unit: 'requests',
       trend: 'up',
       trendValue: '+0.5',
       threshold: 'excellent',
-      description: 'Average service utilization per active enterprise.',
+      description: 'Average number of service requests received per enterprise.',
       icon: 'Activity',
       sparklineData: months.map(() => faker.number.float({ min: usage - 1, max: usage + 0.5, fractionDigits: 1 })),
-      target: `${(Math.round(usage)).toString()} events`,
+      target: `${(Math.round(usage)).toString()} requests`,
     },
     {
       title: 'Enterprise Retention Rate',
@@ -205,7 +205,7 @@ export const generateServiceAdoptionMetrics = (): ServiceAdoptionMetric[] => {
       trend: 'up',
       trendValue: '+1% ',
       threshold: 'good',
-      description: 'Percentage of active enterprises retained.',
+      description: 'Percent of enterprises that returned for another service after their first completed case.',
       icon: 'Repeat',
       sparklineData: months.map(() => faker.number.int({ min: retention - 3, max: retention })),
       target: `${retention - 2}%`,
@@ -216,15 +216,15 @@ export const generateServiceAdoptionMetrics = (): ServiceAdoptionMetric[] => {
 export const generateOnboardingActivation = (filters?: Filters): OnboardingActivationPoint[] => {
   const labels = filters ? getTimeLabels(filters) : lastNMonths();
   const rows = labels.map((m) => {
-    const onboarding = faker.number.int({ min: 55, max: 72 });
-    const activation = onboarding - faker.number.int({ min: 3, max: 10 });
+    const inquiry = faker.number.int({ min: 55, max: 72 });
+    const activation = inquiry - faker.number.int({ min: 3, max: 10 });
     const onboardCount = faker.number.int({ min: 350, max: 560 });
     const activateCount = Math.round(onboardCount * activation / 100);
     const serviceType = faker.helpers.arrayElement(['financial','non-financial']) as 'financial'|'non-financial';
     const subServiceType = faker.helpers.arrayElement(['onboarding','activation','advisory','training']) as 'onboarding'|'activation'|'advisory'|'training';
     const region = faker.helpers.arrayElement(REGIONS) as string;
     const size = faker.helpers.arrayElement(SIZES) as string;
-    return { month: m, onboarding, activation, onboardingCount: onboardCount, activationCount: activateCount, serviceType, subServiceType, region, size } as any;
+    return { month: m, inquiry, activation, onboardingCount: onboardCount, activationCount: activateCount, serviceType, subServiceType, region, size } as any;
   });
   return filters ? applyFilters(rows as any, filters) : rows;
 };

@@ -7,10 +7,19 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+
+.env
+
+
+
+
+
 node_modules
 dist
 dist-ssr
 *.local
+migrations
+database/
 
 # Environment variables
 .env
@@ -21,6 +30,8 @@ dist-ssr
 .env.test
 .env.*.local
 *.temp
+
+
 
 # Editor directories and files
 .vscode/*
@@ -35,5 +46,3 @@ dist-ssr
 
 # Workspace directory for temporary and auto-generated files
 workspace/
-kfrealexpressserver
-/AdminApp_API

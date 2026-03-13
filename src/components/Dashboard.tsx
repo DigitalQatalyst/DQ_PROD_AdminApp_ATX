@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircleIcon, XCircleIcon, ClockIcon, ArrowRightIcon, BarChartIcon, UsersIcon, BuildingIcon } from 'lucide-react';
 import { PageLayout, PageSection, SectionHeader, SectionContent } from './PageLayout';
+import EnterpriseDashboard from './EnterpriseDashboard';
 export const Dashboard: React.FC = () => {
   // Summary data for KPI cards
   const summaryData = [{
@@ -33,7 +34,8 @@ export const Dashboard: React.FC = () => {
     time: 'Today at 10:45 AM',
     icon: CheckCircleIcon,
     iconBgColor: 'bg-green-100',
-    iconColor: 'text-green-600'
+    iconColor: 'text-green-600' 
+
   }, {
     id: '2',
     type: 'commented',
@@ -78,7 +80,7 @@ export const Dashboard: React.FC = () => {
     url: '#'
   }];
   return <PageLayout title="Dashboard">
-      <SectionContent className="px-0 pt-3 pb-8">
+      <div className="pb-20">
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {summaryData.map(item => <div key={item.id} className={`bg-white rounded-xl shadow-md p-5 border-l-4 ${item.color} hover:shadow-lg transition-all duration-200`}>
@@ -113,6 +115,9 @@ export const Dashboard: React.FC = () => {
             </div>
           </SectionContent>
         </PageSection>
+        {/* Enterprise Dashboard */}
+        <EnterpriseDashboard />
+        
         {/* Quick Links */}
         <div className="bg-white rounded-xl shadow-sm p-5 mb-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">
@@ -127,6 +132,6 @@ export const Dashboard: React.FC = () => {
               </li>)}
           </ul>
         </div>
-      </SectionContent>
+      </div>
     </PageLayout>;
 };

@@ -17,16 +17,52 @@ export interface UserAuthorizationContext {
   name?: string;
 }
 
-export function extractAzureOidFromToken(token: string): { oid: string; email: string } {
+export function extractAzureOidFromToken(token: string): {
+  oid: string;
+  email: string;
+  name?: string;
+  given_name?: string;
+  family_name?: string;
+  upn?: string;
+} {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) throw new Error('Invalid JWT token format');
     const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
     const payload = JSON.parse(atob(base64));
+
+    // Log ALL claims for debugging
+    console.log('🔍 ALL Azure Token Claims:', payload);
+    console.log('🔍 Available claim keys:', Object.keys(payload));
+
     const oid = payload.oid || payload.sub;
-    const email = payload.email || payload.preferred_username || payload.upn || '';
+    const email = payload.email || payload.preferred_username || payload.upn || payload.unique_name || payload.signInNames?.[0]?.value || '';
+    const name = payload.name || payload.displayName;
+    const given_name = payload.given_name || payload.givenName;
+    const family_name = payload.family_name || payload.familyName || payload.surname;
+    const upn = payload.upn;
+
     if (!oid) throw new Error('Token missing required claim: oid');
-    return { oid, email };
+
+    console.log('📋 Extracted user details from token:', {
+      oid,
+      email,
+      name,
+      given_name,
+      family_name,
+      upn
+    });
+
+    // Warn if email looks like it's using OID as username
+    if (email.includes(oid)) {
+      console.warn('⚠️ Email claim appears to be using Azure OID as username. This usually means:');
+      console.warn('   1. The user is a guest/external user in Azure AD');
+      console.warn('   2. The email claim is not properly configured in Azure B2C');
+      console.warn('   3. Check Azure B2C User Flow to ensure email is included in token claims');
+      console.warn('   Available claims in token:', Object.keys(payload).join(', '));
+    }
+
+    return { oid, email, name, given_name, family_name, upn };
   } catch (e) {
     console.error('Failed to extract Azure OID from token:', e);
     throw new Error('Invalid Azure token');
@@ -67,7 +103,13 @@ async function createAdminSupabaseClient() {
 
 export async function getUserAuthorizationFromSupabase(
   azureOid: string,
-  email: string
+  email: string,
+  userDetails?: {
+    name?: string;
+    given_name?: string;
+    family_name?: string;
+    upn?: string;
+  }
 ): Promise<UserAuthorizationContext> {
   try {
     const supabase = await createAdminSupabaseClient();
@@ -87,13 +129,29 @@ export async function getUserAuthorizationFromSupabase(
         throw {
           error: 'invalid_api_key',
           message: 'Invalid Supabase API key. Double-check VITE_SUPABASE_URL and VITE_SUPABASE_SERVICE_ROLE_KEY point to the new project.',
-          email
+          email,
+          user_details: {
+            name: userDetails?.name,
+            email: email,
+            given_name: userDetails?.given_name,
+            family_name: userDetails?.family_name,
+            upn: userDetails?.upn,
+            azure_oid: azureOid
+          }
         };
       }
       throw {
         error: 'user_not_provisioned',
         message: 'Your account has not been provisioned. Please contact your administrator to request access.',
-        email
+        email,
+        user_details: {
+          name: userDetails?.name || `${userDetails?.given_name || ''} ${userDetails?.family_name || ''}`.trim() || 'Unknown',
+          email: email,
+          given_name: userDetails?.given_name,
+          family_name: userDetails?.family_name,
+          upn: userDetails?.upn,
+          azure_oid: azureOid
+        }
       };
     }
 
@@ -130,12 +188,21 @@ export async function getUserAuthorizationFromSupabase(
       user_segment: profile.user_segment
     });
 
+    // Normalize role and user_segment to lowercase for consistent RBAC
+    const normalizedRole = profile.role.toLowerCase().trim();
+    const normalizedSegment = profile.user_segment.toLowerCase().trim();
+
+    console.log('Normalized authorization:', {
+      role: normalizedRole,
+      user_segment: normalizedSegment
+    });
+
     return {
       user_id: user.id,
       organization_id: profile.organization_id,
       organization_name: organizationName || undefined,
-      role: profile.role,
-      user_segment: profile.user_segment,
+      role: normalizedRole,
+      user_segment: normalizedSegment,
       email: user.email || email,
       name: user.name
     };
@@ -147,9 +214,9 @@ export async function getUserAuthorizationFromSupabase(
 
 export async function exchangeAzureTokenForAuthorization(azureToken: string): Promise<UserAuthorizationContext> {
   console.log('Processing Azure token for authorization...');
-  const { oid, email } = extractAzureOidFromToken(azureToken);
-  console.log('Azure identity extracted:', { oid, email });
-  const authContext = await getUserAuthorizationFromSupabase(oid, email);
+  const { oid, email, name, given_name, family_name, upn } = extractAzureOidFromToken(azureToken);
+  console.log('Azure identity extracted:', { oid, email, name, given_name, family_name, upn });
+  const authContext = await getUserAuthorizationFromSupabase(oid, email, { name, given_name, family_name, upn });
   console.log('Authorization context loaded:', authContext);
   return authContext;
 }

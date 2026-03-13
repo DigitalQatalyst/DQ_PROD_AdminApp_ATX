@@ -5,7 +5,7 @@
 
 // User and Authentication Types
 export type UserSegment = 'internal' | 'partner' | 'customer' | 'advisor';
-export type UserRole = 'admin' | 'editor' | 'approver' | 'viewer';
+export type UserRole = 'admin' | 'editor' | 'approver' | 'viewer' | 'advisor';
 
 export interface User {
   id: string;
@@ -30,24 +30,17 @@ export const RolePermissions: Record<string, string[]> = {
   approver: ['view', 'review', 'approve', 'comment'],
   editor: ['create', 'edit', 'submit', 'view', 'comment'],
   viewer: ['view'],
+  advisor: ['view', 'comment', 'review'],
 };
 
 // Service Types
 export interface Service {
   id: string;
   title: string;
-  name?: string;
-  // Service type - Business or Financial
-  service_type?: 'Business' | 'Financial';
-  type: 'Financial' | 'Non-Financial' | 'Business'; // Legacy field for compatibility
-  // Partner reference
-  partner_id?: string;
-  partner?: string; // Legacy field - now derived from partner_id join
-  partnerInfo?: PartnerInfo;
-  // Categories
+  type: 'Financial' | 'Non-Financial';
+  partner: string;
   category: string;
-  categories?: string[];
-  // Status and workflow
+  processingTime: string;
   status: 'Draft' | 'Pending' | 'Published' | 'Unpublished' | 'Rejected' | 'Sent Back' | 'Archived';
   applicants: number;
   feedback: {
@@ -55,98 +48,16 @@ export interface Service {
     count: number;
   };
   submitted_on: string;
-  created_at?: string;
-  updated_at?: string;
-  // Description
   description?: string;
-  // Business stages
-  business_stage?: string[];
-  // Key highlights
-  key_highlights?: string[];
-  // Eligibility and requirements
   eligibility?: string[];
-  eligibility_requirements?: string[];
   applicationRequirements?: string[];
-  application_process?: string[];
-  // Service details
-  service_amount?: string;
-  service_processing_time?: string;
-  service_eligibility?: string;
-  fee?: string; // Legacy field
-  processingTime?: string; // Legacy field
-  // Documents
-  documentsRequired?: string[];
-  required_documents?: string[];
-  // Other
+  fee?: string;
   regulatoryCategory?: string;
+  documentsRequired?: string[];
   outcome?: string;
+  partnerInfo?: PartnerInfo;
   comments?: Comment[];
   activityLog?: ActivityLogEntry[];
-  // Organization
-  organization_id?: string;
-  created_by?: string;
-  is_active?: boolean;
-}
-
-// Service Form Types
-export interface ServiceForm {
-  id: string;
-  serviceId: string;
-  service_id?: string; // Database field
-  name: string;
-  description?: string;
-  isActive: boolean;
-  is_active?: boolean; // Database field
-  createdBy?: string;
-  created_by?: string; // Database field
-  createdAt: string;
-  created_at?: string; // Database field
-  updatedAt: string;
-  updated_at?: string; // Database field
-  organizationId?: string;
-  organization_id?: string; // Database field
-  fields?: ServiceFormField[];
-}
-
-export interface ServiceFormField {
-  id: string;
-  formId: string;
-  form_id?: string; // Database field
-  fieldName: string;
-  field_name?: string; // Database field
-  fieldLabel: string;
-  field_label?: string; // Database field
-  fieldType: 'text' | 'textarea' | 'email' | 'number' | 'tel' | 'url' | 'date' | 'datetime' | 'time' | 'select' | 'multiselect' | 'radio' | 'checkbox' | 'file' | 'boolean' | 'rich_text';
-  field_type?: string; // Database field
-  fieldOrder: number;
-  field_order?: number; // Database field
-  isRequired: boolean;
-  is_required?: boolean; // Database field
-  placeholder?: string;
-  helpText?: string;
-  help_text?: string; // Database field
-  defaultValue?: string;
-  default_value?: string; // Database field
-  validationRules?: Record<string, any>;
-  validation_rules?: Record<string, any>; // Database field
-  options?: Array<{ label: string; value: string }>;
-  fieldConfig?: Record<string, any>;
-  field_config?: Record<string, any>; // Database field
-  createdAt: string;
-  created_at?: string; // Database field
-  updatedAt: string;
-  updated_at?: string; // Database field
-}
-
-export interface ServiceFormSubmission {
-  id: string;
-  formId: string;
-  serviceId: string;
-  submissionData: Record<string, any>;
-  submittedBy?: string;
-  submittedAt: string;
-  status: 'pending' | 'reviewed' | 'approved' | 'rejected' | 'archived';
-  organizationId?: string;
 }
 
 export interface PartnerInfo {

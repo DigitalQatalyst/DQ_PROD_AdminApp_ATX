@@ -42,8 +42,8 @@ router.post('/login', async (req: Request, res: Response) => {
     }
 
     // Extract only minimal auth info (azure_oid and email)
-    const { azureOid, email } = authReq.user;
-    
+    const { azureOid, email, name, givenName, familyName, upn, azureSub } = authReq.user;
+
     console.log('🔍 Looking up user by azure_oid:', azureOid);
 
     // Look up user in local database by azure_oid (PRIMARY identifier)
@@ -64,11 +64,28 @@ router.post('/login', async (req: Request, res: Response) => {
 
     if (userError || !user) {
       console.warn('❌ User not provisioned:', azureOid);
-      
+      console.warn('📋 CRM User Details:', {
+        name,
+        email,
+        givenName,
+        familyName,
+        upn,
+        azureOid,
+        azureSub
+      });
+
       return res.status(403).json({
         error: 'user_not_provisioned',
         message: 'Your account has not been provisioned. Please contact your administrator or support to request access.',
-        email: email
+        user_details: {
+          name: name || `${givenName || ''} ${familyName || ''}`.trim() || 'Unknown',
+          email: email,
+          given_name: givenName,
+          family_name: familyName,
+          upn: upn,
+          azure_oid: azureOid,
+          azure_sub: azureSub
+        }
       });
     }
 
@@ -76,7 +93,7 @@ router.post('/login', async (req: Request, res: Response) => {
     const profile = Array.isArray(user.auth_user_profiles) ? user.auth_user_profiles[0] : user.auth_user_profiles;
     if (!profile || !profile.organization_id || !profile.role || !profile.user_segment) {
       console.error('⚠️ User profile incomplete:', user.id);
-      
+
       return res.status(500).json({
         error: 'incomplete_profile',
         message: 'Your user profile is incomplete. Please contact your administrator.'
@@ -104,7 +121,7 @@ router.post('/login', async (req: Request, res: Response) => {
     // Update last login timestamp
     await supabaseAdmin
       .from('auth_users')
-      .update({ 
+      .update({
         last_login_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
@@ -127,9 +144,9 @@ router.post('/login', async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error('❌ Login error:', error);
-    
+
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    
+
     res.status(500).json({
       error: 'internal_server_error',
       message: errorMessage
@@ -186,7 +203,7 @@ router.post('/sync-user', async (req: Request, res: Response) => {
     }
 
     const { azureUserId, email, customerType, userRole, companyName } = authReq.user;
-    
+
     console.log('📋 User claims:', {
       azureUserId,
       email,
@@ -197,7 +214,7 @@ router.post('/sync-user', async (req: Request, res: Response) => {
 
     // 1. Find or create organization
     console.log('🏢 Looking up organization:', companyName);
-    
+
     let { data: org, error: orgError } = await supabaseAdmin
       .from('organisations')
       .select('id')
@@ -211,7 +228,7 @@ router.post('/sync-user', async (req: Request, res: Response) => {
 
     if (!org) {
       console.log('🏢 Creating new organization:', companyName);
-      
+
       const { data: newOrg, error: createOrgError } = await supabaseAdmin
         .from('organisations')
         .insert({
@@ -237,7 +254,7 @@ router.post('/sync-user', async (req: Request, res: Response) => {
 
     // 2. Upsert user
     console.log('👤 Upserting user:', email);
-    
+
     const { data: upsertedUser, error: userError } = await supabaseAdmin
       .from('users')
       .upsert({
@@ -247,7 +264,7 @@ router.post('/sync-user', async (req: Request, res: Response) => {
         is_active: true,
         last_login_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      }, { 
+      }, {
         onConflict: 'azure_user_id',
         ignoreDuplicates: false
       })
@@ -263,7 +280,7 @@ router.post('/sync-user', async (req: Request, res: Response) => {
 
     // 3. Upsert user profile
     console.log('📝 Upserting user profile for user:', upsertedUser.id);
-    
+
     const { error: profileError } = await supabaseAdmin
       .from('user_profiles')
       .upsert({
@@ -274,7 +291,7 @@ router.post('/sync-user', async (req: Request, res: Response) => {
         user_role: userRole,
         last_login_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      }, { 
+      }, {
         onConflict: 'user_id',
         ignoreDuplicates: false
       });
@@ -302,9 +319,9 @@ router.post('/sync-user', async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error('❌ Sync user error:', error);
-    
+
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    
+
     res.status(500).json({
       status: 'error',
       error: 'sync_failed',

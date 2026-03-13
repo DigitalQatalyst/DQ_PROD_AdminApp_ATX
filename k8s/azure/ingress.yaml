@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kf-frontend-admin-ingress
+  namespace: staging
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: letsencrypt-prod   # Added for cert-manager
+spec:
+  tls:
+    - hosts:
+        - admin.kfstaging.qatalyst.tech
+      secretName: admin-tls   # Secret where cert-manager will store the certificate
+  rules:
+    - host: admin.kfstaging.qatalyst.tech
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kf-frontend-admin-service
+                port:
+                  number: 80

@@ -42,55 +42,7 @@ export const DevLogin: React.FC<DevLoginProps> = ({ className = '' }) => {
   };
 
   const presetUsers = [
-    // QDB Admin (internal platform admin)
-    {
-      name: 'QDB Admin',
-      user: {
-        id: 'qdb-admin-1',
-        email: 'admin@qdb.qa',
-        name: 'QDB Admin',
-        role: 'admin',
-        avatar_url: null,
-        is_active: true,
-        last_login_at: new Date().toISOString(),
-      },
-      userSegment: 'internal',
-      role: 'admin',
-      organizationName: 'QDB'
-    },
-    // Enterprise Admin (enterprise / customer tenant)
-    {
-      name: 'Enterprise Admin',
-      user: {
-        id: 'enterprise-admin-1',
-        email: 'admin@enterprise.com',
-        name: 'Enterprise Admin',
-        role: 'admin',
-        avatar_url: null,
-        is_active: true,
-        last_login_at: new Date().toISOString(),
-      },
-      userSegment: 'customer',
-      role: 'admin',
-      organizationName: 'Enterprise Org'
-    },
-    // Partner Admin (partner tenant)
-    {
-      name: 'Partner Admin - QDB Partner',
-      user: {
-        id: 'partner-admin-qdb-1',
-        email: 'partner.admin@qdbpartner.com',
-        name: 'Partner Admin',
-        role: 'admin',
-        avatar_url: null,
-        is_active: true,
-        last_login_at: new Date().toISOString(),
-      },
-      userSegment: 'partner',
-      role: 'admin',
-      organizationName: 'QDB Partner'
-    },
-    // Existing internal users (formerly staff)
+    // Internal users (formerly staff)
     {
       name: 'Internal Admin - DigitalQatalyst',
       user: {

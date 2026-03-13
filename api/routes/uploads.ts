@@ -13,11 +13,8 @@ const UPLOAD_ROOT = path.resolve(process.cwd(), 'uploads');
 const AZ_ACCOUNT = process.env.AZURE_STORAGE_ACCOUNT || process.env.STORAGE_ACCOUNT || 'kfmediaitems';
 const AZ_CONTAINER = process.env.AZURE_STORAGE_CONTAINER || process.env.STORAGE_CONTAINER || 'mediaitems';
 const AZ_CONN = process.env.AZURE_STORAGE_CONNECTION_STRING || process.env.STORAGE_CONNECTION_STRING;
-const AZ_KEY = process.env.AZURE_STORAGE_ACCOUNT_KEY || process.env.STORAGE_ACCOUNT_KEY || '';
+const AZ_KEY = process.env.AZURE_STORAGE_ACCOUNT_KEY || process.env.STORAGE_ACCOUNT_KEY;
 const AZ_CDN = process.env.AZURE_CDN_URL;
-
-// Debug: print which storage configuration is present when the module loads
-console.log('Uploads route config -> AZ_CONN:', !!AZ_CONN, 'AZ_ACCOUNT:', !!AZ_ACCOUNT, 'AZ_KEY:', !!AZ_KEY, 'AZ_CDN:', !!AZ_CDN);
 
 function hasAzureConfig() {
   return Boolean((AZ_ACCOUNT && AZ_KEY) || AZ_CONN);

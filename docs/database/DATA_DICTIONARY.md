@@ -1,4 +1,4 @@
-# Data Dictionary - Qatar Development Bank Platform
+# Data Dictionary - Enterprise Journey Platform
 
 ## Version History
 - **v1.0** - Initial schema with basic ecosystem tables
@@ -7,7 +7,7 @@
 - **v2.0** - **CURRENT** - Added organization-scoped RBAC enforcement
 
 ## Overview
-This data dictionary documents the database schema for the Qatar Development Bank Platform, a comprehensive ecosystem for supporting entrepreneurs and businesses in Qatar. The schema uses a dimensional modeling approach with meaningful prefixes to organize tables by feature domain.
+This data dictionary documents the database schema for the Enterprise Journey Platform, a comprehensive ecosystem for supporting entrepreneurs and businesses in the UAE. The schema uses a dimensional modeling approach with meaningful prefixes to organize tables by feature domain.
 
 **Important**: The database uses `customer_type` field (staff, partner, enterprise, advisor), which is mapped to `user_segment` (internal, partner, customer, advisor) in the frontend. See [SCHEMA_REFERENCE.md](./SCHEMA_REFERENCE.md) for details on the mapping layer.
 

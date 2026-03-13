@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { X, ChevronDown, Info, Lock, Home, Users, Settings, BarChart3, FileText, CreditCard, User, FolderOpen, Send, HelpCircle, ExternalLink, Plus, Check, Menu } from 'lucide-react';
+import { X, ChevronDown, Info, Home, Users, Settings, BarChart3, User, FolderOpen, Send, HelpCircle, ExternalLink, Plus, Check, Menu, FileCheck } from 'lucide-react';
 interface Company {
   id: string;
   name: string;
@@ -55,15 +55,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isLoggedIn = true,
   'data-id': dataId
 }) => {
+  const [companyDropdownOpen, setCompanyDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const menuItemsRef = useRef<(HTMLDivElement | null)[]>([]);
+
   // Don't render sidebar if user is not logged in
   if (!isLoggedIn) {
     return null;
   }
-  const [tooltipItem, setTooltipItem] = useState<string | null>(null);
-  const [companyDropdownOpen, setCompanyDropdownOpen] = useState(false);
-  const [focusedMenuIndex, setFocusedMenuIndex] = useState(-1);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const menuItemsRef = useRef<(HTMLDivElement | null)[]>([]);
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -86,22 +85,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClose?.();
           }
           break;
-        case 'ArrowDown':
-          event.preventDefault();
-          setFocusedMenuIndex(prev => {
-            const next = prev < menuItems.length - 1 ? prev + 1 : 0;
-            menuItemsRef.current[next]?.focus();
-            return next;
-          });
-          break;
-        case 'ArrowUp':
-          event.preventDefault();
-          setFocusedMenuIndex(prev => {
-            const next = prev > 0 ? prev - 1 : menuItems.length - 1;
-            menuItemsRef.current[next]?.focus();
-            return next;
-          });
-          break;
       }
     };
     if (isOpen) {
@@ -118,6 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         label: 'Onboarding',
         icon: <Users size={20} />
       });
+      return items;
     } else {
       // Only show dashboard if onboarding is complete
       items.push({
@@ -139,6 +123,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'documents',
       label: 'Documents',
       icon: <FolderOpen size={20} />
+    }, {
+      id: 'content-data',
+      label: 'CONTENT & DATA',
+      category: 'category'
+    } as MenuItem, {
+      id: 'content-management',
+      label: 'Content Management',
+      icon: <FileCheck size={20} />
     }, {
       id: 'transactions',
       label: 'TRANSACTIONS',
@@ -186,16 +178,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }
     }
   };
-  const handleMouseEnter = (itemId: string) => {
-    // Only allow onboarding when onboarding is not complete
-    const isDisabled = !onboardingComplete && itemId !== 'onboarding';
-    if (isDisabled) {
-      setTooltipItem(itemId);
-    }
-  };
-  const handleMouseLeave = () => {
-    setTooltipItem(null);
-  };
+  
   const handleKeyDown = (event: React.KeyboardEvent, itemId: string, external?: boolean) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -298,24 +281,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
               </div>;
         }
-        // Determine if item should be disabled - only allow onboarding when not complete
-        const isDisabled = !onboardingComplete && item.id !== 'onboarding';
+        
         const isActive = activeSection === item.id;
         const menuItemIndex = getMenuItems().filter(i => i.category !== 'category').findIndex(i => i.id === item.id);
-        return <div key={item.id} ref={el => menuItemsRef.current[menuItemIndex] = el} className={`flex items-center px-4 py-3 relative transition-colors ${isActive ? 'bg-blue-700 text-white' : isDisabled ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-200 cursor-pointer'}`} onClick={() => handleMenuClick(item.id, item.external)} onMouseEnter={() => handleMouseEnter(item.id)} onMouseLeave={handleMouseLeave} onKeyDown={e => handleKeyDown(e, item.id, item.external)} tabIndex={0} role="button" aria-label={`Navigate to ${item.label}`} aria-disabled={isDisabled}>
+        return <div key={item.id} ref={el => menuItemsRef.current[menuItemIndex] = el} className={`flex items-center px-4 py-3 relative transition-colors ${isActive ? 'bg-blue-700 text-white' : 'text-gray-700 hover:bg-gray-200 cursor-pointer'}`} onClick={() => handleMenuClick(item.id, item.external)} onKeyDown={e => handleKeyDown(e, item.id, item.external)} tabIndex={0} role="button" aria-label={`Navigate to ${item.label}`}>
               <span className="w-8 flex items-center justify-center flex-shrink-0">
-                {isDisabled && !isActive ? <div className="relative">
-                    {item.icon}
-                    <Lock size={10} className="absolute -top-1 -right-1 text-gray-400" />
-                  </div> : item.icon}
+                {item.icon}
               </span>
               <span className="flex-1 ml-3">{item.label}</span>
-              {item.external && !isDisabled && <ExternalLink size={14} className="text-gray-400 ml-2 flex-shrink-0" />}
-              {/* Tooltip */}
-              {tooltipItem === item.id && <div className="absolute left-full ml-2 bg-gray-800 text-white text-xs py-2 px-3 rounded-md w-48 z-50">
-                  Complete onboarding to unlock this section
-                  <div className="absolute top-1/2 -left-1 transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
-                </div>}
+              {item.external && <ExternalLink size={14} className="text-gray-400 ml-2 flex-shrink-0" />}
             </div>;
       })}
       </nav>

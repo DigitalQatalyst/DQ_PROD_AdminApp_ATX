@@ -14,7 +14,7 @@ import { Can } from './auth/Can';
 
 export const ServiceManagementPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, role, userSegment, isLoading: authLoading } = useAuth();
+  const { user, role, isLoading: authLoading } = useAuth();
   // const { canCreate, canUpdate, canDelete, canApprove } = usePermissions('services'); // DEPRECATED: Use CASL Can component instead
   const { data: services, loading, error, list, update } = useCRUD<Service>('mktplc_services');
 
@@ -46,21 +46,13 @@ export const ServiceManagementPage: React.FC = () => {
     return service.submitted_on || service.submittedOn;
   };
 
-  // Helper function to convert database data to Service type
+  // Helper function to convert mock data to Service type
   const convertToServiceType = (service: any): Service => {
     return {
       ...service,
-      // Map new schema fields to legacy fields for compatibility
-      title: service.title || service.name || 'Untitled Service',
-      type: service.service_type || service.type || 'Business',
-      partner: service.partner || service.partner_name || 'Unknown Partner',
-      category: service.category || (service.categories?.[0]) || 'Uncategorized',
-      processingTime: service.service_processing_time || service.processingTime || 'N/A',
-      fee: service.service_amount || service.fee || 'N/A',
-      submitted_on: service.submitted_on || service.submittedOn || service.created_at,
-      status: service.status as Service['status'] || 'Draft',
-      applicants: service.applicants || 0,
-      feedback: service.feedback || { rating: 0, count: 0 },
+      submitted_on: service.submitted_on || service.submittedOn,
+      type: service.type as 'Financial' | 'Non-Financial',
+      status: service.status as Service['status']
     };
   };
 
@@ -164,23 +156,17 @@ export const ServiceManagementPage: React.FC = () => {
 
   // Filter and sort services
   const filteredServices = displayServices.filter(service => {
-    // Get normalized values for filtering
-    const svcType = service.service_type || service.type || 'Business';
-    const svcCategory = service.category || (service.categories?.[0]) || '';
-    const svcPartner = service.partner || service.partner_name || '';
-    const svcTitle = service.title || service.name || '';
-    
     // Filter by type
-    if (serviceType !== 'All' && svcType !== serviceType) return false;
+    if (serviceType !== 'All' && service.type !== serviceType) return false;
     // Filter by status
     if (statusFilter !== 'All' && service.status !== statusFilter) return false;
     // Filter by category
-    if (categoryFilter !== 'All' && svcCategory !== categoryFilter) return false;
+    if (categoryFilter !== 'All' && service.category !== categoryFilter) return false;
     // Filter by partner
-    if (partnerFilter !== 'All' && svcPartner !== partnerFilter) return false;
+    if (partnerFilter !== 'All' && service.partner !== partnerFilter) return false;
     // Filter by date range
     if (dateRange.startDate && dateRange.endDate) {
-      const submittedDate = new Date(getSubmittedDate(service) || service.created_at);
+      const submittedDate = new Date(getSubmittedDate(service));
       const startDate = new Date(dateRange.startDate);
       const endDate = new Date(dateRange.endDate);
       endDate.setHours(23, 59, 59, 999); // Set to end of day
@@ -189,7 +175,7 @@ export const ServiceManagementPage: React.FC = () => {
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      return svcTitle.toLowerCase().includes(query) || svcPartner.toLowerCase().includes(query) || svcCategory.toLowerCase().includes(query);
+      return service.title.toLowerCase().includes(query) || service.partner.toLowerCase().includes(query) || service.category.toLowerCase().includes(query);
     }
     return true;
   }).sort((a, b) => {
@@ -207,7 +193,6 @@ export const ServiceManagementPage: React.FC = () => {
   const renderType = (type: string) => {
     const typeStyles: Record<string, string> = {
       Financial: 'bg-blue-100 text-blue-800 border border-blue-200',
-      Business: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
       'Non-Financial': 'bg-emerald-100 text-emerald-800 border border-emerald-200'
     };
     return <span className={`inline-flex px-2 py-0.5 text-[11px] sm:text-xs font-medium rounded-full ${typeStyles[type] || 'bg-gray-100 text-gray-800'}`}>
@@ -257,19 +242,14 @@ export const ServiceManagementPage: React.FC = () => {
       handleRowClick(serviceId);
     }
   };
-  // Handle add new service button click - uses new wizard
+  // Handle add new service button click
   const handleAddNewService = () => {
-    navigate('/service-wizard');
-  };
-  
-  // Handle add new service (legacy form)
-  const handleAddNewServiceLegacy = () => {
     navigate('/service-form');
   };
-  // Handle edit service - uses new wizard
+  // Handle edit service
   const handleEditService = (e: React.MouseEvent, serviceId: string) => {
     e.stopPropagation(); // Prevent row click handler from firing
-    navigate(`/service-wizard/${serviceId}`);
+    navigate(`/service-form/${serviceId}`);
   };
   // Handle service actions
   const handleApproveService = async () => {
@@ -281,9 +261,16 @@ export const ServiceManagementPage: React.FC = () => {
     try {
       let newStatus: Service['status'];
 
-      // Final approval - publish the service
-      newStatus = 'Published';
-      showToast('success', `Service "${selectedService.title}" approved and published!`);
+      // Logic based on service type
+      if (selectedService.type === 'Financial' && selectedService.status !== 'Step 2 Pending') {
+        // Move to step 2
+        newStatus = 'Step 2 Pending';
+        showToast('success', `Service "${selectedService.title}" moved to Step 2 review`);
+      } else {
+        // Final approval
+        newStatus = 'Published';
+        showToast('success', `Service "${selectedService.title}" approved and published!`);
+      }
 
       // Update in database
       await update(selectedService.id, { status: newStatus });
@@ -413,12 +400,10 @@ export const ServiceManagementPage: React.FC = () => {
           </p>
         </div>
         <Can I="create" a="Service">
-          {userSegment !== 'customer' && (
-            <button onClick={handleAddNewService} className="mt-3 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
-              <PlusIcon className="h-4 w-4 mr-1.5" />
-              Add New Service
-            </button>
-          )}
+          <button onClick={handleAddNewService} className="mt-3 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+            <PlusIcon className="h-4 w-4 mr-1.5" />
+            Add New Service
+          </button>
         </Can>
       </div>
     </div>
@@ -459,8 +444,8 @@ export const ServiceManagementPage: React.FC = () => {
             <div className="min-w-[140px] relative">
               <select className="appearance-none w-full bg-white border border-gray-200 rounded-lg py-2 pl-3 pr-8 text-sm leading-5 focus:outline-none focus:ring-blue-500 focus:border-blue-500" value={serviceType} onChange={e => setServiceType(e.target.value)}>
                 <option value="All">All Types</option>
-                <option value="Business">Business</option>
                 <option value="Financial">Financial</option>
+                <option value="Non-Financial">Non-Financial</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                 <ChevronDownIcon className="h-4 w-4" />
@@ -470,6 +455,7 @@ export const ServiceManagementPage: React.FC = () => {
               <select className="appearance-none w-full bg-white border border-gray-200 rounded-lg py-2 pl-3 pr-8 text-sm leading-5 focus:outline-none focus:ring-blue-500 focus:border-blue-500" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
                 <option value="All">All States</option>
                 <option value="Pending">Pending</option>
+                <option value="Step 2 Pending">Step 2 Pending</option>
                 <option value="Published">Published</option>
                 <option value="Unpublished">Unpublished</option>
                 <option value="Archived">Archived</option>
@@ -613,34 +599,27 @@ export const ServiceManagementPage: React.FC = () => {
               <td colSpan={8} className="px-4 py-4 text-center text-sm text-gray-500">
                 No services found
               </td>
-            </tr> : paginatedServices.map(service => {
-              const svcTitle = service.title || service.name || 'Untitled';
-              const svcType = service.service_type || service.type || 'Business';
-              const svcPartner = service.partner || service.partner_name || 'No Partner';
-              const svcCategory = service.category || (service.categories?.[0]) || 'Uncategorized';
-              const svcDate = getSubmittedDate(service) || service.created_at;
-              
-              return <tr key={service.id} onClick={() => handleRowClick(service.id)} onKeyDown={e => handleRowKeyDown(e, service.id)} tabIndex={0} role="button" className="cursor-pointer hover:bg-gray-50 transition-colors duration-150" aria-label={`View details for ${svcTitle}`}>
+            </tr> : paginatedServices.map(service => <tr key={service.id} onClick={() => handleRowClick(service.id)} onKeyDown={e => handleRowKeyDown(e, service.id)} tabIndex={0} role="button" className="cursor-pointer hover:bg-gray-50 transition-colors duration-150" aria-label={`View details for ${service.title}`}>
               <td className="px-4 py-3 text-[13px] font-medium text-gray-900">
-                {svcTitle}
+                {service.title}
               </td>
               <td className="px-4 py-3 text-[13px] text-gray-700">
-                {renderType(svcType)}
+                {renderType(service.type)}
               </td>
               <td className="px-4 py-3 text-[13px] text-gray-700">
-                {svcPartner}
+                {service.partner}
               </td>
               <td className="px-4 py-3 text-[13px] text-gray-700">
-                {svcCategory}
+                {service.category}
               </td>
               <td className="px-4 py-3 text-[13px] text-gray-700">
-                {renderStatus(service.status || 'Draft')}
+                {renderStatus(service.status)}
               </td>
               <td className="px-4 py-3 text-[13px] text-gray-700 text-right hidden lg:table-cell">
-                {service.applicants || 0}
+                {service.applicants}
               </td>
               <td className="px-4 py-3 text-[13px] text-gray-700">
-                {svcDate ? formatDate(svcDate) : 'N/A'}
+                {formatDate(getSubmittedDate(service))}
               </td>
               <td className="px-4 py-3 text-[13px] text-right text-gray-500">
                 <div className="flex items-center justify-end space-x-2">
@@ -652,7 +631,7 @@ export const ServiceManagementPage: React.FC = () => {
                   <EyeIcon className="h-4 w-4 text-gray-500" />
                 </div>
               </td>
-            </tr>})}
+            </tr>)}
           </tbody>
         </table>
       </div>
@@ -661,39 +640,32 @@ export const ServiceManagementPage: React.FC = () => {
     <div className="md:hidden space-y-3 mt-2">
       {paginatedServices.length === 0 ? <div className="bg-white rounded-xl shadow-sm p-6 text-center">
         <p className="text-gray-500">No services found</p>
-      </div> : paginatedServices.map(service => {
-        const svcTitle = service.title || service.name || 'Untitled';
-        const svcType = service.service_type || service.type || 'Business';
-        const svcPartner = service.partner || service.partner_name || 'No Partner';
-        const svcCategory = service.category || (service.categories?.[0]) || 'Uncategorized';
-        const svcDate = getSubmittedDate(service) || service.created_at;
-        
-        return <div key={service.id} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-200" onClick={() => handleRowClick(service.id)} onKeyDown={e => handleRowKeyDown(e, service.id)} tabIndex={0} role="button" aria-label={`View details for ${svcTitle}`}>
+      </div> : paginatedServices.map(service => <div key={service.id} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-200" onClick={() => handleRowClick(service.id)} onKeyDown={e => handleRowKeyDown(e, service.id)} tabIndex={0} role="button" aria-label={`View details for ${service.title}`}>
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-sm font-medium text-gray-900 leading-snug pr-2">
-            {svcTitle}
+            {service.title}
           </h3>
-          {renderStatus(service.status || 'Draft')}
+          {renderStatus(service.status)}
         </div>
         <div className="grid grid-cols-2 gap-y-2 text-[12px] mb-3">
           <div>
             <span className="text-gray-500">Type:</span>{' '}
-            <span className="font-medium">{svcType}</span>
+            <span className="font-medium">{service.type}</span>
           </div>
           <div>
             <span className="text-gray-500">Category:</span>{' '}
-            <span className="font-medium">{svcCategory}</span>
+            <span className="font-medium">{service.category}</span>
           </div>
           <div>
             <span className="text-gray-500">Partner:</span>{' '}
             <span className="font-medium text-gray-700 truncate max-w-[120px] inline-block align-bottom">
-              {svcPartner}
+              {service.partner}
             </span>
           </div>
           <div>
             <span className="text-gray-500">Submitted:</span>{' '}
             <span className="font-medium">
-              {svcDate ? formatDate(svcDate) : 'N/A'}
+              {formatDate(getSubmittedDate(service))}
             </span>
           </div>
         </div>
@@ -701,7 +673,7 @@ export const ServiceManagementPage: React.FC = () => {
           <div className="flex items-center">
             <UserIcon className="w-3 h-3 text-gray-400 mr-1" />
             <span className="text-[11px] text-gray-700">
-              {service.applicants || 0}
+              {service.applicants}
             </span>
           </div>
           <div className="flex space-x-3">
@@ -719,7 +691,7 @@ export const ServiceManagementPage: React.FC = () => {
             </button>
           </div>
         </div>
-      </div>})}
+      </div>)}
     </div>
     {/* Pagination Controls */}
     {filteredServices.length > 0 && <div className="bg-white rounded-xl shadow-sm p-3 sm:p-4 mt-4 flex flex-col sm:flex-row items-center justify-between">
@@ -803,9 +775,9 @@ export const ServiceManagementPage: React.FC = () => {
       onApprove={() => setShowApproveModal(true)}
       onReject={() => setShowRejectModal(true)}
       onSendBack={() => setShowSendBackModal(true)}
-      // canApprove={canApprove}
-      // canUpdate={canUpdate}
-      // canDelete={canDelete}
+      canApprove={canApprove}
+      canUpdate={canUpdate}
+      canDelete={canDelete}
       onRefresh={async () => {
         await list({}, { page: 1, pageSize: 1000, sortBy: 'created_at', sortOrder: 'desc' });
       }}
@@ -845,7 +817,7 @@ export const ServiceManagementPage: React.FC = () => {
             <AlertCircleIcon className="h-5 w-5 text-red-400 mr-3 flex-shrink-0 mt-0.5" />
             <div>
               <h3 className="text-sm font-medium text-red-800">Error loading services</h3>
-              <p className="mt-1 text-sm text-red-700">{(error as any)?.message || 'An error occurred'}</p>
+              <p className="mt-1 text-sm text-red-700">{error.message}</p>
             </div>
           </div>
         </div>
