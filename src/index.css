@@ -1,5 +1,242 @@
-/* PLEASE NOTE: THESE TAILWIND IMPORTS SHOULD NEVER BE DELETED */
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
-/* DO NOT DELETE THESE TAILWIND IMPORTS, OTHERWISE THE STYLING WILL NOT RENDER AT ALL */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light mode colors */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 199 89% 48%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 172 66% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 199 89% 48%;
+
+    --radius: 0.5rem;
+
+    /* Custom ATX tokens - Light mode */
+    --pane-menu: 210 40% 98%;
+    --pane-list: 0 0% 100%;
+    --pane-work: 210 40% 96%;
+    --pane-pop: 0 0% 100%;
+  }
+
+  .dark {
+    /* Dark mode colors */
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 10%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 199 89% 48%;
+    --primary-foreground: 222 47% 6%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 14%;
+    --muted-foreground: 215 20% 55%;
+
+    --accent: 172 66% 50%;
+    --accent-foreground: 222 47% 6%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 6%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 210 40% 98%;
+
+    --border: 217 33% 20%;
+    --input: 217 33% 17%;
+    --ring: 199 89% 48%;
+
+    /* Custom ATX tokens - Dark mode */
+    --pane-menu: 222 47% 7%;
+    --pane-list: 222 47% 9%;
+    --pane-work: 222 47% 11%;
+    --pane-pop: 222 47% 13%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  html, body {
+    @apply h-full;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  #root {
+    @apply h-full;
+  }
+}
+
+@layer components {
+  .bg-pane-menu {
+    background-color: hsl(var(--pane-menu));
+  }
+  
+  .bg-pane-list {
+    background-color: hsl(var(--pane-list));
+  }
+  
+  .bg-pane-work {
+    background-color: hsl(var(--pane-work));
+  }
+  
+  /* Dark mode specific enhancements */
+  .dark .bg-pane-menu {
+    border-color: hsl(var(--border));
+  }
+  
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+  }
+  
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+  
+  /* Global theme overrides for dashboard content */
+  .dark .bg-gray-50 {
+    background-color: hsl(var(--background)) !important;
+  }
+  
+  .dark .bg-white {
+    background-color: hsl(var(--card)) !important;
+  }
+  
+  .dark .bg-gray-100 {
+    background-color: hsl(var(--secondary)) !important;
+  }
+  
+  .dark .bg-blue-50 {
+    background-color: hsl(var(--primary) / 0.1) !important;
+  }
+  
+  .dark .bg-green-50 {
+    background-color: hsl(var(--accent) / 0.1) !important;
+  }
+  
+  .dark .text-gray-900 {
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  .dark .text-gray-800 {
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  .dark .text-gray-700 {
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  .dark .text-gray-600 {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+  
+  .dark .text-gray-500 {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+  
+  .dark .text-blue-600 {
+    color: hsl(var(--primary)) !important;
+  }
+  
+  .dark .text-blue-700 {
+    color: hsl(var(--primary)) !important;
+  }
+  
+  .dark .text-blue-800 {
+    color: hsl(var(--primary)) !important;
+  }
+  
+  .dark .border-gray-200 {
+    border-color: hsl(var(--border)) !important;
+  }
+  
+  .dark .border-gray-300 {
+    border-color: hsl(var(--border)) !important;
+  }
+  
+  .dark .border-blue-200 {
+    border-color: hsl(var(--primary) / 0.3) !important;
+  }
+  
+  /* Ensure cards and panels get proper dark styling */
+  .dark [class*="bg-white"] {
+    background-color: hsl(var(--card)) !important;
+  }
+  
+  .dark [class*="border-gray"] {
+    border-color: hsl(var(--border)) !important;
+  }
+  
+  /* Smooth transitions for theme changes */
+  * {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+  
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+}

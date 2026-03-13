@@ -387,15 +387,15 @@ const EJPTransactionDashboard = () => {
   ]);
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-background min-h-screen">
       {/* Page Header */}
-      <div className="px-4 sm:px-6 pt-4 pb-4 bg-white border-b border-gray-200">
+      <div className="px-4 sm:px-6 pt-4 pb-4 bg-card border-b border-border">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
           <div className="space-y-3">
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
               Service Provider Operations Dashboard (EJP Transactions)
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Track and analyze service provider operations for EJP Transactions
               with real-time metrics, service requests insights, performance
               indicators, and enterprise outcomes for strategic decision-making.
@@ -408,19 +408,21 @@ const EJPTransactionDashboard = () => {
               onClick={() => setIsRealTimeActive(!isRealTimeActive)}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
                 isRealTimeActive
-                  ? 'bg-blue-50 text-blue-700 hover:bg-blue-100'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? "bg-primary/10 text-primary hover:bg-primary/20"
+                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
               }`}
             >
-              <div className={`w-2 h-2 rounded-full ${isRealTimeActive ? 'bg-blue-500 animate-pulse' : 'bg-gray-400'}`} />
-              <span>{isRealTimeActive ? 'Live' : 'Paused'}</span>
+              <div
+                className={`w-2 h-2 rounded-full ${isRealTimeActive ? "bg-primary animate-pulse" : "bg-muted-foreground"}`}
+              />
+              <span>{isRealTimeActive ? "Live" : "Paused"}</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Dashboard Tabs */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-card border-b border-border">
         <div className="px-4 sm:px-6">
           <div className="flex items-center justify-center">
             {dashboardTabs.map((tab, index) => {
@@ -431,12 +433,12 @@ const EJPTransactionDashboard = () => {
                   key={tab.id}
                   disabled={isTbu}
                   onClick={() => !isTbu && setActiveTab(tab.id)}
-                  className={`relative flex-1 px-3 sm:px-8 py-3 text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  className={`relative flex-1 px-3 sm:px-8 py-3 text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                     isTbu
-                      ? "text-gray-400 bg-gray-50 cursor-not-allowed border-b-2 border-transparent"
+                      ? "text-muted-foreground bg-muted cursor-not-allowed border-b-2 border-transparent"
                       : activeTab === tab.id
-                        ? "text-blue-600 bg-blue-50 border-b-2 border-blue-500"
-                        : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                        ? "text-primary bg-primary/10 border-b-2 border-primary"
+                        : "text-foreground hover:text-foreground hover:bg-secondary/50"
                   }`}
                   tabIndex={isTbu ? -1 : 0}
                   role="tab"
@@ -471,19 +473,19 @@ const EJPTransactionDashboard = () => {
         activeTab === "operational-risk" ? (
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center max-w-2xl mx-auto">
-              <div className="w-24 h-24 mx-auto mb-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <Icon name="Settings" size={48} className="text-blue-600" />
+              <div className="w-24 h-24 mx-auto mb-8 bg-primary/10 rounded-full flex items-center justify-center">
+                <Icon name="Settings" size={48} className="text-primary" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold text-foreground mb-4">
                 Coming Soon
               </h2>
-              <p className="text-lg text-gray-600 mb-6">
+              <p className="text-lg text-muted-foreground mb-6">
                 We're working hard to bring you comprehensive analytics and
                 insights for this section of the Service Provider Operations
                 Dashboard.
               </p>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-lg mx-auto">
-                <p className="text-sm text-blue-800">
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-6 max-w-lg mx-auto">
+                <p className="text-sm text-primary">
                   This section will include detailed metrics and visualizations
                   for{" "}
                   {activeTab === "service-performance"
@@ -500,7 +502,7 @@ const EJPTransactionDashboard = () => {
           <>
             {/* Global Filters */}
             <div className="mb-10">
-              <div className="bg-white border border-border rounded-xl p-6">
+              <div className="bg-card border border-border rounded-xl p-6">
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-3">
@@ -510,7 +512,7 @@ const EJPTransactionDashboard = () => {
                           size={16}
                           className="text-blue-600"
                         />
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-sm font-medium text-foreground">
                           Date Range
                         </span>
                       </div>
@@ -531,7 +533,7 @@ const EJPTransactionDashboard = () => {
                           size={16}
                           className="text-green-600"
                         />
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-sm font-medium text-foreground">
                           Service Type
                         </span>
                       </div>
@@ -552,7 +554,7 @@ const EJPTransactionDashboard = () => {
                           size={16}
                           className="text-indigo-600"
                         />
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-sm font-medium text-foreground">
                           Enterprise Size
                         </span>
                       </div>
@@ -577,7 +579,7 @@ const EJPTransactionDashboard = () => {
                             size={14}
                             className="text-gray-500"
                           />
-                          <span className="text-sm font-medium text-gray-700">
+                          <span className="text-sm font-medium text-foreground">
                             Active Filters:
                           </span>
                         </div>
