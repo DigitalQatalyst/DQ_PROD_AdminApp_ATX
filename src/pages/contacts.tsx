@@ -17,30 +17,7 @@ const ContactsPage: React.FC = () => {
     <div className="h-full">
       <LVEWorkspaceLayout
         headerTitle="Contact Management"
-        tenantLabel="Demo Tenant"
-        streamLabel="Contacts Stream"
         tabs={defaultTabs}
-        menuPane={
-          <div className="p-4 space-y-2 text-xs text-muted-foreground">
-            <div className="font-semibold text-foreground text-[11px] tracking-wide uppercase">
-              Contact Actions
-            </div>
-            <ul className="space-y-1">
-              <li className="rounded-md px-2 py-1 bg-accent text-foreground text-xs">
-                All Contacts
-              </li>
-              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                New Contact
-              </li>
-              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                Import Contacts
-              </li>
-              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                Quick Create
-              </li>
-            </ul>
-          </div>
-        }
         listPane={
           <div className="p-4 text-xs text-muted-foreground">
             <div className="mb-2 flex items-center justify-between">
@@ -99,9 +76,7 @@ const ContactsPage: React.FC = () => {
             </div>
           </div>
         }
-        footer={
-          <span>Contact Management MVP - LVE workspace implementation</span>
-        }
+        footer="Contact Management MVP - Integrated with global navigation"
       />
     </div>
   );

@@ -17,41 +17,7 @@ const AccountsPage: React.FC = () => {
     <div className="h-full">
       <LVEWorkspaceLayout
         headerTitle="Account Management"
-        tenantLabel="Demo Tenant"
-        streamLabel="Accounts Stream"
         tabs={defaultTabs}
-        menuPane={
-          <div className="p-4 space-y-2 text-xs text-muted-foreground">
-            <div className="font-semibold text-foreground text-[11px] tracking-wide uppercase">
-              Account Actions
-            </div>
-            <ul className="space-y-1">
-              <li className="rounded-md px-2 py-1 bg-accent text-foreground text-xs">
-                All Accounts
-              </li>
-              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                New Account
-              </li>
-              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                Import Accounts
-              </li>
-            </ul>
-            <div className="font-semibold text-foreground text-[11px] tracking-wide uppercase mt-4">
-              Account Views
-            </div>
-            <ul className="space-y-1">
-              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                Active Accounts
-              </li>
-              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                Recent Activity
-              </li>
-              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                High Value
-              </li>
-            </ul>
-          </div>
-        }
         listPane={
           <div className="p-4 text-xs text-muted-foreground">
             <div className="mb-2 flex items-center justify-between">
@@ -139,11 +105,7 @@ const AccountsPage: React.FC = () => {
             </div>
           </div>
         }
-        footer={
-          <span>
-            Account Management MVP - LVE workspace with tabbed detail views
-          </span>
-        }
+        footer="Account Management MVP - Integrated with global navigation"
       />
     </div>
   );

@@ -1,16 +1,20 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ChevronDown,
   ChevronRight,
   Settings,
-  BarChart3,
-  FileCheck,
   Briefcase,
   MessageSquare,
   User,
   Target,
   Building,
+  Plus,
+  Upload,
+  Zap,
+  Filter,
+  Clock,
+  TrendingUp,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 import { useAuth } from "../../context/AuthContext";
@@ -23,6 +27,14 @@ interface NavigationItem {
   path?: string;
   children?: NavigationItem[];
   requiredSegments?: string[];
+  actions?: NavigationAction[];
+}
+
+interface NavigationAction {
+  id: string;
+  name: string;
+  icon?: any;
+  onClick?: () => void;
 }
 
 export function MenuPane() {
@@ -31,8 +43,10 @@ export function MenuPane() {
   const { userSegment } = useAuth();
   const [expandedSections, setExpandedSections] = useState<string[]>([
     "crm",
-    "analytics",
+    "support", // Keep both sections expanded by default
   ]);
+  const [expandedActions, setExpandedActions] = useState<string[]>([]);
+  const [selectedAction, setSelectedAction] = useState<string | null>(null);
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) =>
@@ -40,6 +54,21 @@ export function MenuPane() {
         ? prev.filter((id) => id !== sectionId)
         : [...prev, sectionId],
     );
+  };
+
+  const toggleActions = (itemId: string) => {
+    const isCurrentlyExpanded = expandedActions.includes(itemId);
+
+    setExpandedActions((prev) =>
+      isCurrentlyExpanded
+        ? prev.filter((id) => id !== itemId)
+        : [...prev, itemId],
+    );
+
+    // If collapsing actions, clear selected action for this module
+    if (isCurrentlyExpanded) {
+      setSelectedAction(null);
+    }
   };
 
   const navigationItems: NavigationItem[] = [
@@ -54,6 +83,12 @@ export function MenuPane() {
           icon: User,
           path: "/contacts",
           requiredSegments: ["internal"],
+          actions: [
+            { id: "all-contacts", name: "All Contacts" },
+            { id: "new-contact", name: "New Contact", icon: Plus },
+            { id: "import-contacts", name: "Import Contacts", icon: Upload },
+            { id: "quick-create", name: "Quick Create", icon: Zap },
+          ],
         },
         {
           id: "leads",
@@ -61,6 +96,19 @@ export function MenuPane() {
           icon: Target,
           path: "/leads",
           requiredSegments: ["internal"],
+          actions: [
+            { id: "all-leads", name: "All Leads" },
+            { id: "new-lead", name: "New Lead", icon: Plus },
+            { id: "import-leads", name: "Import Leads", icon: Upload },
+            {
+              id: "lead-conversion",
+              name: "Lead Conversion",
+              icon: TrendingUp,
+            },
+            { id: "qualified", name: "Qualified", icon: Filter },
+            { id: "contacted", name: "Contacted", icon: Filter },
+            { id: "opportunity", name: "Opportunity", icon: Filter },
+          ],
         },
         {
           id: "accounts",
@@ -68,37 +116,17 @@ export function MenuPane() {
           icon: Building,
           path: "/accounts",
           requiredSegments: ["internal"],
+          actions: [
+            { id: "all-accounts", name: "All Accounts" },
+            { id: "new-account", name: "New Account", icon: Plus },
+            { id: "import-accounts", name: "Import Accounts", icon: Upload },
+            { id: "active-accounts", name: "Active Accounts", icon: Filter },
+            { id: "recent-activity", name: "Recent Activity", icon: Clock },
+            { id: "high-value", name: "High Value", icon: TrendingUp },
+          ],
         },
       ],
     },
-    // {
-    //   id: "analytics",
-    //   name: "Analytics & Monitoring",
-    //   icon: BarChart3,
-    //   children: [
-    //     {
-    //       id: "experience-analytics",
-    //       name: "Experience Analytics",
-    //       icon: BarChart3,
-    //       path: "/ejp-transaction-dashboard",
-    //       requiredSegments: ["partner", "internal"],
-    //     },
-    //   ],
-    // },
-    // {
-    //   id: "content",
-    //   name: "Content & Data",
-    //   icon: FileCheck,
-    //   children: [
-    //     {
-    //       id: "content-management",
-    //       name: "Content Management",
-    //       icon: FileCheck,
-    //       path: "/content-management",
-    //       requiredSegments: ["internal"],
-    //     },
-    //   ],
-    // },
     {
       id: "support",
       name: "Support",
@@ -117,14 +145,44 @@ export function MenuPane() {
 
   const isItemVisible = (item: NavigationItem) => {
     if (!item.requiredSegments) return true;
+    if (!userSegment) return false;
     return item.requiredSegments.includes(userSegment);
   };
 
   const isItemActive = (path: string) => location.pathname === path;
-  const isSectionActive = (section: NavigationItem) =>
-    section.children?.some(
-      (child) => child.path && location.pathname === child.path,
-    ) || false;
+
+  // Check if section is active - only true if the section itself is active, not its children
+  const isSectionActive = (section: NavigationItem) => {
+    // Only highlight section if it has a direct path that matches current location
+    return section.path ? isItemActive(section.path) : false;
+  };
+
+  // Auto-expand actions for the currently active module and set selected action
+  React.useEffect(() => {
+    const activeItem = navigationItems
+      .flatMap((section) => section.children || [])
+      .find((item) => item.path && isItemActive(item.path));
+
+    if (activeItem && activeItem.actions) {
+      // Always expand actions for the active module (don't collapse others)
+      if (!expandedActions.includes(activeItem.id)) {
+        setExpandedActions((prev) => [...prev, activeItem.id]);
+      }
+
+      // Only set default selected action if no action is currently selected
+      // or if the currently selected action doesn't belong to the active module
+      const currentActionBelongsToActiveModule = activeItem.actions.some(
+        (action) => action.id === selectedAction,
+      );
+
+      if (!selectedAction || !currentActionBelongsToActiveModule) {
+        const defaultAction = activeItem.actions[0];
+        if (defaultAction) {
+          setSelectedAction(defaultAction.id);
+        }
+      }
+    }
+  }, [location.pathname, selectedAction]);
 
   return (
     <aside className="w-64 bg-pane-menu border-r border-border flex flex-col shrink-0">
@@ -163,19 +221,72 @@ export function MenuPane() {
                 {expandedSections.includes(section.id) && (
                   <div className="ml-2 mt-1 space-y-0.5">
                     {visibleChildren.map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => item.path && navigate(item.path)}
-                        className={cn(
-                          "w-full flex items-center gap-2 px-3 py-2 rounded-md text-left text-sm transition-all duration-200",
-                          item.path && isItemActive(item.path)
-                            ? "bg-primary/15 text-primary border-l-2 border-primary -ml-[2px]"
-                            : "text-muted-foreground hover:text-foreground hover:bg-secondary/30",
-                        )}
-                      >
-                        {item.icon && <item.icon className="w-3.5 h-3.5" />}
-                        <span className="truncate">{item.name}</span>
-                      </button>
+                      <div key={item.id}>
+                        {/* Main Navigation Item */}
+                        <div className="flex items-center">
+                          <button
+                            onClick={() => item.path && navigate(item.path)}
+                            className={cn(
+                              "flex-1 flex items-center gap-2 px-3 py-2 rounded-md text-left text-sm transition-all duration-200",
+                              // Only highlight parent if this specific item is active AND no actions are selected
+                              item.path &&
+                                isItemActive(item.path) &&
+                                (!expandedActions.includes(item.id) ||
+                                  !selectedAction)
+                                ? "bg-primary/15 text-primary border-l-2 border-primary -ml-[2px]"
+                                : "text-muted-foreground hover:text-foreground hover:bg-secondary/30",
+                            )}
+                          >
+                            {item.icon && <item.icon className="w-3.5 h-3.5" />}
+                            <span className="truncate">{item.name}</span>
+                          </button>
+
+                          {/* Actions Toggle - Show when module has actions */}
+                          {item.actions && (
+                            <button
+                              onClick={() => toggleActions(item.id)}
+                              className="p-1.5 rounded hover:bg-secondary/30 text-muted-foreground/60 hover:text-foreground transition-colors"
+                            >
+                              {expandedActions.includes(item.id) ? (
+                                <ChevronDown className="w-3 h-3" />
+                              ) : (
+                                <ChevronRight className="w-3 h-3" />
+                              )}
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Module Actions - Show when expanded and on this module's page */}
+                        {item.path &&
+                          isItemActive(item.path) &&
+                          item.actions &&
+                          expandedActions.includes(item.id) && (
+                            <div className="ml-2 mt-1 space-y-0.5">
+                              {item.actions.map((action) => (
+                                <button
+                                  key={action.id}
+                                  onClick={() => {
+                                    setSelectedAction(action.id);
+                                    action.onClick?.();
+                                  }}
+                                  className={cn(
+                                    "w-full flex items-center gap-2 px-3 py-2 rounded-md text-left text-sm transition-all duration-200",
+                                    selectedAction === action.id
+                                      ? "bg-primary/15 text-primary border-l-2 border-primary -ml-[2px]"
+                                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/30",
+                                  )}
+                                >
+                                  {action.icon && (
+                                    <action.icon className="w-3.5 h-3.5" />
+                                  )}
+                                  <span className="truncate">
+                                    {action.name}
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                      </div>
                     ))}
                   </div>
                 )}

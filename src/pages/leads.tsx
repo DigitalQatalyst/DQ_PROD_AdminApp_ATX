@@ -17,44 +17,7 @@ const LeadsPage: React.FC = () => {
     <div className="h-full">
       <LVEWorkspaceLayout
         headerTitle="Lead Management"
-        tenantLabel="Demo Tenant"
-        streamLabel="Leads Stream"
         tabs={defaultTabs}
-        menuPane={
-          <div className="p-4 space-y-2 text-xs text-muted-foreground">
-            <div className="font-semibold text-foreground text-[11px] tracking-wide uppercase">
-              Lead Pipeline
-            </div>
-            <ul className="space-y-1">
-              <li className="rounded-md px-2 py-1 bg-accent text-foreground text-xs">
-                All Leads
-              </li>
-              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                New Lead
-              </li>
-              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                Import Leads
-              </li>
-              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                Lead Conversion
-              </li>
-            </ul>
-            <div className="font-semibold text-foreground text-[11px] tracking-wide uppercase mt-4">
-              Lead Stages
-            </div>
-            <ul className="space-y-1">
-              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                Qualified
-              </li>
-              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                Contacted
-              </li>
-              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                Opportunity
-              </li>
-            </ul>
-          </div>
-        }
         listPane={
           <div className="p-4 text-xs text-muted-foreground">
             <div className="mb-2 flex items-center justify-between">
@@ -125,11 +88,7 @@ const LeadsPage: React.FC = () => {
             </div>
           </div>
         }
-        footer={
-          <span>
-            Lead Management MVP - LVE workspace with lifecycle tracking
-          </span>
-        }
+        footer="Lead Management MVP - Integrated with global navigation"
       />
     </div>
   );

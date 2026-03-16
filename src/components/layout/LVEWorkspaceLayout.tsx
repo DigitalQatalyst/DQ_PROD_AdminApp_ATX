@@ -9,15 +9,9 @@ export interface LVETab {
 
 export interface LVEWorkspaceLayoutProps {
   headerTitle?: string;
-  tenantLabel?: string;
-  streamLabel?: string;
   tabs?: LVETab[];
   onTabSelect?: (tabId: string) => void;
   onTabClose?: (tabId: string) => void;
-  onTenantClick?: () => void;
-  onStreamClick?: () => void;
-  onSettingsClick?: () => void;
-  menuPane?: ReactNode;
   listPane?: ReactNode;
   workPane?: ReactNode;
   popPane?: ReactNode;
@@ -27,21 +21,16 @@ export interface LVEWorkspaceLayoutProps {
 /**
  * LVEWorkspaceLayout
  *
- * Reusable layout shell implementing the List | View | Edit (LVE) workspace structure.
- * This component is deliberately UI-only: it contains no module-specific logic and is
- * driven entirely by props so it can be reused across modules.
+ * Streamlined layout shell implementing the List | View | Edit (LVE) workspace structure.
+ * This component integrates seamlessly with the global AppShell layout. Module-specific
+ * actions are now handled directly in the global sidebar MenuPane, eliminating the need
+ * for a separate context menu pane and creating a cleaner, more unified navigation experience.
  */
 export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
   headerTitle = "Workspace",
-  tenantLabel = "Default Tenant",
-  streamLabel = "Default Stream",
   tabs = [],
   onTabSelect,
   onTabClose,
-  onTenantClick,
-  onStreamClick,
-  onSettingsClick,
-  menuPane,
   listPane,
   workPane,
   popPane,
@@ -50,45 +39,10 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
   const hasTabs = tabs && tabs.length > 0;
 
   return (
-    <div className="flex flex-col h-full min-h-[600px] bg-background border border-border rounded-xl overflow-hidden">
-      {/* Global Header */}
-      <header className="border-b border-border bg-card px-4 py-2 flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onTenantClick}
-            className="inline-flex items-center px-2 py-1 rounded-full border border-border text-xs font-medium text-foreground hover:bg-accent"
-          >
-            <span className="h-2 w-2 rounded-full bg-emerald-500 mr-1" />
-            {tenantLabel}
-          </button>
-          <button
-            type="button"
-            onClick={onStreamClick}
-            className="inline-flex items-center px-2 py-1 rounded-full border border-primary/30 bg-primary/10 text-xs font-medium text-primary hover:bg-primary/20"
-          >
-            {streamLabel}
-          </button>
-        </div>
-
-        <div className="flex-1 flex items-center justify-center">
-          <h1 className="text-sm font-semibold text-foreground truncate">
-            {headerTitle}
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {onSettingsClick && (
-            <button
-              type="button"
-              onClick={onSettingsClick}
-              className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-border text-muted-foreground hover:bg-accent text-xs"
-              aria-label="Workspace settings"
-            >
-              ⚙
-            </button>
-          )}
-        </div>
+    <div className="flex flex-col h-full bg-background overflow-hidden">
+      {/* Workspace Header - Simplified */}
+      <header className="border-b border-border bg-card px-4 py-3 flex items-center justify-center shrink-0">
+        <h1 className="text-lg font-semibold text-foreground">{headerTitle}</h1>
       </header>
 
       {/* Tabs Row */}
@@ -129,22 +83,18 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
         </div>
       )}
 
-      {/* Main Workspace Grid */}
-      <div className="flex-1 grid grid-cols-[minmax(200px,240px)_minmax(260px,320px)_minmax(420px,1fr)_minmax(260px,320px)] min-h-0">
-        {/* Menu Pane */}
-        <section className="border-r border-border bg-muted/30 overflow-y-auto">
-          {menuPane ?? (
-            <div className="p-4 text-xs text-muted-foreground">
-              Menu Pane — provide module navigation here.
-            </div>
-          )}
-        </section>
-
+      {/* Main Workspace Grid - 3-pane layout without context menu */}
+      <div className="flex-1 grid grid-cols-[minmax(300px,400px)_minmax(400px,1fr)_minmax(280px,320px)] min-h-0">
         {/* List Pane */}
         <section className="border-r border-border bg-card overflow-y-auto">
           {listPane ?? (
             <div className="p-4 text-xs text-muted-foreground">
-              List Pane — show record queues and filters here.
+              <div className="font-semibold text-foreground text-[11px] tracking-wide uppercase mb-2">
+                Record List
+              </div>
+              <p className="text-muted-foreground">
+                Record queues, filters, and search will appear here.
+              </p>
             </div>
           )}
         </section>
@@ -155,13 +105,12 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
             <div className="h-full flex items-center justify-center px-6 py-8">
               <div className="text-center max-w-sm">
                 <div className="mb-3 text-3xl">🧩</div>
-                <h2 className="text-sm font-semibold text-foreground mb-1">
-                  LVE Workspace Shell
+                <h2 className="text-lg font-semibold text-foreground mb-2">
+                  LVE Workspace
                 </h2>
-                <p className="text-xs text-muted-foreground">
-                  Connect this workspace to a core data entity (e.g. Account,
-                  Lead, Case) and drive it via configuration—no module-specific
-                  logic should live in this layout.
+                <p className="text-sm text-muted-foreground">
+                  Select an item from the list to view and edit details here.
+                  Module actions are available in the sidebar navigation.
                 </p>
               </div>
             </div>
@@ -172,17 +121,24 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
         <section className="bg-muted/30 overflow-y-auto">
           {popPane ?? (
             <div className="p-4 text-xs text-muted-foreground">
-              Pop Pane — use this for related context, timelines, or actions.
+              <div className="font-semibold text-foreground text-[11px] tracking-wide uppercase mb-2">
+                Context Panel
+              </div>
+              <p className="text-muted-foreground">
+                Related context, timelines, and quick actions will appear here.
+              </p>
             </div>
           )}
         </section>
       </div>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-card px-3 py-1.5 text-[11px] text-muted-foreground flex items-center justify-between">
-        <span>System status: Connected</span>
-        <span>{footer}</span>
-      </footer>
+      {/* Footer - Simplified */}
+      {footer && (
+        <footer className="border-t border-border bg-card px-4 py-2 text-xs text-muted-foreground flex items-center justify-between shrink-0">
+          <span>Workspace Status</span>
+          <span>{footer}</span>
+        </footer>
+      )}
     </div>
   );
 };
