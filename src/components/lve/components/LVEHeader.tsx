@@ -1,0 +1,35 @@
+import React from "react";
+import { LVEAction } from "../types";
+import Button from "../../ui/ButtonComponent";
+
+interface LVEHeaderProps {
+  title: string;
+  actions?: LVEAction[];
+}
+
+export const LVEHeader: React.FC<LVEHeaderProps> = ({
+  title,
+  actions = [],
+}) => {
+  return (
+    <div className="flex items-center justify-between p-4 border-b border-border">
+      <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+      {actions.length > 0 && (
+        <div className="flex items-center gap-2">
+          {actions.map((action) => (
+            <Button
+              key={action.id}
+              variant={action.variant || "secondary"}
+              size="sm"
+              onClick={() => action.onClick()}
+              disabled={action.disabled}
+            >
+              {action.icon && <action.icon className="w-4 h-4 mr-1" />}
+              {action.label}
+            </Button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};

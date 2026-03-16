@@ -15,6 +15,7 @@ import ContentFormRoute from "./pages/content-form";
 import AccountsPage from "./pages/accounts";
 import ContactsPage from "./pages/contacts";
 import LeadsPage from "./pages/leads";
+import LVEDemoPage from "./pages/lve-demo";
 import LoginPage from "./pages/login";
 import SettingsPage from "./pages/settings";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -313,6 +314,20 @@ export function AppRouter() {
               <ContentSegmentGate>
                 <ContentFormRoute />
               </ContentSegmentGate>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/lve-demo"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+              requiredSegments={["internal", "partner"]}
+            >
+              <AppShell>
+                <LVEDemoPage />
+              </AppShell>
             </ProtectedRoute>
           }
         />

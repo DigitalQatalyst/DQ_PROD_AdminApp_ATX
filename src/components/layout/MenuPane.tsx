@@ -43,7 +43,8 @@ export function MenuPane() {
   const { userSegment } = useAuth();
   const [expandedSections, setExpandedSections] = useState<string[]>([
     "crm",
-    "support", // Keep both sections expanded by default
+    "support",
+    "demo", // Include demo section
   ]);
   const [expandedActions, setExpandedActions] = useState<string[]>([]);
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
@@ -94,10 +95,57 @@ export function MenuPane() {
           path: "/contacts",
           requiredSegments: ["internal"],
           actions: [
-            { id: "all-contacts", name: "All Contacts" },
-            { id: "new-contact", name: "New Contact", icon: Plus },
-            { id: "import-contacts", name: "Import Contacts", icon: Upload },
-            { id: "quick-create", name: "Quick Create", icon: Zap },
+            {
+              id: "all-contacts",
+              name: "All Contacts",
+              onClick: () => navigate("/lve-demo?module=contacts&filter=all"),
+            },
+            {
+              id: "new-contact",
+              name: "New Contact",
+              icon: Plus,
+              onClick: () => console.log("Create new contact"),
+            },
+            {
+              id: "import-contacts",
+              name: "Import Contacts",
+              icon: Upload,
+              onClick: () => console.log("Import contacts"),
+            },
+            {
+              id: "quick-create",
+              name: "Quick Create",
+              icon: Zap,
+              onClick: () => console.log("Quick create contact"),
+            },
+            {
+              id: "active-contacts",
+              name: "Active Contacts",
+              icon: Filter,
+              onClick: () =>
+                navigate("/lve-demo?module=contacts&filter=active"),
+            },
+            {
+              id: "inactive-contacts",
+              name: "Inactive Contacts",
+              icon: Filter,
+              onClick: () =>
+                navigate("/lve-demo?module=contacts&filter=inactive"),
+            },
+            {
+              id: "prospect-contacts",
+              name: "Prospects",
+              icon: Filter,
+              onClick: () =>
+                navigate("/lve-demo?module=contacts&filter=prospects"),
+            },
+            {
+              id: "recent-contacts",
+              name: "Recent Activity",
+              icon: Clock,
+              onClick: () =>
+                navigate("/lve-demo?module=contacts&filter=recent"),
+            },
           ],
         },
         {
@@ -107,17 +155,75 @@ export function MenuPane() {
           path: "/leads",
           requiredSegments: ["internal"],
           actions: [
-            { id: "all-leads", name: "All Leads" },
-            { id: "new-lead", name: "New Lead", icon: Plus },
-            { id: "import-leads", name: "Import Leads", icon: Upload },
+            {
+              id: "all-leads",
+              name: "All Leads",
+              onClick: () => navigate("/lve-demo?module=leads&filter=all"),
+            },
+            {
+              id: "new-lead",
+              name: "New Lead",
+              icon: Plus,
+              onClick: () => console.log("Create new lead"),
+            },
+            {
+              id: "import-leads",
+              name: "Import Leads",
+              icon: Upload,
+              onClick: () => console.log("Import leads"),
+            },
             {
               id: "lead-conversion",
               name: "Lead Conversion",
               icon: TrendingUp,
+              onClick: () => console.log("Lead conversion tools"),
             },
-            { id: "qualified", name: "Qualified", icon: Filter },
-            { id: "contacted", name: "Contacted", icon: Filter },
-            { id: "opportunity", name: "Opportunity", icon: Filter },
+            {
+              id: "qualified",
+              name: "Qualified",
+              icon: Filter,
+              onClick: () =>
+                navigate("/lve-demo?module=leads&filter=qualified"),
+            },
+            {
+              id: "contacted",
+              name: "Contacted",
+              icon: Filter,
+              onClick: () =>
+                navigate("/lve-demo?module=leads&filter=contacted"),
+            },
+            {
+              id: "opportunity",
+              name: "Opportunity",
+              icon: Filter,
+              onClick: () =>
+                navigate("/lve-demo?module=leads&filter=opportunity"),
+            },
+            {
+              id: "new-leads",
+              name: "New Leads",
+              icon: Filter,
+              onClick: () => navigate("/lve-demo?module=leads&filter=new"),
+            },
+            {
+              id: "closed-leads",
+              name: "Closed Leads",
+              icon: Filter,
+              onClick: () => navigate("/lve-demo?module=leads&filter=closed"),
+            },
+            {
+              id: "high-value-leads",
+              name: "High Value",
+              icon: TrendingUp,
+              onClick: () =>
+                navigate("/lve-demo?module=leads&filter=highValue"),
+            },
+            {
+              id: "recent-leads",
+              name: "Recent Activity",
+              icon: Clock,
+              onClick: () => navigate("/lve-demo?module=leads&filter=recent"),
+            },
           ],
         },
         {
@@ -127,12 +233,78 @@ export function MenuPane() {
           path: "/accounts",
           requiredSegments: ["internal"],
           actions: [
-            { id: "all-accounts", name: "All Accounts" },
-            { id: "new-account", name: "New Account", icon: Plus },
-            { id: "import-accounts", name: "Import Accounts", icon: Upload },
-            { id: "active-accounts", name: "Active Accounts", icon: Filter },
-            { id: "recent-activity", name: "Recent Activity", icon: Clock },
-            { id: "high-value", name: "High Value", icon: TrendingUp },
+            {
+              id: "all-accounts",
+              name: "All Accounts",
+              onClick: () => navigate("/lve-demo?module=accounts&filter=all"),
+            },
+            {
+              id: "new-account",
+              name: "New Account",
+              icon: Plus,
+              onClick: () => console.log("Create new account"),
+            },
+            {
+              id: "import-accounts",
+              name: "Import Accounts",
+              icon: Upload,
+              onClick: () => console.log("Import accounts"),
+            },
+            {
+              id: "customer-accounts",
+              name: "Customers",
+              icon: Filter,
+              onClick: () =>
+                navigate("/lve-demo?module=accounts&filter=customers"),
+            },
+            {
+              id: "prospect-accounts",
+              name: "Prospects",
+              icon: Filter,
+              onClick: () =>
+                navigate("/lve-demo?module=accounts&filter=prospects"),
+            },
+            {
+              id: "partner-accounts",
+              name: "Partners",
+              icon: Filter,
+              onClick: () =>
+                navigate("/lve-demo?module=accounts&filter=partners"),
+            },
+            {
+              id: "active-accounts",
+              name: "Active Accounts",
+              icon: Filter,
+              onClick: () =>
+                navigate("/lve-demo?module=accounts&filter=active"),
+            },
+            {
+              id: "recent-activity",
+              name: "Recent Activity",
+              icon: Clock,
+              onClick: () =>
+                navigate("/lve-demo?module=accounts&filter=recent"),
+            },
+            {
+              id: "high-value",
+              name: "High Value",
+              icon: TrendingUp,
+              onClick: () =>
+                navigate("/lve-demo?module=accounts&filter=highValue"),
+            },
+            {
+              id: "enterprise-accounts",
+              name: "Enterprise",
+              icon: Building,
+              onClick: () =>
+                navigate("/lve-demo?module=accounts&filter=enterprise"),
+            },
+            {
+              id: "large-accounts",
+              name: "Large Accounts",
+              icon: Building,
+              onClick: () => navigate("/lve-demo?module=accounts&filter=large"),
+            },
           ],
         },
       ],
@@ -148,6 +320,20 @@ export function MenuPane() {
           icon: MessageSquare,
           path: "/chat-support",
           requiredSegments: ["internal"],
+        },
+      ],
+    },
+    {
+      id: "demo",
+      name: "Demo",
+      icon: Building,
+      children: [
+        {
+          id: "lve-demo",
+          name: "LVE Demo",
+          icon: Building,
+          path: "/lve-demo",
+          requiredSegments: ["internal", "partner"],
         },
       ],
     },
@@ -270,33 +456,30 @@ export function MenuPane() {
                         </div>
 
                         {/* Module Actions - Show when expanded */}
-                        {item.actions &&
-                          expandedActions.includes(item.id) && (
-                            <div className="ml-2 mt-1 space-y-0.5">
-                              {item.actions.map((action) => (
-                                <button
-                                  key={action.id}
-                                  onClick={() => {
-                                    setSelectedAction(action.id);
-                                    action.onClick?.();
-                                  }}
-                                  className={cn(
-                                    "w-full flex items-center gap-2 px-3 py-2 rounded-md text-left text-sm transition-all duration-200",
-                                    selectedAction === action.id
-                                      ? "bg-primary/15 text-primary border-l-2 border-primary -ml-[2px]"
-                                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/30",
-                                  )}
-                                >
-                                  {action.icon && (
-                                    <action.icon className="w-3.5 h-3.5" />
-                                  )}
-                                  <span className="truncate">
-                                    {action.name}
-                                  </span>
-                                </button>
-                              ))}
-                            </div>
-                          )}
+                        {item.actions && expandedActions.includes(item.id) && (
+                          <div className="ml-2 mt-1 space-y-0.5">
+                            {item.actions.map((action) => (
+                              <button
+                                key={action.id}
+                                onClick={() => {
+                                  setSelectedAction(action.id);
+                                  action.onClick?.();
+                                }}
+                                className={cn(
+                                  "w-full flex items-center gap-2 px-3 py-2 rounded-md text-left text-sm transition-all duration-200",
+                                  selectedAction === action.id
+                                    ? "bg-primary/15 text-primary border-l-2 border-primary -ml-[2px]"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/30",
+                                )}
+                              >
+                                {action.icon && (
+                                  <action.icon className="w-3.5 h-3.5" />
+                                )}
+                                <span className="truncate">{action.name}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
