@@ -71,34 +71,34 @@ export function MenuPane() {
         },
       ],
     },
-    {
-      id: "analytics",
-      name: "Analytics & Monitoring",
-      icon: BarChart3,
-      children: [
-        {
-          id: "experience-analytics",
-          name: "Experience Analytics",
-          icon: BarChart3,
-          path: "/ejp-transaction-dashboard",
-          requiredSegments: ["partner", "internal"],
-        },
-      ],
-    },
-    {
-      id: "content",
-      name: "Content & Data",
-      icon: FileCheck,
-      children: [
-        {
-          id: "content-management",
-          name: "Content Management",
-          icon: FileCheck,
-          path: "/content-management",
-          requiredSegments: ["internal"],
-        },
-      ],
-    },
+    // {
+    //   id: "analytics",
+    //   name: "Analytics & Monitoring",
+    //   icon: BarChart3,
+    //   children: [
+    //     {
+    //       id: "experience-analytics",
+    //       name: "Experience Analytics",
+    //       icon: BarChart3,
+    //       path: "/ejp-transaction-dashboard",
+    //       requiredSegments: ["partner", "internal"],
+    //     },
+    //   ],
+    // },
+    // {
+    //   id: "content",
+    //   name: "Content & Data",
+    //   icon: FileCheck,
+    //   children: [
+    //     {
+    //       id: "content-management",
+    //       name: "Content Management",
+    //       icon: FileCheck,
+    //       path: "/content-management",
+    //       requiredSegments: ["internal"],
+    //     },
+    //   ],
+    // },
     {
       id: "support",
       name: "Support",
@@ -109,7 +109,7 @@ export function MenuPane() {
           name: "Chat Support",
           icon: MessageSquare,
           path: "/chat-support",
-          requiredSegments: ["partner"],
+          requiredSegments: ["internal"],
         },
       ],
     },

@@ -12,7 +12,7 @@
     "export-policies": "ts-node scripts/exportPolicies.ts"
   },
   "dependencies": {
-    "@azure/msal-browser": "^4.25.0",
+    "@azure/msal-browser": "^4.29.1",
     "@azure/msal-react": "^3.0.20",
     "@azure/storage-blob": "^12.29.1",
     "@casl/ability": "^6.7.3",
