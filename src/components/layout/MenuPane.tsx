@@ -65,9 +65,19 @@ export function MenuPane() {
         : [...prev, itemId],
     );
 
-    // If collapsing actions, clear selected action for this module
-    if (isCurrentlyExpanded) {
-      setSelectedAction(null);
+    // If collapsing actions, clear selected action ONLY if it belongs to this module
+    if (isCurrentlyExpanded && selectedAction) {
+      const activeModule = navigationItems
+        .flatMap((section) => section.children || [])
+        .find((item) => item.id === itemId);
+
+      const actionBelongsToModule = activeModule?.actions?.some(
+        (action) => action.id === selectedAction,
+      );
+
+      if (actionBelongsToModule) {
+        setSelectedAction(null);
+      }
     }
   };
 
@@ -164,10 +174,10 @@ export function MenuPane() {
       .find((item) => item.path && isItemActive(item.path));
 
     if (activeItem && activeItem.actions) {
-      // Always expand actions for the active module (don't collapse others)
-      if (!expandedActions.includes(activeItem.id)) {
-        setExpandedActions((prev) => [...prev, activeItem.id]);
-      }
+      // Auto-expand only if not already expanded (to allow manual collapse)
+      setExpandedActions((prev) =>
+        prev.includes(activeItem.id) ? prev : [...prev, activeItem.id],
+      );
 
       // Only set default selected action if no action is currently selected
       // or if the currently selected action doesn't belong to the active module
@@ -182,7 +192,7 @@ export function MenuPane() {
         }
       }
     }
-  }, [location.pathname, selectedAction]);
+  }, [location.pathname]); // Only re-run when navigating to a different page
 
   return (
     <aside className="w-64 bg-pane-menu border-r border-border flex flex-col shrink-0">
@@ -225,7 +235,10 @@ export function MenuPane() {
                         {/* Main Navigation Item */}
                         <div className="flex items-center">
                           <button
-                            onClick={() => item.path && navigate(item.path)}
+                            onClick={() => {
+                              if (item.path) navigate(item.path);
+                              if (item.actions) toggleActions(item.id);
+                            }}
                             className={cn(
                               "flex-1 flex items-center gap-2 px-3 py-2 rounded-md text-left text-sm transition-all duration-200",
                               // Only highlight parent if this specific item is active AND no actions are selected
@@ -245,21 +258,19 @@ export function MenuPane() {
                           {item.actions && (
                             <button
                               onClick={() => toggleActions(item.id)}
-                              className="p-1.5 rounded hover:bg-secondary/30 text-muted-foreground/60 hover:text-foreground transition-colors"
+                              className="p-2.5 rounded hover:bg-secondary/30 text-muted-foreground/60 hover:text-foreground transition-colors"
                             >
                               {expandedActions.includes(item.id) ? (
-                                <ChevronDown className="w-3 h-3" />
+                                <ChevronDown className="w-4 h-4" />
                               ) : (
-                                <ChevronRight className="w-3 h-3" />
+                                <ChevronRight className="w-4 h-4" />
                               )}
                             </button>
                           )}
                         </div>
 
-                        {/* Module Actions - Show when expanded and on this module's page */}
-                        {item.path &&
-                          isItemActive(item.path) &&
-                          item.actions &&
+                        {/* Module Actions - Show when expanded */}
+                        {item.actions &&
                           expandedActions.includes(item.id) && (
                             <div className="ml-2 mt-1 space-y-0.5">
                               {item.actions.map((action) => (
