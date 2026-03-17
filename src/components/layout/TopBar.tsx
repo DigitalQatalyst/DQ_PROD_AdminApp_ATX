@@ -1,4 +1,4 @@
-import { ChevronDown, Layers, User, Settings } from "lucide-react";
+import { ChevronDown, Layers, Plus, Settings, User } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../ui/ButtonComponent";
 import { Badge } from "../ui/Badge";
@@ -7,122 +7,122 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "../ui/DropdownMenu";
 
 export function TopBar() {
   const { userSegment } = useAuth();
 
   return (
-    <header className="h-14 bg-pane-menu border-b border-border flex items-center justify-between px-4 shrink-0">
-      {/* Left Section */}
-      <div className="flex items-center gap-4">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-pane-menu px-4">
+      <div className="flex items-center gap-5">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-            <Layers className="w-5 h-5 text-primary" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20">
+            <Layers className="h-5 w-5 text-primary" />
           </div>
           <div>
             <h1 className="text-sm font-semibold text-foreground">
               ATX Admin Platform
             </h1>
-            <p className="text-[10px] text-muted-foreground">
-              Content & Experience Management
+            <p className="text-[11px] text-muted-foreground">
+              Transactional workspace shell
             </p>
           </div>
         </div>
+
+        <div className="hidden items-center gap-3 xl:flex">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="h-10 gap-2 border-border bg-secondary/40 px-3 hover:bg-secondary hover:text-foreground"
+              >
+                <div className="flex h-6 w-6 items-center justify-center rounded bg-primary/20 text-xs font-semibold text-primary">
+                  A
+                </div>
+                <span className="text-sm font-medium">ATX Organization</span>
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuLabel>Tenant</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="flex items-center gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded bg-primary/20 text-xs font-semibold text-primary">
+                  A
+                </div>
+                <div>
+                  <p className="text-sm font-medium">ATX Organization</p>
+                  <p className="text-xs text-muted-foreground">Admin Platform</p>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="h-10 gap-2 border-border bg-background px-3 hover:bg-secondary hover:text-foreground"
+              >
+                <Layers className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Default Stream</span>
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-48">
+              <DropdownMenuLabel>Data Stream</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Default Stream</DropdownMenuItem>
+              <DropdownMenuItem>CRM Stream</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
-      {/* Center Section - Tenant & Stream Controls */}
       <div className="flex items-center gap-3">
-        {/* Tenant Switch */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="h-9 px-3 gap-2 bg-secondary/50 border-border hover:bg-secondary hover:text-foreground"
-            >
-              <div className="w-6 h-6 rounded bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">
-                A
-              </div>
-              <span className="text-sm font-medium">ATX Organization</span>
-              <ChevronDown className="w-4 h-4 text-muted-foreground" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="center" className="w-56">
-            <DropdownMenuLabel>Tenant</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">
-                A
-              </div>
-              <div>
-                <p className="text-sm font-medium">ATX Organization</p>
-                <p className="text-xs text-muted-foreground">Admin Platform</p>
-              </div>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-9 gap-2 border-border bg-background px-3 hover:bg-secondary hover:text-foreground"
+          onClick={() => {
+            // Reserved for cross-module quick create flows.
+          }}
+        >
+          <Plus className="h-4 w-4" />
+          Quick Create
+        </Button>
 
-        {/* Stream Switch */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="h-9 px-3 gap-2 bg-accent/10 border-accent/30 hover:bg-accent/20 text-accent"
-            >
-              <Layers className="w-4 h-4" />
-              <span className="text-sm font-medium">Default Stream</span>
-              <ChevronDown className="w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="center" className="w-48">
-            <DropdownMenuLabel>Data Stream</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <span className="text-sm">Default Stream</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <span className="text-sm">CRM Stream</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      {/* Right Section - User & Controls */}
-      <div className="flex items-center gap-3">
-        {/* Segment Badge */}
         <Badge
           variant="outline"
           className={
             userSegment === "internal"
-              ? "bg-primary/10 text-primary border-primary/30"
-              : "bg-accent/10 text-accent border-accent/30"
+              ? "border-primary/30 bg-primary/10 text-primary"
+              : "border-accent/30 bg-accent/10 text-accent"
           }
         >
           {userSegment === "internal" ? "Staff" : "Partner"}
         </Badge>
 
-        {/* Settings Control */}
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0"
+          className="h-9 gap-2 px-3 text-muted-foreground hover:text-foreground"
           onClick={() => {
-            /* Handle settings */
+            // Reserved for global settings.
           }}
         >
-          <Settings className="w-4 h-4" />
+          <Settings className="h-4 w-4" />
+          <span className="hidden lg:inline">Settings</span>
         </Button>
 
-        {/* Theme Toggle */}
         <ModeToggle />
 
-        {/* User Chip */}
-        <div className="flex items-center gap-2 pl-3 border-l border-border">
-          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-            <User className="w-4 h-4 text-muted-foreground" />
+        <div className="flex items-center gap-2 border-l border-border pl-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary">
+            <User className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="hidden lg:block">
             <p className="text-sm font-medium">Admin User</p>

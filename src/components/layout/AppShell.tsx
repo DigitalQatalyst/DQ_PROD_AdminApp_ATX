@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { TopBar } from "./TopBar";
 import { MenuPane } from "./MenuPane";
 
@@ -7,12 +7,19 @@ interface AppShellProps {
 }
 
 export function AppShell({ children }: AppShellProps) {
+  const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
+
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
+    <div className="flex h-screen min-h-0 min-w-0 w-full flex-col overflow-hidden bg-background">
       <TopBar />
-      <div className="flex-1 flex overflow-hidden">
-        <MenuPane />
-        <main className="flex-1 flex overflow-hidden">{children}</main>
+      <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
+        <MenuPane
+          collapsed={isMenuCollapsed}
+          onToggleCollapse={() => setIsMenuCollapsed((prev) => !prev)}
+        />
+        <main className="flex min-h-0 min-w-0 w-full flex-1 overflow-hidden">
+          {children}
+        </main>
       </div>
     </div>
   );
