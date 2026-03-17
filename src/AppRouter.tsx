@@ -12,14 +12,13 @@ import ContentManagementRoute from "./pages/content-management";
 // import GrowthAreaFormRoute from './pages/growth-area-form';
 // import ZoneFormRoute from './pages/zone-form';
 import ContentFormRoute from "./pages/content-form";
-import AccountsPage from "./pages/accounts";
-import ContactsPage from "./pages/contacts";
-import LeadsPage from "./pages/leads";
 import LoginPage from "./pages/login";
 import SettingsPage from "./pages/settings";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ContentSegmentGate } from "./components/ContentSegmentGate";
 import { AppShell } from "./components/layout/AppShell";
+import { LVEWorkspace } from "./components/layout/workspace/LVEWorkspace";
+import { lveModules } from "./components/layout/workspace/moduleRegistry";
 import EJPTransactionDashboard from "./modules/ejp-transaction-dashboard";
 // import TaxonomyManagerRoute from './pages/taxonomy-manager';
 // import TaxonomyCollectionFormRoute from './pages/taxonomy-collection-form';
@@ -27,7 +26,6 @@ import EJPTransactionDashboard from "./modules/ejp-transaction-dashboard";
 // import TaxonomyTagFormRoute from './pages/taxonomy-tag-form';
 // REFACTOR: Service Delivery Overview disabled - only EJP Transaction Dashboard is active
 // import ServiceDeliveryOverview from "./modules/service-delivery-overview";
-import { useAuth } from "./context/AuthContext";
 import { ChatInterface } from "./modules/chat-support/pages/ChatInterface";
 
 // Component to redirect to primary dashboard (EJP Transaction Dashboard)
@@ -147,45 +145,38 @@ export function AppRouter() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/accounts"
-          element={
-            <ProtectedRoute
-              requiredRoles={["admin", "approver", "editor", "viewer"]}
-              requiredSegments={["internal"]}
-            >
-              <AppShell>
-                <AccountsPage />
-              </AppShell>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/contacts"
-          element={
-            <ProtectedRoute
-              requiredRoles={["admin", "approver", "editor", "viewer"]}
-              requiredSegments={["internal"]}
-            >
-              <AppShell>
-                <ContactsPage />
-              </AppShell>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/leads"
-          element={
-            <ProtectedRoute
-              requiredRoles={["admin", "approver", "editor", "viewer"]}
-              requiredSegments={["internal"]}
-            >
-              <AppShell>
-                <LeadsPage />
-              </AppShell>
-            </ProtectedRoute>
-          }
-        />
+        {lveModules.map((module) => (
+          <Route
+            key={module.metadata.id}
+            path={module.routes.base}
+            element={
+              <ProtectedRoute
+                requiredRoles={["admin", "approver", "editor", "viewer"]}
+                requiredSegments={module.menu.requiredSegments}
+              >
+                <AppShell>
+                  <LVEWorkspace module={module} />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+        ))}
+        {lveModules.map((module) => (
+          <Route
+            key={`${module.metadata.id}-record`}
+            path={`${module.routes.base}/:recordId`}
+            element={
+              <ProtectedRoute
+                requiredRoles={["admin", "approver", "editor", "viewer"]}
+                requiredSegments={module.menu.requiredSegments}
+              >
+                <AppShell>
+                  <LVEWorkspace module={module} />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+        ))}
         {/*}
       <Route path="/business-directory" element={
         <ProtectedRoute requiredRoles={['admin', 'approver', 'editor', 'viewer']}>

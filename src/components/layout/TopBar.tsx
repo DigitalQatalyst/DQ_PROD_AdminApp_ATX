@@ -1,5 +1,6 @@
 import { ChevronDown, Layers, Plus, Settings, User } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useLVEWorkspace } from "../../context/LVEWorkspaceContext";
 import Button from "../ui/ButtonComponent";
 import { Badge } from "../ui/Badge";
 import { ModeToggle } from "../ui/mode-toggle";
@@ -13,7 +14,16 @@ import {
 } from "../ui/DropdownMenu";
 
 export function TopBar() {
-  const { userSegment } = useAuth();
+  const { user, userSegment } = useAuth();
+  const {
+    currentStreamId,
+    currentTenantLabel,
+    setCurrentStreamId,
+    streamOptions,
+  } = useLVEWorkspace();
+  const currentStreamLabel =
+    streamOptions.find((option) => option.id === currentStreamId)?.label ??
+    streamOptions[0].label;
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-pane-menu px-4">
@@ -42,7 +52,7 @@ export function TopBar() {
                 <div className="flex h-6 w-6 items-center justify-center rounded bg-primary/20 text-xs font-semibold text-primary">
                   A
                 </div>
-                <span className="text-sm font-medium">ATX Organization</span>
+                <span className="text-sm font-medium">{currentTenantLabel}</span>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
@@ -54,7 +64,7 @@ export function TopBar() {
                   A
                 </div>
                 <div>
-                  <p className="text-sm font-medium">ATX Organization</p>
+                  <p className="text-sm font-medium">{currentTenantLabel}</p>
                   <p className="text-xs text-muted-foreground">Admin Platform</p>
                 </div>
               </DropdownMenuItem>
@@ -68,15 +78,21 @@ export function TopBar() {
                 className="h-10 gap-2 border-border bg-background px-3 hover:bg-secondary hover:text-foreground"
               >
                 <Layers className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Default Stream</span>
+                <span className="text-sm font-medium">{currentStreamLabel}</span>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-48">
               <DropdownMenuLabel>Data Stream</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Default Stream</DropdownMenuItem>
-              <DropdownMenuItem>CRM Stream</DropdownMenuItem>
+              {streamOptions.map((option) => (
+                <DropdownMenuItem
+                  key={option.id}
+                  onClick={() => setCurrentStreamId(option.id)}
+                >
+                  {option.label}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -125,7 +141,7 @@ export function TopBar() {
             <User className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="hidden lg:block">
-            <p className="text-sm font-medium">Admin User</p>
+            <p className="text-sm font-medium">{user?.name ?? "Admin User"}</p>
             <p className="text-[10px] text-muted-foreground">
               {userSegment === "internal" ? "Platform Admin" : "Partner Admin"}
             </p>

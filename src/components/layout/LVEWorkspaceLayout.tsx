@@ -2,7 +2,6 @@ import React, { ReactNode, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
-  PanelRight,
   X,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
@@ -39,8 +38,10 @@ export interface LVEWorkspaceLayoutProps {
   headerDescription?: ReactNode;
   headerActions?: LVEWorkspaceAction[];
   moduleTabs?: LVETab[];
+  moduleTabsLabel?: string;
   onModuleTabSelect?: (tabId: string) => void;
   tabs?: LVETab[];
+  recordTabsLabel?: string;
   onTabSelect?: (tabId: string) => void;
   onTabClose?: (tabId: string) => void;
   listHeader?: LVEWorkspacePaneHeader;
@@ -50,6 +51,9 @@ export interface LVEWorkspaceLayoutProps {
   workPane?: ReactNode;
   popHeader?: LVEWorkspacePaneHeader;
   popPane?: ReactNode;
+  popPaneCollapsible?: boolean;
+  isPopPaneCollapsed?: boolean;
+  onPopPaneCollapsedChange?: (nextValue: boolean) => void;
   defaultPopPaneCollapsed?: boolean;
   footer?: ReactNode;
 }
@@ -205,8 +209,10 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
   headerDescription = "Module queue, active workspace, and context stay visible in one shell.",
   headerActions,
   moduleTabs = [],
+  moduleTabsLabel = "Modules",
   onModuleTabSelect,
   tabs = [],
+  recordTabsLabel = "Records",
   onTabSelect,
   onTabClose,
   listHeader,
@@ -216,15 +222,28 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
   workPane,
   popHeader,
   popPane,
+  popPaneCollapsible = true,
+  isPopPaneCollapsed: controlledPopPaneCollapsed,
+  onPopPaneCollapsedChange,
   defaultPopPaneCollapsed = false,
   footer,
 }) => {
-  const [isPopPaneCollapsed, setIsPopPaneCollapsed] = useState(
+  const [uncontrolledPopPaneCollapsed, setUncontrolledPopPaneCollapsed] = useState(
     defaultPopPaneCollapsed,
   );
+  const isPopPaneCollapsed =
+    controlledPopPaneCollapsed ?? uncontrolledPopPaneCollapsed;
   const hasModuleTabs = moduleTabs.length > 0;
   const hasTabs = tabs.length > 0;
   const hasPopPane = Boolean(popPane);
+
+  const setIsPopPaneCollapsed = (nextValue: boolean) => {
+    if (controlledPopPaneCollapsed === undefined) {
+      setUncontrolledPopPaneCollapsed(nextValue);
+    }
+
+    onPopPaneCollapsedChange?.(nextValue);
+  };
 
   return (
     <div className="flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden bg-background">
@@ -232,7 +251,7 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
         renderTabBar({
           tabs: moduleTabs,
           onSelect: onModuleTabSelect,
-          label: "Modules",
+          label: moduleTabsLabel,
         })}
 
       <header className="border-b border-border bg-card px-4 py-4">
@@ -257,28 +276,18 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
           tabs,
           onSelect: onTabSelect,
           onClose: onTabClose,
-          label: "Records",
+          label: recordTabsLabel,
         })}
 
       <div className="relative min-h-0 min-w-0 flex-1 overflow-auto">
-        {hasPopPane && isPopPaneCollapsed && (
-          <button
-            type="button"
-            onClick={() => setIsPopPaneCollapsed(false)}
-            className="absolute right-3 top-3 z-10 inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground shadow-sm transition-colors hover:bg-muted hover:text-foreground"
-          >
-            <PanelRight className="h-3.5 w-3.5" />
-            Show Context
-            <ChevronLeft className="h-3.5 w-3.5" />
-          </button>
-        )}
-
         <div
           className={cn(
             "grid h-full min-h-full w-full",
             hasPopPane && !isPopPaneCollapsed
               ? "grid-cols-[minmax(18rem,0.95fr)_minmax(34rem,1.7fr)_minmax(16rem,0.85fr)]"
-              : "grid-cols-[minmax(18rem,1fr)_minmax(36rem,2.15fr)]",
+              : hasPopPane && popPaneCollapsible
+                ? "grid-cols-[minmax(18rem,1fr)_minmax(36rem,2.15fr)_3.25rem]"
+                : "grid-cols-[minmax(18rem,1fr)_minmax(36rem,2.15fr)]",
           )}
         >
           <section className="flex min-h-0 min-w-0 flex-col border-r border-border bg-card">
@@ -323,19 +332,38 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
               {renderPaneHeader(
                 popHeader,
                 "Context",
+                popPaneCollapsible ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-8 w-8 border-border bg-background px-0 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    onClick={() => setIsPopPaneCollapsed(true)}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                ) : undefined,
+              )}
+              <div className="min-h-0 flex-1 overflow-auto">
+                {popPane}
+              </div>
+            </section>
+          )}
+
+          {hasPopPane && popPaneCollapsible && isPopPaneCollapsed && (
+            <section className="flex min-h-0 min-w-0 flex-col border-l border-border bg-muted/20">
+              <div className="flex h-full items-start justify-center px-1 py-3">
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
-                  className="h-8 gap-2 border-border bg-background px-3 text-muted-foreground hover:bg-secondary hover:text-foreground"
-                  onClick={() => setIsPopPaneCollapsed(true)}
+                  className="h-8 w-8 border-border bg-background px-0 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  onClick={() => setIsPopPaneCollapsed(false)}
+                  aria-label="Show context pane"
+                  title="Show context pane"
                 >
-                  <span>Collapse</span>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>,
-              )}
-              <div className="min-h-0 flex-1 overflow-auto">
-                {popPane}
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
               </div>
             </section>
           )}
