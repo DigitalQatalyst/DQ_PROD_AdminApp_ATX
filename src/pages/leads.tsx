@@ -6,37 +6,51 @@ import {
 
 const defaultTabs: LVETab[] = [
   {
-    id: "contacts-home",
-    label: "Contacts Workspace",
+    id: "leads-home",
+    label: "Leads Workspace",
     isActive: true,
   },
 ];
 
-const ContactsPage: React.FC = () => {
+const LeadsPage: React.FC = () => {
   return (
     <div className="h-full">
       <LVEWorkspaceLayout
-        headerTitle="Contact Management"
+        headerTitle="Lead Management"
         tenantLabel="Demo Tenant"
-        streamLabel="Contacts Stream"
+        streamLabel="Leads Stream"
         tabs={defaultTabs}
         menuPane={
           <div className="p-4 space-y-2 text-xs text-muted-foreground">
             <div className="font-semibold text-foreground text-[11px] tracking-wide uppercase">
-              Contact Actions
+              Lead Pipeline
             </div>
             <ul className="space-y-1">
               <li className="rounded-md px-2 py-1 bg-accent text-foreground text-xs">
-                All Contacts
+                All Leads
               </li>
               <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                New Contact
+                New Lead
               </li>
               <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                Import Contacts
+                Import Leads
               </li>
               <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
-                Quick Create
+                Lead Conversion
+              </li>
+            </ul>
+            <div className="font-semibold text-foreground text-[11px] tracking-wide uppercase mt-4">
+              Lead Stages
+            </div>
+            <ul className="space-y-1">
+              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
+                Qualified
+              </li>
+              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
+                Contacted
+              </li>
+              <li className="rounded-md px-2 py-1 text-muted-foreground hover:bg-accent/50 cursor-pointer">
+                Opportunity
               </li>
             </ul>
           </div>
@@ -45,33 +59,43 @@ const ContactsPage: React.FC = () => {
           <div className="p-4 text-xs text-muted-foreground">
             <div className="mb-2 flex items-center justify-between">
               <div className="font-semibold text-foreground text-[11px] tracking-wide uppercase">
-                Contact List
+                Lead Queue
               </div>
               <span className="text-[10px] text-muted-foreground">
                 MVP Placeholder
               </span>
             </div>
-            <p className="text-muted-foreground">
-              Contact list view with search, filters, and contact records will
-              be implemented here. This follows the LVE workspace pattern for
-              contact management.
+            <p className="text-muted-foreground mb-3">
+              Lead list with lifecycle stages, activity timeline, and conversion
+              workflow will be implemented here.
             </p>
+            <div className="space-y-2">
+              <div className="text-[10px] text-muted-foreground">
+                • Lead scoring and qualification
+              </div>
+              <div className="text-[10px] text-muted-foreground">
+                • Stage progression tracking
+              </div>
+              <div className="text-[10px] text-muted-foreground">
+                • Activity and follow-up management
+              </div>
+            </div>
           </div>
         }
         workPane={
           <div className="p-6 text-center">
             <div className="max-w-md mx-auto">
               <h3 className="text-lg font-semibold text-foreground mb-2">
-                Contact Workspace
+                Lead Workspace
               </h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Select a contact from the list to view details, edit
-                information, or create a new contact record.
+                Select a lead from the queue to view details, update stage, log
+                activities, or convert to opportunity.
               </p>
               <div className="bg-card border border-border rounded-lg p-4">
                 <p className="text-xs text-muted-foreground">
-                  Contact detail view, edit forms, and related activities will
-                  appear in this workspace area.
+                  Lead detail view, stage management, activity timeline, and
+                  conversion forms will appear here.
                 </p>
               </div>
             </div>
@@ -80,31 +104,35 @@ const ContactsPage: React.FC = () => {
         popPane={
           <div className="p-4 text-xs text-muted-foreground">
             <div className="font-semibold text-foreground text-[11px] tracking-wide uppercase mb-2">
-              Related Context
+              Lead Context
             </div>
             <p className="text-muted-foreground mb-3">
-              Related accounts, activities, and contact history will appear
-              here.
+              Lead activities, conversion history, and related opportunities.
             </p>
             <div className="space-y-2">
               <div className="text-[10px] text-muted-foreground">
-                • Recent Activities
+                • Activity Timeline
               </div>
               <div className="text-[10px] text-muted-foreground">
-                • Associated Accounts
+                • Lead Source
               </div>
               <div className="text-[10px] text-muted-foreground">
-                • Contact Timeline
+                • Conversion Tracking
+              </div>
+              <div className="text-[10px] text-muted-foreground">
+                • Related Opportunities
               </div>
             </div>
           </div>
         }
         footer={
-          <span>Contact Management MVP - LVE workspace implementation</span>
+          <span>
+            Lead Management MVP - LVE workspace with lifecycle tracking
+          </span>
         }
       />
     </div>
   );
 };
 
-export default ContactsPage;
+export default LeadsPage;

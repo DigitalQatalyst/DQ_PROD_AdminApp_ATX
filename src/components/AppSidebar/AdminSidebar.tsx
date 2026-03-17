@@ -10,7 +10,7 @@ import {
   Check,
   FileCheck,
   MessageSquare,
-  Users,
+  Briefcase,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 // DEVELOP-V1: Home icon removed (dashboard disabled)
@@ -173,6 +173,12 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label: "Content Management",
           icon: <FileCheck size={20} />,
           path: "/content-management",
+        },
+        {
+          id: "accounts",
+          label: "Accounts (LVE Shell)",
+          icon: <Briefcase size={20} />,
+          path: "/accounts",
         }
       );
 

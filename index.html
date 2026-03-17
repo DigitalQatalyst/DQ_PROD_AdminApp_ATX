@@ -5,7 +5,21 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EJP Admin</title>
+  <title>ATX Admin</title>
+  <script>
+    // Prevent FOUC by applying theme class before React loads
+    (function() {
+      const storageKey = 'atx-ui-theme';
+      const theme = localStorage.getItem(storageKey) || 'system';
+      
+      if (theme === 'system') {
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.classList.add(systemTheme);
+      } else {
+        document.documentElement.classList.add(theme);
+      }
+    })();
+  </script>
 </head>
 
 <body>
