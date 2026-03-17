@@ -152,7 +152,7 @@ The system includes comprehensive mock data for testing:
 
 ### Demo Page
 
-Visit `/lve-demo` to see all three modules in action:
+Visit `/contacts`, `/leads`, or `/accounts` to see the shared LVE shell in action:
 
 - Switch between Leads, Contacts, and Accounts
 - Test selection, filtering, and actions
@@ -263,5 +263,5 @@ For questions or issues with the LVE system:
 
 1. Check existing configurations in `/configs/` folder
 2. Review mock data examples in `/mock/` folder
-3. Test functionality in the demo page at `/lve-demo`
+3. Test functionality in the shared module pages at `/contacts`, `/leads`, or `/accounts`
 4. Refer to type definitions in `/types.ts`

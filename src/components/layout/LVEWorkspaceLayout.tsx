@@ -38,6 +38,8 @@ export interface LVEWorkspaceLayoutProps {
   headerTitle?: string;
   headerDescription?: ReactNode;
   headerActions?: LVEWorkspaceAction[];
+  moduleTabs?: LVETab[];
+  onModuleTabSelect?: (tabId: string) => void;
   tabs?: LVETab[];
   onTabSelect?: (tabId: string) => void;
   onTabClose?: (tabId: string) => void;
@@ -102,6 +104,68 @@ const renderTitleActions = (actions?: LVEWorkspaceAction[]) => {
   );
 };
 
+const renderTabBar = ({
+  tabs,
+  onSelect,
+  onClose,
+  label,
+}: {
+  tabs: LVETab[];
+  onSelect?: (tabId: string) => void;
+  onClose?: (tabId: string) => void;
+  label?: string;
+}) => {
+  if (tabs.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex items-center gap-3 overflow-x-auto border-b border-border bg-muted/50 px-3 py-2">
+      {label && (
+        <span className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          {label}
+        </span>
+      )}
+      <div className="flex items-center gap-1">
+        {tabs.map((tab) => (
+          <div
+            key={tab.id}
+            className={cn(
+              "group inline-flex max-w-xs items-center rounded-md border transition-colors",
+              tab.isActive
+                ? "border-primary bg-card text-primary shadow-sm"
+                : "border-border bg-muted text-muted-foreground hover:bg-card hover:text-foreground",
+            )}
+          >
+            <button
+              type="button"
+              onClick={() => onSelect?.(tab.id)}
+              className="inline-flex min-w-0 items-center px-3 py-1.5 text-xs"
+            >
+              <span className="truncate">{tab.label}</span>
+              {tab.isDirty && (
+                <span className="ml-2 inline-block h-2 w-2 rounded-full bg-amber-500" />
+              )}
+            </button>
+            {tab.canClose !== false && onClose && (
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onClose(tab.id);
+                }}
+                className="ml-2 rounded p-0.5 text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const renderPaneHeader = (
   header: LVEWorkspacePaneHeader | undefined,
   fallbackTitle: string,
@@ -140,6 +204,8 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
   headerTitle = "Workspace",
   headerDescription = "Module queue, active workspace, and context stay visible in one shell.",
   headerActions,
+  moduleTabs = [],
+  onModuleTabSelect,
   tabs = [],
   onTabSelect,
   onTabClose,
@@ -156,11 +222,19 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
   const [isPopPaneCollapsed, setIsPopPaneCollapsed] = useState(
     defaultPopPaneCollapsed,
   );
+  const hasModuleTabs = moduleTabs.length > 0;
   const hasTabs = tabs.length > 0;
   const hasPopPane = Boolean(popPane);
 
   return (
     <div className="flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden bg-background">
+      {hasModuleTabs &&
+        renderTabBar({
+          tabs: moduleTabs,
+          onSelect: onModuleTabSelect,
+          label: "Modules",
+        })}
+
       <header className="border-b border-border bg-card px-4 py-4">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
@@ -178,44 +252,13 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
         </div>
       </header>
 
-      {hasTabs && (
-        <div className="flex items-center gap-1 overflow-x-auto border-b border-border bg-muted/50 px-2 py-1.5">
-          {tabs.map((tab) => (
-            <div
-              key={tab.id}
-              className={cn(
-                "group inline-flex max-w-xs items-center rounded-md border transition-colors",
-                tab.isActive
-                  ? "border-primary bg-card text-primary shadow-sm"
-                  : "border-border bg-muted text-muted-foreground hover:bg-card hover:text-foreground",
-              )}
-            >
-              <button
-                type="button"
-                onClick={() => onTabSelect?.(tab.id)}
-                className="inline-flex min-w-0 items-center px-3 py-1.5 text-xs"
-              >
-                <span className="truncate">{tab.label}</span>
-                {tab.isDirty && (
-                  <span className="ml-2 inline-block h-2 w-2 rounded-full bg-amber-500" />
-                )}
-              </button>
-              {tab.canClose !== false && onTabClose && (
-                <button
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onTabClose(tab.id);
-                  }}
-                  className="ml-2 rounded p-0.5 text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      {hasTabs &&
+        renderTabBar({
+          tabs,
+          onSelect: onTabSelect,
+          onClose: onTabClose,
+          label: "Records",
+        })}
 
       <div className="relative min-h-0 min-w-0 flex-1 overflow-auto">
         {hasPopPane && isPopPaneCollapsed && (

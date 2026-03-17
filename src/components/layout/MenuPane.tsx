@@ -78,20 +78,6 @@ const navigationSections: NavigationSection[] = [
       },
     ],
   },
-  {
-    id: "demo",
-    name: "Demo",
-    icon: Building,
-    children: [
-      {
-        id: "lve-demo",
-        name: "LVE Demo",
-        icon: Building,
-        path: "/lve-demo",
-        requiredSegments: ["internal", "partner"],
-      },
-    ],
-  },
 ];
 
 export function MenuPane({
@@ -104,7 +90,6 @@ export function MenuPane({
   const [expandedSections, setExpandedSections] = useState<string[]>([
     "crm",
     "support",
-    "demo",
   ]);
 
   const visibleSections = useMemo(() => {

@@ -3,6 +3,7 @@ import { AzureAuthProvider } from "./components/AzureAuthProvider";
 import { AzureAuthWrapper } from "./components/AzureAuthWrapper";
 import { AppRouter } from "./AppRouter.tsx";
 import { AppProvider } from "./context/AppContext";
+import { LVEWorkspaceProvider } from "./context/LVEWorkspaceContext";
 import { ToastProvider } from "./components/ui/Toast";
 import { ThemeProvider } from "./components/theme-provider";
 
@@ -13,9 +14,11 @@ export function App() {
         <AuthProvider>
           <AzureAuthWrapper>
             <AppProvider>
-              <ToastProvider>
-                <AppRouter />
-              </ToastProvider>
+              <LVEWorkspaceProvider>
+                <ToastProvider>
+                  <AppRouter />
+                </ToastProvider>
+              </LVEWorkspaceProvider>
             </AppProvider>
           </AzureAuthWrapper>
         </AuthProvider>

@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { CircleEllipsis, Eye, Plus, RefreshCw } from "lucide-react";
 import {
   LVEWorkspaceAction,
@@ -8,17 +9,27 @@ import {
 import {
   MockWorkspaceModuleData,
   MockWorkspaceRecord,
+  mockWorkspaceModuleTabs,
 } from "./mock/lveShellMockData";
 import { cn } from "../../utils/cn";
 import Button from "../ui/ButtonComponent";
+import { useLVEWorkspace } from "../../context/LVEWorkspaceContext";
 
 interface MockLVEWorkspacePageProps {
   module: MockWorkspaceModuleData;
 }
 
 const RECORD_TAB_PREFIX = "record:";
+const DEFAULT_WORKSPACE_STATE = {
+  activeTabId: "module-root",
+  openRecordIds: [],
+};
 
 const toRecordTabId = (recordId: string) => `${RECORD_TAB_PREFIX}${recordId}`;
+const toRecordIdFromTabId = (tabId: string) =>
+  tabId.startsWith(RECORD_TAB_PREFIX)
+    ? tabId.slice(RECORD_TAB_PREFIX.length)
+    : undefined;
 
 const getRecordStatusClassName = (status: string) => {
   const normalizedStatus = status.toLowerCase();
@@ -45,11 +56,57 @@ const getRecordStatusClassName = (status: string) => {
 export function MockLVEWorkspacePage({
   module,
 }: MockLVEWorkspacePageProps) {
-  const [openRecordIds, setOpenRecordIds] = useState<string[]>([]);
-  const [activeTabId, setActiveTabId] = useState<string>("module-root");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { setModuleWorkspaceState, workspaceSessions } = useLVEWorkspace();
+  const moduleWorkspaceState =
+    workspaceSessions[module.moduleId] ?? DEFAULT_WORKSPACE_STATE;
+  const availableRecordIds = useMemo(
+    () => new Set(module.records.map((record) => record.id)),
+    [module.records],
+  );
+  const openRecordIds = useMemo(
+    () =>
+      moduleWorkspaceState.openRecordIds.filter((recordId) =>
+        availableRecordIds.has(recordId),
+      ),
+    [availableRecordIds, moduleWorkspaceState.openRecordIds],
+  );
+  const activeRecordIdFromState = toRecordIdFromTabId(moduleWorkspaceState.activeTabId);
+  const activeTabId =
+    moduleWorkspaceState.activeTabId === "module-root" ||
+    (activeRecordIdFromState !== undefined &&
+      availableRecordIds.has(activeRecordIdFromState))
+      ? moduleWorkspaceState.activeTabId
+      : "module-root";
+  const storedOpenRecordIdsKey = moduleWorkspaceState.openRecordIds.join("|");
+  const openRecordIdsKey = openRecordIds.join("|");
+
+  useEffect(() => {
+    const needsCleanup =
+      openRecordIdsKey !== storedOpenRecordIdsKey ||
+      activeTabId !== moduleWorkspaceState.activeTabId;
+
+    if (!needsCleanup) {
+      return;
+    }
+
+    setModuleWorkspaceState(module.moduleId, {
+      openRecordIds,
+      activeTabId,
+    });
+  }, [
+    activeTabId,
+    module.moduleId,
+    moduleWorkspaceState.activeTabId,
+    openRecordIdsKey,
+    openRecordIds,
+    setModuleWorkspaceState,
+    storedOpenRecordIdsKey,
+  ]);
 
   const activeRecordId = activeTabId.startsWith(RECORD_TAB_PREFIX)
-    ? activeTabId.slice(RECORD_TAB_PREFIX.length)
+    ? toRecordIdFromTabId(activeTabId)
     : undefined;
 
   const activeRecord = useMemo(
@@ -74,23 +131,48 @@ export function MockLVEWorkspacePage({
         canClose: true,
       })),
   ];
+  const moduleTabs: LVETab[] = mockWorkspaceModuleTabs.map((moduleTab) => ({
+    id: moduleTab.id,
+    label: moduleTab.label,
+    isActive: location.pathname === moduleTab.path,
+    canClose: false,
+  }));
 
   const handleRecordOpen = (record: MockWorkspaceRecord) => {
-    setOpenRecordIds((prev) =>
-      prev.includes(record.id) ? prev : [...prev, record.id],
-    );
-    setActiveTabId(toRecordTabId(record.id));
+    setModuleWorkspaceState(module.moduleId, (prev) => ({
+      openRecordIds: prev.openRecordIds.includes(record.id)
+        ? prev.openRecordIds
+        : [...prev.openRecordIds, record.id],
+      activeTabId: toRecordTabId(record.id),
+    }));
   };
 
   const handleTabSelect = (tabId: string) => {
-    setActiveTabId(tabId);
+    setModuleWorkspaceState(module.moduleId, (prev) => ({
+      ...prev,
+      activeTabId: tabId,
+    }));
+  };
+
+  const handleModuleTabSelect = (tabId: string) => {
+    const targetModule = mockWorkspaceModuleTabs.find(
+      (moduleTab) => moduleTab.id === tabId,
+    );
+
+    if (!targetModule || targetModule.path === location.pathname) {
+      return;
+    }
+
+    navigate(targetModule.path);
   };
 
   const handleTabClose = (tabId: string) => {
     const recordId = tabId.replace(RECORD_TAB_PREFIX, "");
 
-    setOpenRecordIds((prev) => prev.filter((id) => id !== recordId));
-    setActiveTabId((prev) => (prev === tabId ? "module-root" : prev));
+    setModuleWorkspaceState(module.moduleId, (prev) => ({
+      openRecordIds: prev.openRecordIds.filter((id) => id !== recordId),
+      activeTabId: prev.activeTabId === tabId ? "module-root" : prev.activeTabId,
+    }));
   };
 
   const moduleActions: LVEWorkspaceAction[] = module.moduleActions.map(
@@ -121,6 +203,8 @@ export function MockLVEWorkspacePage({
         headerTitle={module.headerTitle}
         headerDescription={module.headerDescription}
         headerActions={moduleActions}
+        moduleTabs={moduleTabs}
+        onModuleTabSelect={handleModuleTabSelect}
         tabs={tabs}
         onTabSelect={handleTabSelect}
         onTabClose={handleTabClose}

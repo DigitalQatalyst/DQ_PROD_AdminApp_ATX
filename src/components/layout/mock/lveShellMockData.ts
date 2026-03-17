@@ -31,8 +31,15 @@ export interface MockWorkspaceActionConfig {
   label: string;
 }
 
+export interface MockWorkspaceModuleTabConfig {
+  id: string;
+  label: string;
+  path: string;
+}
+
 export interface MockWorkspaceModuleData {
   moduleId: string;
+  routePath: string;
   headerTitle: string;
   headerDescription: string;
   queueTitle: string;
@@ -46,6 +53,24 @@ export interface MockWorkspaceModuleData {
   recordActions: MockWorkspaceActionConfig[];
   records: MockWorkspaceRecord[];
 }
+
+export const mockWorkspaceModuleTabs: MockWorkspaceModuleTabConfig[] = [
+  {
+    id: "contacts",
+    label: "Contacts",
+    path: "/contacts",
+  },
+  {
+    id: "leads",
+    label: "Leads",
+    path: "/leads",
+  },
+  {
+    id: "accounts",
+    label: "Accounts",
+    path: "/accounts",
+  },
+];
 
 const createWorkspaceCrudActions = (
   entityId: string,
@@ -67,6 +92,7 @@ const createRecordCrudActions = (
 
 export const contactsModuleMockData: MockWorkspaceModuleData = {
   moduleId: "contacts",
+  routePath: "/contacts",
   headerTitle: "Contact Management",
   headerDescription:
     "Mock workspace data for validating queue navigation, tabbed record work, and supporting context before live APIs.",
@@ -272,6 +298,7 @@ export const contactsModuleMockData: MockWorkspaceModuleData = {
 
 export const leadsModuleMockData: MockWorkspaceModuleData = {
   moduleId: "leads",
+  routePath: "/leads",
   headerTitle: "Lead Management",
   headerDescription:
     "Mock lead queue for validating non-destructive record switching and action placement before APIs are connected.",
@@ -479,6 +506,7 @@ export const leadsModuleMockData: MockWorkspaceModuleData = {
 
 export const accountsModuleMockData: MockWorkspaceModuleData = {
   moduleId: "accounts",
+  routePath: "/accounts",
   headerTitle: "Account Management",
   headerDescription:
     "Mock account data for validating long-lived workspaces, context pane collapse, and multi-record tabs.",
