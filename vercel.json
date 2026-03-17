@@ -13,6 +13,12 @@
       "use": "@vercel/node"
     }
   ],
+  "env": {
+    "VITE_USE_MOCK_AUTH": "true",
+    "VITE_ENVIRONMENT": "dev",
+    "AUTH_MODE": "mock",
+    "USE_MOCK_AUTH": "true"
+  },
   "routes": [
     {
       "src": "/api/crm-webhook",

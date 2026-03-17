@@ -7,9 +7,20 @@ export interface LVERecord {
 export interface LVETab {
   id: string;
   label: string;
+  kind?: 'module' | 'record';
+  recordId?: string;
+  description?: string;
   isActive?: boolean;
   isDirty?: boolean;
   canClose?: boolean;
+}
+
+export interface LVERecordTabsConfig {
+  enabled?: boolean;
+  maxOpen?: number;
+  canClose?: boolean;
+  getLabel?: (record: LVERecord) => string;
+  getIsDirty?: (record: LVERecord) => boolean;
 }
 
 export interface LVEColumn {
@@ -74,6 +85,7 @@ export interface LVEWorkspaceConfig {
   
   // Tabs configuration
   tabs?: LVETab[];
+  recordTabs?: LVERecordTabsConfig;
   
   // List pane configuration
   listPane: {
@@ -116,9 +128,10 @@ export interface LVEWorkspaceProps<T extends LVERecord = LVERecord> {
   
   // Handlers
   onRecordSelect?: (record: T) => void;
+  onRecordClear?: () => void;
   onRecordUpdate?: (record: T) => void;
-  onTabSelect?: (tabId: string) => void;
-  onTabClose?: (tabId: string) => void;
+  onTabSelect?: (tabId: string, tab?: LVETab) => void;
+  onTabClose?: (tabId: string, tab?: LVETab) => void;
   onFilterChange?: (filters: Record<string, any>) => void;
   onSort?: (field: string, direction: 'asc' | 'desc') => void;
   
@@ -135,6 +148,8 @@ export interface LVEWorkspaceProps<T extends LVERecord = LVERecord> {
 export interface LVEWorkspaceState {
   selectedRecordId?: string;
   activeTabId?: string;
+  activeBaseTabId?: string;
+  openRecordTabIds: string[];
   filters: Record<string, any>;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { LVERecord, LVESection, LVEAction, LVEPaneConfig } from "../types";
 import { cn } from "../../../utils/cn";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText } from "lucide-react";
 import { ScrollArea } from "../../ui/scroll-area";
 import Button from "../../ui/ButtonComponent";
 
@@ -17,8 +17,6 @@ export const LVEWorkPane = <T extends LVERecord>({
   selectedRecord,
   sections,
   actions = [],
-  config,
-  onRecordUpdate,
 }: LVEWorkPaneProps<T>) => {
   const [collapsedSections, setCollapsedSections] = useState<string[]>([]);
 
@@ -32,10 +30,12 @@ export const LVEWorkPane = <T extends LVERecord>({
 
   if (!selectedRecord) {
     return (
-      <div className="flex items-center justify-center h-full px-6 py-8">
-        <div className="text-center max-w-sm">
-          <div className="mb-3 text-3xl">📋</div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">
+      <div className="flex h-full items-center justify-center px-6 py-8">
+        <div className="max-w-sm text-center">
+          <div className="mb-3 flex justify-center text-muted-foreground">
+            <FileText className="h-8 w-8" />
+          </div>
+          <h3 className="mb-2 text-lg font-semibold text-foreground">
             No Record Selected
           </h3>
           <p className="text-sm text-muted-foreground">
@@ -47,10 +47,9 @@ export const LVEWorkPane = <T extends LVERecord>({
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Actions Bar */}
+    <div className="flex h-full flex-col">
       {actions.length > 0 && (
-        <div className="p-3 border-b border-border">
+        <div className="border-b border-border p-3">
           <div className="flex items-center gap-2">
             {actions.map((action) => (
               <Button
@@ -60,7 +59,7 @@ export const LVEWorkPane = <T extends LVERecord>({
                 onClick={() => action.onClick(selectedRecord)}
                 disabled={action.disabled}
               >
-                {action.icon && <action.icon className="w-4 h-4 mr-1" />}
+                {action.icon && <action.icon className="mr-1 h-4 w-4" />}
                 {action.label}
               </Button>
             ))}
@@ -68,18 +67,16 @@ export const LVEWorkPane = <T extends LVERecord>({
         </div>
       )}
 
-      {/* Sections */}
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-4">
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="space-y-4 p-4">
           {sections.map((section) => {
             const isCollapsed = collapsedSections.includes(section.id);
 
             return (
-              <div key={section.id} className="border border-border rounded-lg">
-                {/* Section Header */}
+              <div key={section.id} className="rounded-lg border border-border">
                 <div
                   className={cn(
-                    "flex items-center justify-between p-3 border-b border-border bg-muted/50",
+                    "flex items-center justify-between border-b border-border bg-muted/50 p-3",
                     section.collapsible && "cursor-pointer hover:bg-muted",
                   )}
                   onClick={
@@ -88,26 +85,23 @@ export const LVEWorkPane = <T extends LVERecord>({
                       : undefined
                   }
                 >
-                  <h4 className="font-medium text-foreground">
-                    {section.title}
-                  </h4>
+                  <h4 className="font-medium text-foreground">{section.title}</h4>
                   {section.collapsible &&
                     (isCollapsed ? (
-                      <ChevronRight className="w-4 h-4" />
+                      <ChevronRight className="h-4 w-4" />
                     ) : (
-                      <ChevronDown className="w-4 h-4" />
+                      <ChevronDown className="h-4 w-4" />
                     ))}
                 </div>
 
-                {/* Section Content */}
                 {!isCollapsed && (
-                  <div className="p-3 space-y-3">
+                  <div className="space-y-3 p-3">
                     {section.fields.map((field) => (
                       <div key={field.id} className="space-y-1">
                         <label className="text-sm font-medium text-foreground">
                           {field.label}
                           {field.required && (
-                            <span className="text-destructive ml-1">*</span>
+                            <span className="ml-1 text-destructive">*</span>
                           )}
                         </label>
                         <div className="text-sm text-muted-foreground">
@@ -116,7 +110,7 @@ export const LVEWorkPane = <T extends LVERecord>({
                                 selectedRecord[field.field],
                                 selectedRecord,
                               )
-                            : selectedRecord[field.field] || "—"}
+                            : selectedRecord[field.field] || "-"}
                         </div>
                       </div>
                     ))}

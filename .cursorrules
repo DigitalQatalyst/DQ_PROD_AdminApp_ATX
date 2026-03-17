@@ -122,3 +122,12 @@ documentation:
            - If duplicate found, consolidate into authoritative doc (SCHEMA_REFERENCE.md, PERMISSIONS_REFERENCE.md, etc.)
            - Move old/duplicate implementation summaries to /docs/archive/
            - Never have duplicate content in /docs root - always use subdirectories
+
+execution:
+  - description: >
+      Build commands are opt-in in this project.
+
+      Rules:
+      - Do NOT run build commands automatically after edits.
+      - Only run a build when the user explicitly asks for it.
+      - If verification is needed and the user has not requested a build, prefer lighter checks or report that build verification was not run.

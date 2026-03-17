@@ -84,6 +84,7 @@ const LVEDemoPage: React.FC = () => {
               (l) => l.id === selectedLeadId,
             )}
             onRecordSelect={(lead) => setSelectedLeadId(lead.id)}
+            onRecordClear={() => setSelectedLeadId(undefined)}
             onRecordUpdate={(lead) => console.log("Update lead:", lead)}
             onTabSelect={(tabId) => console.log("Tab selected:", tabId)}
             onTabClose={(tabId) => console.log("Tab closed:", tabId)}
@@ -105,6 +106,7 @@ const LVEDemoPage: React.FC = () => {
               (c) => c.id === selectedContactId,
             )}
             onRecordSelect={(contact) => setSelectedContactId(contact.id)}
+            onRecordClear={() => setSelectedContactId(undefined)}
             onRecordUpdate={(contact) =>
               console.log("Update contact:", contact)
             }
@@ -128,6 +130,7 @@ const LVEDemoPage: React.FC = () => {
               (a) => a.id === selectedAccountId,
             )}
             onRecordSelect={(account) => setSelectedAccountId(account.id)}
+            onRecordClear={() => setSelectedAccountId(undefined)}
             onRecordUpdate={(account) =>
               console.log("Update account:", account)
             }
@@ -148,8 +151,8 @@ const LVEDemoPage: React.FC = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col">
-      {/* Module Switcher */}
+    <div className="flex h-screen min-h-0 flex-col overflow-hidden">
+      {/*
       <div className="bg-card border-b border-border p-4">
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-semibold">LVE Workspace Demo</h1>
@@ -177,7 +180,7 @@ const LVEDemoPage: React.FC = () => {
             </Button>
           </div>
         </div>
-        <div className="flex items-center gap-4 mt-3">
+        <div className="mt-3 flex items-center gap-4">
           <p className="text-sm text-muted-foreground">
             Active Filter:{" "}
             <span className="font-medium capitalize">{activeFilter}</span>
@@ -196,14 +199,15 @@ const LVEDemoPage: React.FC = () => {
             </Button>
           )}
         </div>
-        <p className="text-sm text-muted-foreground mt-2">
+        <p className="mt-2 text-sm text-muted-foreground">
           Switch between modules to test the config-driven LVE workspace system.
           Use the sidebar menu actions to apply different filters.
         </p>
       </div>
+      */}
 
       {/* Active Module */}
-      <div className="flex-1">{renderModule()}</div>
+      <div className="min-h-0 flex-1 overflow-hidden">{renderModule()}</div>
     </div>
   );
 };

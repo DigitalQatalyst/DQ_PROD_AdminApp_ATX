@@ -1,4 +1,6 @@
 import React, { ReactNode } from "react";
+import { ChevronLeft, ChevronRight, PanelRight } from "lucide-react";
+import { cn } from "../../utils/cn";
 
 export interface LVEWorkspaceLayoutProps {
   headerTitle?: string;
@@ -6,6 +8,8 @@ export interface LVEWorkspaceLayoutProps {
   listPane?: ReactNode;
   workPane?: ReactNode;
   popPane?: ReactNode;
+  popPaneCollapsed?: boolean;
+  onPopPaneToggle?: () => void;
   footer?: ReactNode;
 }
 
@@ -22,10 +26,14 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
   listPane,
   workPane,
   popPane,
+  popPaneCollapsed = false,
+  onPopPaneToggle,
   footer,
 }) => {
+  const hasPopPane = Boolean(popPane);
+
   return (
-    <div className="flex flex-col h-full bg-background overflow-hidden">
+    <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-background">
       {/* Workspace Header */}
       <header className="border-b border-border bg-card px-4 py-3 flex items-center justify-center shrink-0">
         <h1 className="text-lg font-semibold text-foreground">{headerTitle}</h1>
@@ -39,19 +47,44 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
       )}
 
       {/* Main Workspace Grid */}
-      <div className="flex-1 grid grid-cols-[minmax(300px,400px)_minmax(400px,1fr)_minmax(280px,320px)] min-h-0">
-        {/* List Pane */}
-        <section className="border-r border-border bg-card overflow-hidden">
-          {listPane}
-        </section>
+      <div className="relative min-h-0 min-w-0 flex-1 overflow-auto">
+        {hasPopPane && popPaneCollapsed && onPopPaneToggle && (
+          <button
+            type="button"
+            onClick={onPopPaneToggle}
+            className="absolute right-3 top-3 z-10 inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground shadow-sm transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <PanelRight className="h-3.5 w-3.5" />
+            Show Context
+            <ChevronLeft className="h-3.5 w-3.5" />
+          </button>
+        )}
 
-        {/* Work Pane */}
-        <section className="border-r border-border bg-card overflow-hidden">
-          {workPane}
-        </section>
+        <div
+          className={cn(
+            "grid h-full min-h-full min-w-[980px]",
+            hasPopPane && !popPaneCollapsed
+              ? "grid-cols-[minmax(300px,400px)_minmax(400px,1fr)_minmax(280px,320px)]"
+              : "grid-cols-[minmax(300px,400px)_minmax(400px,1fr)]",
+          )}
+        >
+          {/* List Pane */}
+          <section className="min-h-0 min-w-0 overflow-hidden border-r border-border bg-card">
+            {listPane}
+          </section>
 
-        {/* Pop Pane */}
-        <section className="bg-muted/30 overflow-hidden">{popPane}</section>
+          {/* Work Pane */}
+          <section className="min-h-0 min-w-0 overflow-hidden border-r border-border bg-card">
+            {workPane}
+          </section>
+
+          {/* Pop Pane */}
+          {hasPopPane && !popPaneCollapsed && (
+            <section className="min-h-0 min-w-0 overflow-hidden bg-muted/30">
+              {popPane}
+            </section>
+          )}
+        </div>
       </div>
 
       {/* Footer */}

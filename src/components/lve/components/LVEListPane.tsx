@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { LVERecord, LVEColumn, LVEFilter, LVEPaneConfig } from "../types";
 import { cn } from "../../../utils/cn";
 import { Search, Filter, ChevronUp, ChevronDown } from "lucide-react";
@@ -18,35 +18,73 @@ interface LVEListPaneProps<T extends LVERecord> {
   onSort?: (field: string, direction: "asc" | "desc") => void;
 }
 
+const toSearchableText = (value: unknown): string => {
+  if (value == null) {
+    return "";
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => toSearchableText(item)).join(" ");
+  }
+
+  if (typeof value === "object") {
+    return Object.values(value as Record<string, unknown>)
+      .map((item) => toSearchableText(item))
+      .join(" ");
+  }
+
+  return "";
+};
+
 export const LVEListPane = <T extends LVERecord>({
   records,
   columns,
   selectedRecord,
   filters = [],
-  config,
   loading = false,
   error,
   searchable = true,
   onRecordSelect,
-  onFilterChange,
-  onSort,
 }: LVEListPaneProps<T>) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  const [sortField, setSortField] = useState<string>();
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const primaryColumn =
+    columns.find((column) =>
+      ["name", "firstName", "title", "label"].includes(column.field),
+    ) ?? columns[0];
+  const statusColumn = columns.find((column) => column.field === "status");
 
-  const handleSort = (field: string) => {
-    const newDirection =
-      sortField === field && sortDirection === "asc" ? "desc" : "asc";
-    setSortField(field);
-    setSortDirection(newDirection);
-    onSort?.(field, newDirection);
-  };
+  const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+
+  const visibleRecords = useMemo(() => {
+    if (!normalizedSearchTerm) {
+      return records;
+    }
+
+    return records.filter((record) => {
+      const columnValues = columns.map((column) => toSearchableText(record[column.field]));
+      const recordValues = Object.values(record).map((value) => toSearchableText(value));
+      const haystack = [...columnValues, ...recordValues].join(" ").toLowerCase();
+
+      return haystack.includes(normalizedSearchTerm);
+    });
+  }, [columns, normalizedSearchTerm, records]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex h-full items-center justify-center">
         <div className="text-sm text-muted-foreground">Loading...</div>
       </div>
     );
@@ -54,16 +92,15 @@ export const LVEListPane = <T extends LVERecord>({
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex h-full items-center justify-center">
         <div className="text-sm text-destructive">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Search and Filters */}
-      <div className="p-3 border-b border-border space-y-2">
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="space-y-2 border-b border-border p-3">
         {searchable && (
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -71,56 +108,81 @@ export const LVEListPane = <T extends LVERecord>({
               type="text"
               placeholder="Search records..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-8 pr-3 py-2 text-sm border border-border rounded-md bg-background"
+              onChange={(event) => setSearchTerm(event.target.value)}
+              className="w-full rounded-md border border-border bg-background py-2 pl-8 pr-3 text-sm"
             />
           </div>
         )}
 
-        {filters.length > 0 && (
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"
-          >
-            <Filter className="w-3 h-3" />
-            Filters
-            {showFilters ? (
-              <ChevronUp className="w-3 h-3" />
-            ) : (
-              <ChevronDown className="w-3 h-3" />
-            )}
-          </button>
+        <div className="flex items-center justify-between gap-3">
+          {filters.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => setShowFilters((prev) => !prev)}
+              className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <Filter className="h-3 w-3" />
+              Filters
+              {showFilters ? (
+                <ChevronUp className="h-3 w-3" />
+              ) : (
+                <ChevronDown className="h-3 w-3" />
+              )}
+            </button>
+          ) : (
+            <span className="text-xs text-muted-foreground">
+              {visibleRecords.length} result{visibleRecords.length === 1 ? "" : "s"}
+            </span>
+          )}
+
+          {filters.length > 0 && (
+            <span className="text-xs text-muted-foreground">
+              {visibleRecords.length} result{visibleRecords.length === 1 ? "" : "s"}
+            </span>
+          )}
+        </div>
+
+        {showFilters && filters.length > 0 && (
+          <div className="rounded-md border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+            Filter controls are not configured yet for the default list pane.
+          </div>
         )}
       </div>
 
-      {/* Records List */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="min-h-0 flex-1">
         <div className="space-y-1 p-2">
-          {records.length === 0 ? (
-            <div className="text-center py-8 text-sm text-muted-foreground">
-              No records found
+          {visibleRecords.length === 0 ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              {normalizedSearchTerm
+                ? `No records match "${searchTerm}".`
+                : "No records found"}
             </div>
           ) : (
-            records.map((record) => (
+            visibleRecords.map((record) => (
               <div
                 key={record.id}
                 onClick={() => onRecordSelect?.(record)}
                 className={cn(
-                  "p-3 rounded-md border cursor-pointer transition-colors",
+                  "cursor-pointer rounded-md border p-3 transition-colors",
                   selectedRecord?.id === record.id
-                    ? "bg-primary/10 border-primary"
-                    : "bg-card border-border hover:bg-accent",
+                    ? "border-primary/25 bg-muted/60 shadow-sm ring-1 ring-inset ring-primary/15"
+                    : "border-border bg-card hover:border-border/80 hover:bg-muted/40",
                 )}
               >
-                {columns.slice(0, 3).map((column) => (
-                  <div key={column.id} className="text-sm">
-                    <span className="font-medium">
-                      {column.render
-                        ? column.render(record[column.field], record)
-                        : record[column.field]}
-                    </span>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0 text-sm font-medium">
+                    {primaryColumn?.render
+                      ? primaryColumn.render(record[primaryColumn.field], record)
+                      : record[primaryColumn?.field]}
                   </div>
-                ))}
+                  {statusColumn && (
+                    <div className="shrink-0 text-sm">
+                      {statusColumn.render
+                        ? statusColumn.render(record[statusColumn.field], record)
+                        : record[statusColumn.field]}
+                    </div>
+                  )}
+                </div>
               </div>
             ))
           )}
