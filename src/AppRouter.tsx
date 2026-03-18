@@ -13,31 +13,27 @@ import ContentManagementRoute from "./pages/content-management";
 // import ZoneFormRoute from './pages/zone-form';
 import ContentFormRoute from "./pages/content-form";
 import AccountsPage from "./pages/accounts";
+import ContactsPage from "./pages/contacts";
+import LeadsPage from "./pages/leads";
 import LoginPage from "./pages/login";
+import SettingsPage from "./pages/settings";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ContentSegmentGate } from "./components/ContentSegmentGate";
-import { AppLayout } from "./components/AppLayout";
+import { AppShell } from "./components/layout/AppShell";
 import EJPTransactionDashboard from "./modules/ejp-transaction-dashboard";
 // import TaxonomyManagerRoute from './pages/taxonomy-manager';
 // import TaxonomyCollectionFormRoute from './pages/taxonomy-collection-form';
 // import TaxonomyFacetFormRoute from './pages/taxonomy-facet-form';
 // import TaxonomyTagFormRoute from './pages/taxonomy-tag-form';
-import ServiceDeliveryOverview from "./modules/service-delivery-overview";
+// REFACTOR: Service Delivery Overview disabled - only EJP Transaction Dashboard is active
+// import ServiceDeliveryOverview from "./modules/service-delivery-overview";
 import { useAuth } from "./context/AuthContext";
 import { ChatInterface } from "./modules/chat-support/pages/ChatInterface";
 
-// Component to redirect to appropriate dashboard based on user segment
+// Component to redirect to primary dashboard (EJP Transaction Dashboard)
 const DashboardRedirect = () => {
-  const { userSegment } = useAuth();
-
-  // Redirect based on user segment
-  if (userSegment === "internal") {
-    return <Navigate to="/service-delivery-overview" replace />;
-  } else if (userSegment === "partner") {
-    return <Navigate to="/ejp-transaction-dashboard" replace />;
-  }
-
-  // Default fallback (should not happen if user is properly authenticated)
+  // REFACTOR: Always redirect to EJP Transaction Dashboard as the primary dashboard
+  // Service Delivery Overview is disabled in this refactor
   return <Navigate to="/ejp-transaction-dashboard" replace />;
 };
 
@@ -55,11 +51,13 @@ export function AppRouter() {
         <Route
           path="/chat-support"
           element={
-            <ProtectedRoute requiredRoles={["admin", "approver", "editor", "viewer"]}
-            requiredSegments={["partner"]}>
-              <AppLayout activeSection="chat-support">
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+              requiredSegments={["partner"]}
+            >
+              <AppShell>
                 <ChatInterface />
-              </AppLayout>
+              </AppShell>
             </ProtectedRoute>
           }
         />
@@ -84,8 +82,8 @@ export function AppRouter() {
           }
         />
 
-        {/* Analytics Dashboards - Enabled in v1 */}
-        {/* Service Delivery Dashboard - Only accessible to Staff (internal segment) */}
+        {/* DEVELOP-V1: Service Delivery Dashboard - DISABLED in refactor */}
+        {/* 
         <Route
           path="/service-delivery-overview"
           element={
@@ -93,24 +91,25 @@ export function AppRouter() {
               requiredRoles={["admin", "approver", "editor", "viewer"]}
               requiredSegments={["internal"]}
             >
-              <AppLayout activeSection="service-delivery">
+              <AppShell>
                 <ServiceDeliveryOverview />
-              </AppLayout>
+              </AppShell>
             </ProtectedRoute>
           }
         />
+        */}
 
-        {/* Experience Analytics Dashboard - Only accessible to Partners */}
+        {/* Experience Analytics Dashboard - Primary Dashboard for all users */}
         <Route
           path="/ejp-transaction-dashboard"
           element={
             <ProtectedRoute
               requiredRoles={["admin", "approver", "editor", "viewer"]}
-              requiredSegments={["partner","internal",]}
+              requiredSegments={["partner", "internal"]}
             >
-              <AppLayout activeSection="experience-analytics">
+              <AppShell>
                 <EJPTransactionDashboard />
-              </AppLayout>
+              </AppShell>
             </ProtectedRoute>
           }
         />
@@ -155,9 +154,35 @@ export function AppRouter() {
               requiredRoles={["admin", "approver", "editor", "viewer"]}
               requiredSegments={["internal"]}
             >
-              <AppLayout activeSection="accounts">
+              <AppShell>
                 <AccountsPage />
-              </AppLayout>
+              </AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/contacts"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+              requiredSegments={["internal"]}
+            >
+              <AppShell>
+                <ContactsPage />
+              </AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/leads"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+              requiredSegments={["internal"]}
+            >
+              <AppShell>
+                <LeadsPage />
+              </AppShell>
             </ProtectedRoute>
           }
         />
@@ -288,6 +313,20 @@ export function AppRouter() {
               <ContentSegmentGate>
                 <ContentFormRoute />
               </ContentSegmentGate>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Settings */}
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+            >
+              <AppShell>
+                <SettingsPage />
+              </AppShell>
             </ProtectedRoute>
           }
         />
