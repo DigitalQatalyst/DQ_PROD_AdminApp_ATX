@@ -23,6 +23,7 @@ import authRouter from './routes/auth';
 import adminRouter from './routes/admin';
 import contentsRouter from './routes/contents';
 import servicesRouter from './routes/services';
+import accountsRouter from './routes/accounts';
 import vendureRouter from './routes/vendure';
 import uploadsRouter from './routes/uploads';
 
@@ -83,6 +84,9 @@ app.use('/api/vendure', vendureRouter);
 
 // Uploads routes (no auth required for file operations)
 app.use('/api/uploads', uploadsRouter);
+
+// Accounts routes (MVP - currently no auth, swap to internal auth when ready)
+app.use('/api/accounts', accountsRouter);
 
 // CRM Webhook routes are now handled by Vercel serverless function
 // See: api/webhooks/crm/user-provisioning.ts

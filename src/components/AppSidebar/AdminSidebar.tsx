@@ -176,7 +176,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         },
         {
           id: "accounts",
-          label: "Accounts (LVE Shell)",
+          label: "Accounts",
           icon: <Briefcase size={20} />,
           path: "/accounts",
         }
