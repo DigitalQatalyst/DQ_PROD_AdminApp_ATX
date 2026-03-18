@@ -6,6 +6,14 @@ export default {
   theme: {
     extend: {
       colors: {
+<<<<<<< HEAD
+        blue: {
+          500: '#2596be',
+          600: '#1d7a9c', // Darker shade for hover
+        }
+      }
+    }
+=======
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -49,5 +57,6 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
     },
+>>>>>>> ddcfceabca613197be9d15183ed9ba8caf042334
   },
 }
