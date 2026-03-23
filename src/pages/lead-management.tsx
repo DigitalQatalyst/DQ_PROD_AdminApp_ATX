@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { LVEWorkspaceLayout, LVETab } from "../components/layout/LVEWorkspaceLayout";
+import { LVEWorkspaceLayoutLegacy as LVEWorkspaceLayout, LVETabLegacy as LVETab } from "../components/layout/LVEWorkspaceLayoutLegacy";
 import { Users, UserPlus, Clock, CheckCircle, Filter } from "lucide-react";
 
 // Mock lead data - replace with actual API calls

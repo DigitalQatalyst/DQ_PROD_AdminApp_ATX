@@ -17,6 +17,7 @@ import LoginPage from "./pages/login";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ContentSegmentGate } from "./components/ContentSegmentGate";
 import { AppLayout } from "./components/AppLayout";
+import { AppShell } from "./components/layout/AppShell";
 import EJPTransactionDashboard from "./modules/ejp-transaction-dashboard";
 // import TaxonomyManagerRoute from './pages/taxonomy-manager';
 // import TaxonomyCollectionFormRoute from './pages/taxonomy-collection-form';
@@ -155,9 +156,9 @@ export function AppRouter() {
               requiredRoles={["admin", "approver", "editor", "viewer"]}
               requiredSegments={["internal", "partner"]}
             >
-              <AppLayout activeSection="lead-management">
+              <AppShell>
                 <LeadManagementModule />
-              </AppLayout>
+              </AppShell>
             </ProtectedRoute>
           }
         />

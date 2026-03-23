@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Component, useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Mail, Phone, Calendar, MoreHorizontal, Edit, CheckCircle, CheckCircle2, FileText, Clock, Briefcase, Building2, Target, Trash2, Download } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 import { Avatar, AvatarFallback } from '../../../components/ui/Avatar';
@@ -11,6 +11,20 @@ import { LeadStatusPicker } from '../components/LeadStatusPicker';
 import { LeadTagManager } from '../components/LeadTagManager';
 import { LeadActivityTimeline } from '../components/LeadActivityTimeline';
 import { Lead, TeamMember, LeadStatus } from '../types';
+import { LeadProcessFlow } from '../components/LeadProcessFlow';
+
+// Error boundary to isolate LeadProcessFlow render failures
+interface BpfErrorBoundaryState { hasError: boolean }
+class BpfErrorBoundary extends Component<React.PropsWithChildren, BpfErrorBoundaryState> {
+  state: BpfErrorBoundaryState = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) {
+      return <div className="w-full mb-6 text-xs text-muted-foreground px-1">Pipeline unavailable</div>;
+    }
+    return this.props.children;
+  }
+}
 
 interface LeadDetailProps {
   lead: Lead;
@@ -150,6 +164,16 @@ export const LeadDetail: React.FC<LeadDetailProps> = ({
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto p-6">
+        <BpfErrorBoundary>
+          <LeadProcessFlow
+            leadId={lead.id}
+            currentStatus={lead.status}
+            lead={lead}
+            teamMembers={teamMembers}
+            onStatusChange={onStatusChange}
+            onUpdate={onUpdate}
+          />
+        </BpfErrorBoundary>
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column */}
           <div className="space-y-6">

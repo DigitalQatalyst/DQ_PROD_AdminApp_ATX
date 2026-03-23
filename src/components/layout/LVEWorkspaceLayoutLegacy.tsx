@@ -1,17 +1,17 @@
 import React, { ReactNode } from "react";
 
-export interface LVETab {
+export interface LVETabLegacy {
   id: string;
   label: string;
   isActive?: boolean;
   isDirty?: boolean;
 }
 
-export interface LVEWorkspaceLayoutProps {
+export interface LVEWorkspaceLayoutLegacyProps {
   headerTitle?: string;
   tenantLabel?: string;
   streamLabel?: string;
-  tabs?: LVETab[];
+  tabs?: LVETabLegacy[];
   onTabSelect?: (tabId: string) => void;
   onTabClose?: (tabId: string) => void;
   onTenantClick?: () => void;
@@ -25,13 +25,13 @@ export interface LVEWorkspaceLayoutProps {
 }
 
 /**
- * LVEWorkspaceLayout
+ * LVEWorkspaceLayoutLegacy
  *
  * Reusable layout shell implementing the List | View | Edit (LVE) workspace structure.
  * This component is deliberately UI-only: it contains no module-specific logic and is
  * driven entirely by props so it can be reused across modules.
  */
-export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
+export const LVEWorkspaceLayoutLegacy: React.FC<LVEWorkspaceLayoutLegacyProps> = ({
   headerTitle = "Workspace",
   tenantLabel = "Default Tenant",
   streamLabel = "Default Stream",
@@ -50,14 +50,14 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
   const hasTabs = tabs && tabs.length > 0;
 
   return (
-    <div className="flex flex-col h-full min-h-[600px] bg-background border border-border rounded-xl overflow-hidden">
+    <div className="flex flex-col h-full min-h-[600px] bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
       {/* Global Header */}
-      <header className="border-b border-border bg-card px-4 py-2 flex items-center gap-3">
+      <header className="border-b border-slate-200 bg-white px-4 py-2 flex items-center gap-3">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={onTenantClick}
-            className="inline-flex items-center px-2 py-1 rounded-full border border-border text-xs font-medium text-foreground hover:bg-accent"
+            className="inline-flex items-center px-2 py-1 rounded-full border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50"
           >
             <span className="h-2 w-2 rounded-full bg-emerald-500 mr-1" />
             {tenantLabel}
@@ -65,14 +65,14 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
           <button
             type="button"
             onClick={onStreamClick}
-            className="inline-flex items-center px-2 py-1 rounded-full border border-primary/30 bg-primary/10 text-xs font-medium text-primary hover:bg-primary/20"
+            className="inline-flex items-center px-2 py-1 rounded-full border border-indigo-100 bg-indigo-50 text-xs font-medium text-indigo-700 hover:bg-indigo-100"
           >
             {streamLabel}
           </button>
         </div>
 
         <div className="flex-1 flex items-center justify-center">
-          <h1 className="text-sm font-semibold text-foreground truncate">
+          <h1 className="text-sm font-semibold text-slate-800 truncate">
             {headerTitle}
           </h1>
         </div>
@@ -82,7 +82,7 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
             <button
               type="button"
               onClick={onSettingsClick}
-              className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-border text-muted-foreground hover:bg-accent text-xs"
+              className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-slate-200 text-slate-500 hover:bg-slate-50 text-xs"
               aria-label="Workspace settings"
             >
               ⚙
@@ -93,7 +93,7 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
 
       {/* Tabs Row */}
       {hasTabs && (
-        <div className="border-b border-border bg-muted/50 px-2 py-1 flex items-center gap-1 overflow-x-auto">
+        <div className="border-b border-slate-200 bg-slate-50/80 px-2 py-1 flex items-center gap-1 overflow-x-auto">
           {tabs.map((tab) => {
             const active = tab.isActive;
             return (
@@ -103,8 +103,8 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
                 onClick={() => onTabSelect?.(tab.id)}
                 className={`group inline-flex items-center max-w-xs px-3 py-1.5 rounded-md text-xs border transition-colors ${
                   active
-                    ? "bg-card border-primary text-primary shadow-sm"
-                    : "bg-muted border-border text-muted-foreground hover:bg-card"
+                    ? "bg-white border-indigo-500 text-indigo-700 shadow-sm"
+                    : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-white"
                 }`}
               >
                 <span className="truncate">{tab.label}</span>
@@ -118,7 +118,7 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
                       e.stopPropagation();
                       onTabClose(tab.id);
                     }}
-                    className="ml-2 text-[10px] text-muted-foreground hover:text-foreground"
+                    className="ml-2 text-[10px] text-slate-400 hover:text-slate-600"
                   >
                     ✕
                   </span>
@@ -132,33 +132,33 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
       {/* Main Workspace Grid */}
       <div className="flex-1 grid grid-cols-[minmax(200px,240px)_minmax(260px,320px)_minmax(420px,1fr)_minmax(260px,320px)] min-h-0">
         {/* Menu Pane */}
-        <section className="border-r border-border bg-muted/30 overflow-y-auto">
+        <section className="border-r border-slate-200 bg-slate-50/70 overflow-y-auto">
           {menuPane ?? (
-            <div className="p-4 text-xs text-muted-foreground">
+            <div className="p-4 text-xs text-slate-500">
               Menu Pane — provide module navigation here.
             </div>
           )}
         </section>
 
         {/* List Pane */}
-        <section className="border-r border-border bg-card overflow-y-auto">
+        <section className="border-r border-slate-200 bg-white overflow-y-auto">
           {listPane ?? (
-            <div className="p-4 text-xs text-muted-foreground">
+            <div className="p-4 text-xs text-slate-500">
               List Pane — show record queues and filters here.
             </div>
           )}
         </section>
 
         {/* Work Window */}
-        <section className="border-r border-border bg-card overflow-y-auto">
+        <section className="border-r border-slate-200 bg-white overflow-y-auto">
           {workPane ?? (
             <div className="h-full flex items-center justify-center px-6 py-8">
               <div className="text-center max-w-sm">
                 <div className="mb-3 text-3xl">🧩</div>
-                <h2 className="text-sm font-semibold text-foreground mb-1">
+                <h2 className="text-sm font-semibold text-slate-800 mb-1">
                   LVE Workspace Shell
                 </h2>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-slate-500">
                   Connect this workspace to a core data entity (e.g. Account,
                   Lead, Case) and drive it via configuration—no module-specific
                   logic should live in this layout.
@@ -169,9 +169,9 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
         </section>
 
         {/* Pop Pane */}
-        <section className="bg-muted/30 overflow-y-auto">
+        <section className="bg-slate-50/80 overflow-y-auto">
           {popPane ?? (
-            <div className="p-4 text-xs text-muted-foreground">
+            <div className="p-4 text-xs text-slate-500">
               Pop Pane — use this for related context, timelines, or actions.
             </div>
           )}
@@ -179,7 +179,7 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card px-3 py-1.5 text-[11px] text-muted-foreground flex items-center justify-between">
+      <footer className="border-t border-slate-200 bg-white px-3 py-1.5 text-[11px] text-slate-500 flex items-center justify-between">
         <span>System status: Connected</span>
         <span>{footer}</span>
       </footer>
