@@ -545,8 +545,8 @@ class MockQueryBuilder implements QueryBuilder {
 // Initialize the appropriate database client based on environment
 // Always prefer Supabase if credentials are available, regardless of environment
 function initializeDbClient(): DatabaseClient {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_COMMUNITY_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_COMMUNITY_SUPABASE_ANON_KEY;
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
   // Log environment configuration for debugging (helpful for Vercel deployments)
@@ -555,11 +555,11 @@ function initializeDbClient(): DatabaseClient {
     MODE: import.meta.env.MODE,
     PROD: import.meta.env.PROD,
     DEV: import.meta.env.DEV,
-    hasSupabaseUrl: !!supabaseUrl,
-    hasSupabaseKey: !!supabaseKey,
+    hasSupabaseUrl: !!(import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_COMMUNITY_SUPABASE_URL),
+    hasSupabaseKey: !!(import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_COMMUNITY_SUPABASE_ANON_KEY),
     hasApiBaseUrl: !!apiBaseUrl,
-    supabaseUrlPreview: supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'not set',
-    supabaseKeyPreview: supabaseKey ? supabaseKey.substring(0, 20) + '...' : 'not set',
+    supabaseUrlPreview: (import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_COMMUNITY_SUPABASE_URL) ? (import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_COMMUNITY_SUPABASE_URL).substring(0, 30) + '...' : 'not set',
+    supabaseKeyPreview: (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_COMMUNITY_SUPABASE_ANON_KEY) ? (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_COMMUNITY_SUPABASE_ANON_KEY).substring(0, 20) + '...' : 'not set',
     viteEnvironment: import.meta.env.VITE_ENVIRONMENT || 'not set'
   });
 
@@ -615,11 +615,11 @@ export function getSupabaseClient(): SupabaseClient | null {
   console.error('❌ Supabase client not available. Debug info:', {
     clientType,
     ENV,
-    hasSupabaseUrl: !!import.meta.env.VITE_SUPABASE_URL,
-    hasSupabaseKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
+    hasSupabaseUrl: !!(import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_COMMUNITY_SUPABASE_URL),
+    hasSupabaseKey: !!(import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_COMMUNITY_SUPABASE_ANON_KEY),
     hasApiBaseUrl: !!import.meta.env.VITE_API_BASE_URL,
-    supabaseUrl: import.meta.env.VITE_SUPABASE_URL ? 'present' : 'missing',
-    supabaseKey: import.meta.env.VITE_SUPABASE_ANON_KEY ? 'present' : 'missing'
+    supabaseUrl: (import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_COMMUNITY_SUPABASE_URL) ? 'present' : 'missing',
+    supabaseKey: (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_COMMUNITY_SUPABASE_ANON_KEY) ? 'present' : 'missing'
   });
   
   return null;

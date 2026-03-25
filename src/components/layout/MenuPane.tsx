@@ -11,6 +11,7 @@ import {
   User,
   Target,
   Building,
+  Wrench,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 import { useAuth } from "../../context/AuthContext";
@@ -69,6 +70,13 @@ export function MenuPane() {
           path: "/accounts",
           requiredSegments: ["internal"],
         },
+        {
+          id: "services",
+          name: "Services",
+          icon: Wrench,
+          path: "/admin/services",
+          requiredSegments: ["internal"],
+        },
       ],
     },
     {
@@ -117,6 +125,7 @@ export function MenuPane() {
 
   const isItemVisible = (item: NavigationItem) => {
     if (!item.requiredSegments) return true;
+    if (!userSegment) return false;
     return item.requiredSegments.includes(userSegment);
   };
 
