@@ -108,11 +108,18 @@ router.put('/:id', async (req: Request, res: Response) => {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error updating service request:', error);
+      throw error;
+    }
     res.json({ status: 'success', data });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating service request:', error);
-    res.status(500).json({ status: 'error', message: 'Failed to update service request' });
+    res.status(500).json({ 
+      status: 'error', 
+      message: error.message || 'Failed to update service request',
+      details: error.details || undefined
+    });
   }
 });
 

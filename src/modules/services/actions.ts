@@ -66,7 +66,30 @@ export async function updateServiceRequest(
   currentStatus?: ServiceRequestStatus
 ): Promise<{ data: ServiceRequest | null; error: string | null }> {
   try {
-    const updated = await ServiceRequestApi.updateServiceRequest(id, input);
+    // Sanitize input to only include valid update fields (prevent joined fields from breaking Supabase)
+    const sanitizedInput: UpdateServiceRequestInput = {
+      title: input.title,
+      description: input.description,
+      type: input.type,
+      priority: input.priority,
+      status: input.status,
+      account_id: input.account_id,
+      contact_id: input.contact_id,
+      lead_id: input.lead_id,
+      owner_id: input.owner_id,
+      sla_due_at: input.sla_due_at,
+      resolution_summary: input.resolution_summary,
+      lessons_learned: input.lessons_learned,
+      resolved_by: input.resolved_by,
+      recurrence_count: input.recurrence_count,
+    };
+
+    // Remove undefined fields
+    Object.keys(sanitizedInput).forEach(key => 
+      (sanitizedInput as any)[key] === undefined && delete (sanitizedInput as any)[key]
+    );
+
+    const updated = await ServiceRequestApi.updateServiceRequest(id, sanitizedInput);
     
     // If status changed, log it
     if (input.status && input.status !== currentStatus) {
