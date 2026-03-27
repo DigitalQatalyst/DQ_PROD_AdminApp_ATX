@@ -13,6 +13,7 @@ import ContentManagementRoute from "./pages/content-management";
 // import ZoneFormRoute from './pages/zone-form';
 import ContentFormRoute from "./pages/content-form";
 import AccountsPage from "./pages/accounts";
+import SupportPage from "./pages/support";
 import ContactsPage from "./pages/contacts";
 import LeadsPage from "./pages/leads";
 import LoginPage from "./pages/login";
@@ -156,6 +157,19 @@ export function AppRouter() {
             >
               <AppShell>
                 <AccountsPage />
+              </AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/support"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+              requiredSegments={["internal"]}
+            >
+              <AppShell>
+                <SupportPage />
               </AppShell>
             </ProtectedRoute>
           }

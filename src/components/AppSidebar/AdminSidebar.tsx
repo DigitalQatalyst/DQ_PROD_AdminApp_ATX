@@ -11,6 +11,8 @@ import {
   FileCheck,
   MessageSquare,
   Briefcase,
+  Users,
+  HeadphonesIcon,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 // DEVELOP-V1: Home icon removed (dashboard disabled)
@@ -160,7 +162,42 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       }
     }
 
-    // Content & Data - enable Content Management
+    // CRM Modules
+    if (userSegment === "internal") {
+      items.push(
+        {
+          id: "crm-modules",
+          label: "CRM MODULES",
+          category: "category",
+        },
+        {
+          id: "contacts",
+          label: "Contacts",
+          icon: <Users size={20} />,
+          path: "/contacts",
+        },
+        {
+          id: "leads",
+          label: "Leads",
+          icon: <BarChart3 size={20} />,
+          path: "/leads",
+        },
+        {
+          id: "accounts",
+          label: "Accounts",
+          icon: <Briefcase size={20} />,
+          path: "/accounts",
+        },
+        {
+          id: "support",
+          label: "Support",
+          icon: <HeadphonesIcon size={20} />,
+          path: "/support",
+        }
+      );
+    }
+
+    // Content & Data
     if (userSegment === "internal") {
       items.push(
         {
@@ -173,12 +210,6 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label: "Content Management",
           icon: <FileCheck size={20} />,
           path: "/content-management",
-        },
-        {
-          id: "accounts",
-          label: "Accounts",
-          icon: <Briefcase size={20} />,
-          path: "/accounts",
         }
       );
     }

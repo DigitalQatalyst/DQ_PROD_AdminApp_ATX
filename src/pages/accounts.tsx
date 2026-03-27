@@ -228,24 +228,7 @@ const AccountsPage: React.FC = () => {
     }
   };
 
-  const menuPane = (
-    <div className="p-4 space-y-2 text-xs text-slate-700">
-      <div className="font-semibold text-slate-900 text-[11px] tracking-wide uppercase">
-        Workspace Sections
-      </div>
-      <ul className="space-y-1">
-        <li className="rounded-md px-2 py-1 bg-slate-100 text-slate-900 text-xs">
-          Accounts
-        </li>
-        <li className="rounded-md px-2 py-1 text-slate-500">
-          Contacts (coming soon)
-        </li>
-        <li className="rounded-md px-2 py-1 text-slate-500">
-          Opportunities (coming soon)
-        </li>
-      </ul>
-    </div>
-  );
+  const menuPane = null;
 
   const listPane = (
     <div className="p-4 h-full flex flex-col text-xs text-slate-700">
@@ -600,8 +583,7 @@ const AccountsPage: React.FC = () => {
       : tabs;
 
   return (
-    <div className="h-full">
-      <LVEWorkspaceLayout
+    <LVEWorkspaceLayout
         headerTitle="Account Management"
         tenantLabel="Enterprise Admin"
         streamLabel="Accounts"
@@ -618,7 +600,6 @@ const AccountsPage: React.FC = () => {
           </span>
         }
       />
-    </div>
   );
 };
 

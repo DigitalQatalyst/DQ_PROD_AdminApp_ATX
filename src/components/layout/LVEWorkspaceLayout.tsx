@@ -50,7 +50,7 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
   const hasTabs = tabs && tabs.length > 0;
 
   return (
-    <div className="flex flex-col h-full min-h-[600px] bg-background border border-border rounded-xl overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-background border border-border overflow-hidden">
       {/* Global Header */}
       <header className="border-b border-border bg-card px-4 py-2 flex items-center gap-3">
         <div className="flex items-center gap-2">
@@ -130,15 +130,13 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
       )}
 
       {/* Main Workspace Grid */}
-      <div className="flex-1 grid grid-cols-[minmax(200px,240px)_minmax(260px,320px)_minmax(420px,1fr)_minmax(260px,320px)] min-h-0">
-        {/* Menu Pane */}
-        <section className="border-r border-border bg-muted/30 overflow-y-auto">
-          {menuPane ?? (
-            <div className="p-4 text-xs text-muted-foreground">
-              Menu Pane — provide module navigation here.
-            </div>
-          )}
-        </section>
+      <div className={`flex-1 grid min-h-0 ${menuPane ? 'grid-cols-[minmax(200px,240px)_minmax(360px,420px)_minmax(420px,1fr)_minmax(240px,280px)]' : 'grid-cols-[minmax(360px,420px)_minmax(420px,1fr)_minmax(240px,280px)]'}`}>
+        {/* Menu Pane — hidden when not provided */}
+        {menuPane && (
+          <section className="border-r border-border bg-muted/30 overflow-y-auto">
+            {menuPane}
+          </section>
+        )}
 
         {/* List Pane */}
         <section className="border-r border-border bg-card overflow-y-auto">

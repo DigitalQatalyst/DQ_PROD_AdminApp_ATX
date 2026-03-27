@@ -11,6 +11,7 @@ import {
   User,
   Target,
   Building,
+  Headphones,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 import { useAuth } from "../../context/AuthContext";
@@ -67,6 +68,13 @@ export function MenuPane() {
           name: "Accounts",
           icon: Building,
           path: "/accounts",
+          requiredSegments: ["internal"],
+        },
+        {
+          id: "support",
+          name: "Support",
+          icon: Headphones,
+          path: "/support",
           requiredSegments: ["internal"],
         },
       ],
