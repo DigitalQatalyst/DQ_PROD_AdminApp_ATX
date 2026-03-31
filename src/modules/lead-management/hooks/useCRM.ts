@@ -1,15 +1,28 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Lead, LeadStatus, FilterState, ViewType } from '../types';
-import { initialLeads, teamMembers } from '../data/mockData';
+import { teamMembers } from '../data/mockData';
+import { useLeads } from './useLeads';
 
 export function useCRM() {
-  const [leads, setLeads] = useState<Lead[]>(initialLeads);
+  const {
+    leads,
+    loading: leadsLoading,
+    error: leadsError,
+    usingMock,
+    createLead: dbCreateLead,
+    updateLead: dbUpdateLead,
+    updateLeadStatus: dbUpdateLeadStatus,
+    deleteLead: dbDeleteLead,
+    logActivity,
+    addNote: dbAddNote,
+  } = useLeads();
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [previousView, setPreviousView] = useState<ViewType>('leads');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
   const [filters, setFilters] = useState<FilterState>({
+
     status: 'All',
     source: 'All',
     assignedTo: 'All',
@@ -40,15 +53,15 @@ export function useCRM() {
       if (filters.status !== 'All' && lead.status !== filters.status) return false;
       if (filters.source !== 'All' && lead.source !== filters.source) return false;
       if (filters.assignedTo !== 'All' && lead.assignedTo !== filters.assignedTo) return false;
-      if (lead.score < filters.scoreMin || lead.score > filters.scoreMax) return false;
+      if ((lead.score ?? 0) < filters.scoreMin || (lead.score ?? 0) > filters.scoreMax) return false;
       if (filters.formType !== 'All' && lead.formType !== filters.formType) return false;
       if (filters.search) {
         const q = filters.search.toLowerCase();
         return (
-          lead.name.toLowerCase().includes(q) ||
-          lead.company.toLowerCase().includes(q) ||
-          lead.email.toLowerCase().includes(q) ||
-          lead.service.toLowerCase().includes(q)
+          (lead.name ?? '').toLowerCase().includes(q) ||
+          (lead.company ?? '').toLowerCase().includes(q) ||
+          (lead.email ?? '').toLowerCase().includes(q) ||
+          (lead.service ?? '').toLowerCase().includes(q)
         );
       }
       return true;
@@ -61,155 +74,87 @@ export function useCRM() {
   );
 
   const updateLeadStatus = useCallback((leadId: string, newStatus: LeadStatus) => {
-    setLeads((prev) =>
-      prev.map((l) => {
-        if (l.id !== leadId) return l;
-        return {
-          ...l,
-          status: newStatus,
-          activities: [
-            { id: `a${Date.now()}`, type: 'status_change' as const, description: `Status changed to ${newStatus}`, timestamp: new Date().toISOString(), user: 'You' },
-            ...l.activities,
-          ],
-        };
-      })
-    );
-  }, []);
+    dbUpdateLeadStatus(leadId, newStatus);
+    logActivity(leadId, 'status_change', `Status changed to ${newStatus}`);
+  }, [dbUpdateLeadStatus, logActivity]);
 
   const assignLead = useCallback((leadId: string, memberId: string) => {
     const member = teamMembers.find((m) => m.id === memberId);
-    setLeads((prev) =>
-      prev.map((l) => {
-        if (l.id !== leadId) return l;
-        return {
-          ...l,
-          assignedTo: memberId,
-          activities: [
-            { id: `a${Date.now()}`, type: 'note' as const, description: `Assigned to ${member?.name || memberId}`, timestamp: new Date().toISOString(), user: 'You' },
-            ...l.activities,
-          ],
-        };
-      })
-    );
-  }, []);
+    dbUpdateLead(leadId, { assignedTo: memberId });
+    logActivity(leadId, 'assignment', `Assigned to ${member?.name || memberId}`);
+  }, [dbUpdateLead, logActivity]);
 
   const addNote = useCallback((leadId: string, note: string) => {
-    setLeads((prev) =>
-      prev.map((l) => {
-        if (l.id !== leadId) return l;
-        return {
-          ...l,
-          activities: [
-            { id: `a${Date.now()}`, type: 'note' as const, description: note, timestamp: new Date().toISOString(), user: 'You' },
-            ...l.activities,
-          ],
-        };
-      })
-    );
-  }, []);
+    dbAddNote(leadId, note);
+  }, [dbAddNote]);
 
   const addTag = useCallback((leadId: string, tag: string) => {
-    setLeads((prev) =>
-      prev.map((l) => {
-        if (l.id !== leadId) return l;
-        if (l.tags.includes(tag)) return l;
-        return { ...l, tags: [...l.tags, tag] };
-      })
-    );
-  }, []);
+    const lead = leads.find((l) => l.id === leadId);
+    if (!lead || lead.tags.includes(tag)) return;
+    dbUpdateLead(leadId, { tags: [...lead.tags, tag] });
+    logActivity(leadId, 'tag_change', `Tag added: ${tag}`);
+  }, [leads, dbUpdateLead, logActivity]);
 
   const removeTag = useCallback((leadId: string, tag: string) => {
-    setLeads((prev) =>
-      prev.map((l) => {
-        if (l.id !== leadId) return l;
-        return { ...l, tags: l.tags.filter((t) => t !== tag) };
-      })
-    );
-  }, []);
+    const lead = leads.find((l) => l.id === leadId);
+    if (!lead) return;
+    dbUpdateLead(leadId, { tags: lead.tags.filter((t) => t !== tag) });
+    logActivity(leadId, 'tag_change', `Tag removed: ${tag}`);
+  }, [leads, dbUpdateLead, logActivity]);
 
   const addLead = useCallback(
     (lead: Omit<Lead, 'id' | 'activities' | 'createdAt' | 'score'>) => {
-      const newLead: Lead = {
-        ...lead,
-        id: `l${Date.now()}`,
-        score: Math.floor(Math.random() * 40) + 30,
-        createdAt: new Date().toISOString(),
-        activities: [
-          { id: `a${Date.now()}`, type: 'note' as const, description: 'Lead created manually', timestamp: new Date().toISOString(), user: 'You' },
-        ],
-      };
-      setLeads((prev) => [newLead, ...prev]);
+      dbCreateLead(lead);
     },
-    []
+    [dbCreateLead]
   );
 
   const updateLead = useCallback((leadId: string, updates: Partial<Lead>) => {
-    setLeads((prev) =>
-      prev.map((l) => (l.id !== leadId ? l : { ...l, ...updates }))
-    );
-  }, []);
+    dbUpdateLead(leadId, updates);
+  }, [dbUpdateLead]);
 
   const deleteLead = useCallback(
     (leadId: string) => {
-      setLeads((prev) => prev.filter((l) => l.id !== leadId));
+      dbDeleteLead(leadId);
       if (selectedLeadId === leadId) {
         setSelectedLeadId(null);
         setActiveView(previousView);
       }
     },
-    [selectedLeadId, previousView]
+    [dbDeleteLead, selectedLeadId, previousView]
   );
 
   const bulkUpdateStatus = useCallback((ids: string[], status: LeadStatus) => {
-    setLeads((prev) =>
-      prev.map((l) => {
-        if (!ids.includes(l.id)) return l;
-        return {
-          ...l,
-          status,
-          activities: [
-            { id: `a${Date.now()}_${l.id}`, type: 'status_change' as const, description: `Status changed to ${status} (bulk action)`, timestamp: new Date().toISOString(), user: 'You' },
-            ...l.activities,
-          ],
-        };
-      })
-    );
+    ids.forEach((id) => {
+      dbUpdateLeadStatus(id, status);
+      logActivity(id, 'status_change', `Status changed to ${status} (bulk action)`);
+    });
     setSelectedLeadIds([]);
-  }, []);
+  }, [dbUpdateLeadStatus, logActivity]);
 
   const bulkAssign = useCallback((ids: string[], memberId: string) => {
     const member = teamMembers.find((m) => m.id === memberId);
-    setLeads((prev) =>
-      prev.map((l) => {
-        if (!ids.includes(l.id)) return l;
-        return {
-          ...l,
-          assignedTo: memberId,
-          activities: [
-            { id: `a${Date.now()}_${l.id}`, type: 'note' as const, description: `Assigned to ${member?.name || memberId} (bulk action)`, timestamp: new Date().toISOString(), user: 'You' },
-            ...l.activities,
-          ],
-        };
-      })
-    );
+    ids.forEach((id) => {
+      dbUpdateLead(id, { assignedTo: memberId });
+      logActivity(id, 'assignment', `Assigned to ${member?.name || memberId} (bulk action)`);
+    });
     setSelectedLeadIds([]);
-  }, []);
+  }, [dbUpdateLead, logActivity]);
 
   const bulkAddTag = useCallback((ids: string[], tag: string) => {
-    setLeads((prev) =>
-      prev.map((l) => {
-        if (!ids.includes(l.id)) return l;
-        if (l.tags.includes(tag)) return l;
-        return { ...l, tags: [...l.tags, tag] };
-      })
-    );
+    ids.forEach((id) => {
+      const lead = leads.find((l) => l.id === id);
+      if (lead && !lead.tags.includes(tag)) {
+        dbUpdateLead(id, { tags: [...lead.tags, tag] });
+      }
+    });
     setSelectedLeadIds([]);
-  }, []);
+  }, [leads, dbUpdateLead]);
 
   const bulkDelete = useCallback((ids: string[]) => {
-    setLeads((prev) => prev.filter((l) => !ids.includes(l.id)));
+    ids.forEach((id) => dbDeleteLead(id));
     setSelectedLeadIds([]);
-  }, []);
+  }, [dbDeleteLead]);
 
   const toggleLeadSelection = useCallback((id: string) => {
     setSelectedLeadIds((prev) =>
@@ -231,6 +176,9 @@ export function useCRM() {
     selectedLeadIds,
     filters,
     teamMembers,
+    leadsLoading,
+    leadsError,
+    usingMock,
     setActiveView,
     setFilters,
     setSidebarOpen,

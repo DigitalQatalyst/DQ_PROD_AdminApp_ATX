@@ -18,7 +18,7 @@ export const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange, 
     source: 'Website Form' as LeadSource,
     service: 'DCO Assessment' as ServiceType,
     priority: 'Medium' as LeadPriority,
-    assignedTo: 'tm1', notes: '',
+    assignedTo: '', notes: '',
   });
 
   if (!open) return null;

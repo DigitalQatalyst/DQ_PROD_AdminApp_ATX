@@ -13,6 +13,7 @@ import ContentManagementRoute from "./pages/content-management";
 // import ZoneFormRoute from './pages/zone-form';
 import ContentFormRoute from "./pages/content-form";
 import LeadManagementModule from "./modules/lead-management";
+import OpportunityManagementModule from "./modules/opportunity-management";
 import LoginPage from "./pages/login";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ContentSegmentGate } from "./components/ContentSegmentGate";
@@ -158,6 +159,19 @@ export function AppRouter() {
             >
               <AppShell>
                 <LeadManagementModule />
+              </AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/opportunity-management"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+              requiredSegments={["internal", "partner"]}
+            >
+              <AppShell>
+                <OpportunityManagementModule />
               </AppShell>
             </ProtectedRoute>
           }

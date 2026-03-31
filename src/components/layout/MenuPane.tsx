@@ -63,6 +63,13 @@ export function MenuPane() {
           requiredSegments: ["internal"],
         },
         {
+          id: "opportunities",
+          name: "Opportunities",
+          icon: Briefcase,
+          path: "/opportunity-management",
+          requiredSegments: ["internal"],
+        },
+        {
           id: "accounts",
           name: "Accounts",
           icon: Building,

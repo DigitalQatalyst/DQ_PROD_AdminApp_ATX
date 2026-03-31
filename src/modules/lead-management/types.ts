@@ -44,7 +44,9 @@ export type ActivityType =
   | 'note'
   | 'status_change'
   | 'meeting'
-  | 'task';
+  | 'task'
+  | 'assignment'
+  | 'tag_change';
 
 export type FormType =
   | 'service-request'

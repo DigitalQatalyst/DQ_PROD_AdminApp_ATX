@@ -1,59 +1,70 @@
 import React, { useState } from 'react';
 import {
-  LayoutDashboard, Users, GitBranch, BarChart2, FileText, Mail, Settings, Plus, ChevronLeft, ChevronRight,
+  LayoutDashboard, Briefcase, GitBranch, BarChart2, Settings, Plus, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import { useCRM } from './hooks/useCRM';
-import { LeadDashboard } from './pages/LeadDashboard';
-import { LeadInbox } from './pages/LeadInbox';
-import { LeadPipeline } from './pages/LeadPipeline';
-import { LeadAnalytics } from './pages/LeadAnalytics';
-import { LeadFormSubmissions } from './pages/LeadFormSubmissions';
-import { LeadEmailList } from './pages/LeadEmailList';
-import { LeadDetail } from './pages/LeadDetail';
-import { AddLeadModal } from './components/AddLeadModal';
-import { ViewType } from './types';
+import { useCRMOpportunity } from './hooks/useCRMOpportunity';
+import { OpportunityDashboard } from './pages/OpportunityDashboard';
+import { OpportunityList } from './pages/OpportunityList';
+import { OpportunityPipeline } from './pages/OpportunityPipeline';
+import { OpportunityAnalytics } from './pages/OpportunityAnalytics';
+import { OpportunityDetail } from './pages/OpportunityDetail';
+import { AddOpportunityModal } from './components/AddOpportunityModal';
+import { OpportunityViewType } from './types';
 
 interface NavItem {
-  id: ViewType;
+  id: OpportunityViewType;
   label: string;
   icon: React.ReactNode;
 }
 
 const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
-  { id: 'leads', label: 'All Leads', icon: <Users className="w-4 h-4" /> },
+  { id: 'opportunities', label: 'All Deals', icon: <Briefcase className="w-4 h-4" /> },
   { id: 'pipeline', label: 'Pipeline', icon: <GitBranch className="w-4 h-4" /> },
   { id: 'analytics', label: 'Analytics', icon: <BarChart2 className="w-4 h-4" /> },
-  { id: 'form-submissions', label: 'Form Submissions', icon: <FileText className="w-4 h-4" /> },
-  { id: 'email-list', label: 'Email Outreach', icon: <Mail className="w-4 h-4" /> },
 ];
 
-const LeadManagementModule: React.FC = () => {
-  const crm = useCRM();
-  const [addLeadOpen, setAddLeadOpen] = useState(false);
+const OpportunityManagement: React.FC = () => {
+  const crm = useCRMOpportunity();
+  const [addOpportunityOpen, setAddOpportunityOpen] = useState(false);
+
+  const handleAddTag = (id: string, tag: string) => {
+    const opp = crm.opportunities.find((o) => o.id === id);
+    if (!opp) return;
+    const tags = opp.tags.includes(tag) ? opp.tags : [...opp.tags, tag];
+    crm.updateOpportunity(id, { tags });
+  };
+
+  const handleRemoveTag = (id: string, tag: string) => {
+    const opp = crm.opportunities.find((o) => o.id === id);
+    if (!opp) return;
+    crm.updateOpportunity(id, { tags: opp.tags.filter((t) => t !== tag) });
+  };
 
   const renderView = () => {
-    if (crm.leadsLoading) {
+    if (crm.opportunitiesLoading) {
       return (
         <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-          Loading leads...
+          Loading opportunities...
         </div>
       );
     }
-    if (crm.activeView === 'lead-detail' && crm.selectedLead) {
+
+    if (crm.activeView === 'opportunity-detail' && crm.selectedOpportunity) {
       return (
-        <LeadDetail
-          lead={crm.selectedLead}
+        <OpportunityDetail
+          opportunity={crm.selectedOpportunity}
           teamMembers={crm.teamMembers}
           onBack={crm.navigateBack}
-          onStatusChange={crm.updateLeadStatus}
-          onAssign={crm.assignLead}
+          onStageChange={crm.updateOpportunityStage}
+          onAssign={crm.assignOpportunity}
           onAddNote={crm.addNote}
-          onAddTag={crm.addTag}
-          onRemoveTag={crm.removeTag}
-          onDelete={crm.deleteLead}
-          onUpdate={crm.updateLead}
+          onAddTag={handleAddTag}
+          onRemoveTag={handleRemoveTag}
+          onDelete={crm.deleteOpportunity}
+          onUpdate={crm.updateOpportunity}
+          usingMock={crm.usingMock}
         />
       );
     }
@@ -61,60 +72,44 @@ const LeadManagementModule: React.FC = () => {
     switch (crm.activeView) {
       case 'dashboard':
         return (
-          <LeadDashboard
-            leads={crm.leads}
-            onLeadClick={(id) => crm.navigateToLead(id, 'dashboard')}
+          <OpportunityDashboard
+            opportunities={crm.opportunities}
+            onOpportunityClick={(id) => crm.navigateToOpportunity(id, 'dashboard')}
           />
         );
-      case 'leads':
+      case 'opportunities':
         return (
-          <LeadInbox
-            leads={crm.filteredLeads}
+          <OpportunityList
+            opportunities={crm.filteredOpportunities}
             filters={crm.filters}
             setFilters={crm.setFilters}
-            onLeadClick={(id) => crm.navigateToLead(id, 'leads')}
-            selectedIds={crm.selectedLeadIds}
-            onToggleSelect={crm.toggleLeadSelection}
-            onSelectAll={crm.selectAllLeads}
+            onOpportunityClick={(id) => crm.navigateToOpportunity(id, 'opportunities')}
+            selectedIds={crm.selectedOpportunityIds}
+            onToggleSelect={crm.toggleOpportunitySelection}
+            onSelectAll={crm.selectAllOpportunities}
             teamMembers={crm.teamMembers}
-            onBulkUpdateStatus={crm.bulkUpdateStatus}
+            onBulkUpdateStage={crm.bulkUpdateStage}
             onBulkAssign={crm.bulkAssign}
-            onBulkAddTag={crm.bulkAddTag}
             onBulkDelete={crm.bulkDelete}
           />
         );
       case 'pipeline':
         return (
-          <LeadPipeline
-            leads={crm.leads}
+          <OpportunityPipeline
+            opportunities={crm.opportunities}
             teamMembers={crm.teamMembers}
-            onLeadClick={(id) => crm.navigateToLead(id, 'pipeline')}
-            onUpdateStatus={crm.updateLeadStatus}
+            onOpportunityClick={(id) => crm.navigateToOpportunity(id, 'pipeline')}
+            onUpdateStage={crm.updateOpportunityStage}
           />
         );
       case 'analytics':
-        return <LeadAnalytics leads={crm.leads} />;
-      case 'form-submissions':
-        return (
-          <LeadFormSubmissions
-            leads={crm.leads}
-            onLeadClick={(id) => crm.navigateToLead(id, 'form-submissions')}
-          />
-        );
-      case 'email-list':
-        return (
-          <LeadEmailList
-            leads={crm.leads}
-            teamMembers={crm.teamMembers}
-            onLeadClick={(id) => crm.navigateToLead(id, 'email-list')}
-          />
-        );
+        return <OpportunityAnalytics opportunities={crm.opportunities} />;
       default:
         return null;
     }
   };
 
-  const activeNavId = crm.activeView === 'lead-detail' ? crm.previousView : crm.activeView;
+  const activeNavId = crm.activeView === 'opportunity-detail' ? crm.previousView : crm.activeView;
 
   return (
     <div className="flex h-full bg-gray-50 overflow-hidden">
@@ -126,9 +121,9 @@ const LeadManagementModule: React.FC = () => {
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-3 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-3 py-4 border-b border-border">
           {crm.sidebarOpen && (
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">CRM</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">CRM</span>
           )}
           <button
             onClick={() => crm.setSidebarOpen(!crm.sidebarOpen)}
@@ -138,17 +133,17 @@ const LeadManagementModule: React.FC = () => {
           </button>
         </div>
 
-        {/* Add Lead Button */}
-        <div className="px-2 py-3 border-b border-gray-100">
+        {/* Add Opportunity Button */}
+        <div className="px-2 py-3 border-b border-border">
           <button
-            onClick={() => setAddLeadOpen(true)}
+            onClick={() => setAddOpportunityOpen(true)}
             className={cn(
               'flex items-center gap-2 w-full rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors text-sm font-medium',
               crm.sidebarOpen ? 'px-3 py-2' : 'justify-center p-2'
             )}
           >
             <Plus className="w-4 h-4 flex-shrink-0" />
-            {crm.sidebarOpen && <span>Add Lead</span>}
+            {crm.sidebarOpen && <span>Add Opportunity</span>}
           </button>
         </div>
 
@@ -174,7 +169,7 @@ const LeadManagementModule: React.FC = () => {
         </nav>
 
         {/* Settings */}
-        <div className="px-2 py-3 border-t border-gray-100">
+        <div className="px-2 py-3 border-t border-border">
           <button
             className={cn(
               'flex items-center gap-3 w-full rounded-lg text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors',
@@ -189,16 +184,18 @@ const LeadManagementModule: React.FC = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto min-w-0">
-        {renderView()}
+      <main className="flex-1 overflow-auto min-w-0 flex flex-col">
+      <div className="flex-1 overflow-auto min-h-0">
+          {renderView()}
+        </div>
       </main>
 
-      {/* Add Lead Modal */}
-      {addLeadOpen && (
-        <AddLeadModal
-          open={addLeadOpen}
-          onOpenChange={(open) => setAddLeadOpen(open)}
-          onSubmit={(lead) => { crm.addLead(lead); setAddLeadOpen(false); }}
+      {/* Add Opportunity Modal */}
+      {addOpportunityOpen && (
+        <AddOpportunityModal
+          open={addOpportunityOpen}
+          onOpenChange={(open) => setAddOpportunityOpen(open)}
+          onSubmit={(data) => { crm.addOpportunity(data); setAddOpportunityOpen(false); }}
           teamMembers={crm.teamMembers}
         />
       )}
@@ -206,4 +203,4 @@ const LeadManagementModule: React.FC = () => {
   );
 };
 
-export default LeadManagementModule;
+export default OpportunityManagement;

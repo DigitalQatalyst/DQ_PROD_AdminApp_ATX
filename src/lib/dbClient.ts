@@ -547,6 +547,7 @@ class MockQueryBuilder implements QueryBuilder {
 function initializeDbClient(): DatabaseClient {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const serviceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
   // Log environment configuration for debugging (helpful for Vercel deployments)
@@ -565,8 +566,12 @@ function initializeDbClient(): DatabaseClient {
 
   // Priority 1: Use Supabase if credentials are provided (works in all environments)
   if (supabaseUrl && supabaseKey && !supabaseUrl.includes('your-project') && !supabaseUrl.includes('your-actual')) {
-    console.log('✅ Initializing Supabase client');
-    return new SupabaseAdapter(supabaseUrl, supabaseKey);
+    // When mock auth is active (no real Supabase session), use the service role key
+    // so RLS is bypassed and queries return data in dev/test environments.
+    const useMockAuth = import.meta.env.VITE_USE_MOCK_AUTH === 'true';
+    const effectiveKey = (useMockAuth && serviceRoleKey) ? serviceRoleKey : supabaseKey;
+    console.log(`✅ Initializing Supabase client (${useMockAuth ? 'service_role — mock auth' : 'anon key'})`);
+    return new SupabaseAdapter(supabaseUrl, effectiveKey);
   }
 
   // Priority 2: Use Azure API if API base URL is provided (staging/production)
