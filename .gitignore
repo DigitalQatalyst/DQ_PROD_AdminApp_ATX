@@ -37,8 +37,22 @@ database/
 *.njsproj
 *.sln
 *.sw?
+
+# Ignore markdown files by default
 *.md
+
+# But allow specific important documentation
 !README.md
+!**/README.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+!LICENSE.md
+
+# Ignore all markdown documentation in workspace directory except README.md
+src/components/layout/workspace/*.md
+src/components/layout/workspace/docs/*.md
+!src/components/layout/workspace/README.md
+!src/components/layout/workspace/__tests__/README.md
 
 # Workspace directory for temporary and auto-generated files
-workspace/
+/workspace/
