@@ -1,60 +1,182 @@
 import React, { ReactNode, useState } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  X,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { cn } from "../../utils/cn";
 import Button from "../ui/ButtonComponent";
 
+/**
+ * Represents a tab in the workspace (either module tab or record tab).
+ */
 export interface LVETab {
+  /** Unique identifier for the tab */
   id: string;
+  /** Display label shown in the tab */
   label: string;
+  /** Whether this tab is currently active/selected */
   isActive?: boolean;
+  /** Whether this tab has unsaved changes (shows dirty indicator) */
   isDirty?: boolean;
+  /** Whether this tab can be closed by the user (defaults to true) */
   canClose?: boolean;
 }
 
+/**
+ * Represents an action button in the workspace (header actions, pane actions, etc.).
+ */
 export interface LVEWorkspaceAction {
+  /** Unique identifier for the action */
   id: string;
+  /** Display label shown on the button */
   label: string;
+  /** Optional icon component to display alongside the label */
   icon?: React.ComponentType<{ className?: string }>;
+  /** Visual style variant for the button (defaults to "outline" for header actions, "ghost" for title actions) */
   variant?: "default" | "primary" | "secondary" | "outline" | "ghost";
+  /** Whether the action button is disabled */
   disabled?: boolean;
+  /** Callback function invoked when the action button is clicked */
   onClick?: () => void;
 }
 
+/**
+ * Generic configuration for a pane header (list, work, or pop pane).
+ * All fields are optional and accept only generic content - no module-specific logic.
+ */
 export interface LVEWorkspacePaneHeader {
+  /** Small uppercase label displayed above the title (e.g., "RECORD QUEUE", "WORKSPACE") */
   eyebrow?: string;
+  /** Main title for the pane header (can be string or ReactNode for dynamic content) */
   title?: ReactNode;
+  /** Small action buttons displayed inline with the title (rendered with "ghost" variant) */
   titleActions?: LVEWorkspaceAction[];
+  /** Subtitle text displayed below the title (typically smaller, muted text) */
   subtitle?: ReactNode;
+  /** Additional metadata content displayed below the subtitle (e.g., badges, status indicators) */
   meta?: ReactNode;
+  /** Action buttons displayed in the top-right of the header (rendered with "outline" variant) */
   actions?: LVEWorkspaceAction[];
 }
 
+/**
+ * Props for the LVEWorkspaceLayout component.
+ *
+ * This interface defines the complete contract for the Shell_Layout component.
+ * All props are generic and reusable across any module type - no module-specific
+ * props or conditional logic should be added to this interface.
+ *
+ * @template TRecord - The record type is not used directly by the layout, but may
+ *                     be present in action callbacks passed from the orchestrator.
+ *
+ * @example
+ * ```tsx
+ * <LVEWorkspaceLayout
+ *   headerTitle="Contacts Workspace"
+ *   headerDescription="Manage your contacts"
+ *   tabs={recordTabs}
+ *   onTabSelect={handleTabSelect}
+ *   onTabClose={handleTabClose}
+ *   listHeader={{ title: "Contact Queue", eyebrow: "RECORDS" }}
+ *   listPane={<ContactList />}
+ *   workHeader={{ title: "Contact Details" }}
+ *   workPane={<ContactForm />}
+ *   popHeader={{ title: "Context" }}
+ *   popPane={<ContactContext />}
+ *   popPaneCollapsible={true}
+ * />
+ * ```
+ */
 export interface LVEWorkspaceLayoutProps {
+  // ============================================================================
+  // HEADER CONFIGURATION
+  // ============================================================================
+
+  /** Main title displayed in the workspace header (defaults to "Workspace") */
   headerTitle?: string;
+
+  /** Description text displayed below the header title */
   headerDescription?: ReactNode;
+
+  /** Action buttons displayed in the top-right of the header */
   headerActions?: LVEWorkspaceAction[];
+
+  // ============================================================================
+  // MODULE TABS (for switching between different modules)
+  // ============================================================================
+
+  /** Array of module tabs (e.g., Contacts, Leads, Accounts) */
   moduleTabs?: LVETab[];
+
+  /** Label for the module tabs section (defaults to "Modules") */
   moduleTabsLabel?: string;
+
+  /** Callback invoked when a module tab is selected */
   onModuleTabSelect?: (tabId: string) => void;
+
+  // ============================================================================
+  // RECORD TABS (for switching between open records within a module)
+  // ============================================================================
+
+  /** Array of record tabs (e.g., open contact records) */
   tabs?: LVETab[];
+
+  /** Label for the record tabs section (defaults to "Records") */
   recordTabsLabel?: string;
+
+  /** Callback invoked when a record tab is selected */
   onTabSelect?: (tabId: string) => void;
+
+  /** Callback invoked when a record tab is closed */
   onTabClose?: (tabId: string) => void;
+
+  // ============================================================================
+  // LIST PANE (left pane - typically shows a queue/list of records)
+  // ============================================================================
+
+  /** Generic header configuration for the list pane */
   listHeader?: LVEWorkspacePaneHeader;
+
+  /** Optional toolbar content displayed below the list header (e.g., search, filters) */
   listToolbar?: ReactNode;
+
+  /** Content to render in the list pane body */
   listPane?: ReactNode;
+
+  // ============================================================================
+  // WORK PANE (center pane - typically shows the active record details/form)
+  // ============================================================================
+
+  /** Generic header configuration for the work pane */
   workHeader?: LVEWorkspacePaneHeader;
+
+  /** Content to render in the work pane body */
   workPane?: ReactNode;
+
+  // ============================================================================
+  // POP PANE (right pane - typically shows context/metadata)
+  // ============================================================================
+
+  /** Generic header configuration for the pop pane */
   popHeader?: LVEWorkspacePaneHeader;
+
+  /** Content to render in the pop pane body */
   popPane?: ReactNode;
+
+  /** Whether the pop pane can be collapsed by the user (defaults to true) */
   popPaneCollapsible?: boolean;
+
+  /** Controlled state for pop pane collapse (if provided, component becomes controlled) */
   isPopPaneCollapsed?: boolean;
+
+  /** Callback invoked when pop pane collapse state changes */
   onPopPaneCollapsedChange?: (nextValue: boolean) => void;
+
+  /** Default collapse state for uncontrolled mode (defaults to false) */
   defaultPopPaneCollapsed?: boolean;
+
+  // ============================================================================
+  // FOOTER
+  // ============================================================================
+
+  /** Optional footer content displayed at the bottom of the workspace */
   footer?: ReactNode;
 }
 
@@ -189,7 +311,9 @@ const renderPaneHeader = (
         {renderTitleActions(header?.titleActions)}
       </div>
       {header?.subtitle && (
-        <p className="mt-0.5 text-xs text-muted-foreground">{header.subtitle}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {header.subtitle}
+        </p>
       )}
       {header?.meta && <div className="mt-1.5">{header.meta}</div>}
     </div>
@@ -198,11 +322,105 @@ const renderPaneHeader = (
 );
 
 /**
- * LVEWorkspaceLayout
+ * LVEWorkspaceLayout - Shell Layout Component
  *
- * Global ATX List | View | Edit shell.
- * Keeps the queue visible, preserves tabbed workspaces, and leaves module behavior
- * in configuration rather than embedding module-specific logic in the layout.
+ * Global ATX List | View | Edit shell that provides a three-pane workspace layout.
+ * This component is a pure layout primitive that accepts only generic props and
+ * delegates all module-specific behavior to the orchestrator (LVEWorkspace.tsx).
+ *
+ * ## Design Principles
+ *
+ * 1. **Generic Props Only**: All props are generic and reusable across any module type.
+ *    No module-specific props or conditional logic based on module type/ID.
+ *
+ * 2. **Separation of Concerns**: This component handles only visual layout and structure.
+ *    The orchestrator (LVEWorkspace.tsx) handles routing, state, and API integration.
+ *
+ * 3. **Pane Header Contract**: Pane headers accept only generic configuration:
+ *    - eyebrow: Small uppercase label
+ *    - title: Main title (string or ReactNode)
+ *    - titleActions: Small inline action buttons
+ *    - subtitle: Secondary text below title
+ *    - meta: Additional metadata content
+ *    - actions: Action buttons in top-right
+ *
+ * 4. **UI Styling Preservation**: All Tailwind classes and visual design are preserved.
+ *    This component should not be modified for styling changes.
+ *
+ * ## Three-Pane Layout
+ *
+ * - **List Pane** (left): Typically shows a queue/list of records
+ * - **Work Pane** (center): Typically shows the active record details/form
+ * - **Pop Pane** (right): Typically shows context/metadata, can be collapsed
+ *
+ * ## Module Types Support
+ *
+ * This layout supports all module types through the same structure:
+ * - Record modules: Standard CRUD operations
+ * - Workflow modules: Lifecycle-aware workflows
+ * - Parent workspace modules: Nested workspaces with inner tabs
+ *
+ * All module-specific behavior is handled by the orchestrator through configuration.
+ *
+ * @example
+ * ```tsx
+ * // Basic usage with minimal props
+ * <LVEWorkspaceLayout
+ *   headerTitle="Contacts"
+ *   listPane={<ContactList />}
+ *   workPane={<ContactForm />}
+ *   popPane={<ContactContext />}
+ * />
+ *
+ * // Full usage with all features
+ * <LVEWorkspaceLayout
+ *   headerTitle="Contacts Workspace"
+ *   headerDescription="Manage your contacts"
+ *   headerActions={[
+ *     { id: "import", label: "Import", onClick: handleImport },
+ *     { id: "export", label: "Export", onClick: handleExport },
+ *   ]}
+ *   moduleTabs={[
+ *     { id: "contacts", label: "Contacts", isActive: true },
+ *     { id: "leads", label: "Leads", isActive: false },
+ *   ]}
+ *   onModuleTabSelect={handleModuleTabSelect}
+ *   tabs={[
+ *     { id: "contact-1", label: "John Doe", isActive: true, isDirty: false },
+ *     { id: "contact-2", label: "Jane Smith", isActive: false, isDirty: true },
+ *   ]}
+ *   onTabSelect={handleTabSelect}
+ *   onTabClose={handleTabClose}
+ *   listHeader={{
+ *     eyebrow: "RECORD QUEUE",
+ *     title: "Contacts",
+ *     subtitle: "125 total contacts",
+ *   }}
+ *   listToolbar={<SearchAndFilters />}
+ *   listPane={<ContactList />}
+ *   workHeader={{
+ *     eyebrow: "CONTACT DETAILS",
+ *     title: "John Doe",
+ *     subtitle: "john.doe@example.com",
+ *     actions: [
+ *       { id: "edit", label: "Edit", onClick: handleEdit },
+ *       { id: "delete", label: "Delete", onClick: handleDelete },
+ *     ],
+ *   }}
+ *   workPane={<ContactForm />}
+ *   popHeader={{
+ *     title: "Context",
+ *     subtitle: "Related information",
+ *   }}
+ *   popPane={<ContactContext />}
+ *   popPaneCollapsible={true}
+ *   isPopPaneCollapsed={false}
+ *   onPopPaneCollapsedChange={setIsPopPaneCollapsed}
+ * />
+ * ```
+ *
+ * @see LVEWorkspace.tsx - The orchestrator that uses this layout component
+ * @see types.ts - Complete type definitions for workspace contracts
  */
 export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
   headerTitle = "Workspace",
@@ -228,9 +446,8 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
   defaultPopPaneCollapsed = false,
   footer,
 }) => {
-  const [uncontrolledPopPaneCollapsed, setUncontrolledPopPaneCollapsed] = useState(
-    defaultPopPaneCollapsed,
-  );
+  const [uncontrolledPopPaneCollapsed, setUncontrolledPopPaneCollapsed] =
+    useState(defaultPopPaneCollapsed);
   const isPopPaneCollapsed =
     controlledPopPaneCollapsed ?? uncontrolledPopPaneCollapsed;
   const hasModuleTabs = moduleTabs.length > 0;
@@ -291,11 +508,7 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
           )}
         >
           <section className="flex min-h-0 min-w-0 flex-col border-r border-border bg-card">
-            {renderPaneHeader(
-              listHeader,
-              "Record Queue",
-              listToolbar,
-            )}
+            {renderPaneHeader(listHeader, "Record Queue", listToolbar)}
             <div className="min-h-0 flex-1 overflow-auto">
               {listPane ?? (
                 <div className="p-4 text-sm text-muted-foreground">
@@ -319,7 +532,8 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
                       Active Workspace
                     </h3>
                     <p className="mt-2 text-sm text-muted-foreground">
-                      Select a record from the queue to start working without leaving the module.
+                      Select a record from the queue to start working without
+                      leaving the module.
                     </p>
                   </div>
                 </div>
@@ -344,9 +558,7 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
                   </Button>
                 ) : undefined,
               )}
-              <div className="min-h-0 flex-1 overflow-auto">
-                {popPane}
-              </div>
+              <div className="min-h-0 flex-1 overflow-auto">{popPane}</div>
             </section>
           )}
 

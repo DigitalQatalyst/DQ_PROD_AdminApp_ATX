@@ -2,6 +2,15 @@ import React, { ReactNode } from "react";
 import { ChevronLeft, ChevronRight, PanelRight } from "lucide-react";
 import { cn } from "../../utils/cn";
 
+// Log deprecation warning once
+if (typeof window !== "undefined") {
+  console.warn(
+    "[DEPRECATED] LVEWorkspaceLayout from @/components/lve is deprecated. " +
+      "Please migrate to the canonical workspace at @/components/layout/workspace. " +
+      "See MIGRATION.md at src/components/layout/workspace/MIGRATION.md for guidance.",
+  );
+}
+
 export interface LVEWorkspaceLayoutProps {
   headerTitle?: string;
   tabs?: ReactNode;
@@ -14,6 +23,9 @@ export interface LVEWorkspaceLayoutProps {
 }
 
 /**
+ * @deprecated This component is deprecated. Use LVEWorkspaceLayout from @/components/layout/LVEWorkspaceLayout instead.
+ * See MIGRATION.md at src/components/layout/workspace/MIGRATION.md for migration guidance.
+ *
  * LVEWorkspaceLayout - Dumb shell component
  *
  * Pure layout component that only handles positioning and styling.

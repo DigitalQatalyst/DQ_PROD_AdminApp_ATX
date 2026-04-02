@@ -1,10 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { LVERecord, LVETab, LVEWorkspaceProps, LVEWorkspaceState } from "./types";
+import {
+  LVERecord,
+  LVETab,
+  LVEWorkspaceProps,
+  LVEWorkspaceState,
+} from "./types";
 import { LVEWorkspaceLayout } from "./LVEWorkspaceLayout";
 import { LVETabsBar } from "./components/LVETabsBar";
 import { LVEListPane } from "./components/LVEListPane";
 import { LVEWorkPane } from "./components/LVEWorkPane";
 import { LVEPopPane } from "./components/LVEPopPane";
+
+// Log deprecation warning once
+if (typeof window !== "undefined") {
+  console.warn(
+    "[DEPRECATED] LVEWorkspace from @/components/lve is deprecated. " +
+      "Please migrate to the canonical workspace at @/components/layout/workspace. " +
+      "See MIGRATION.md at src/components/layout/workspace/MIGRATION.md for guidance.",
+  );
+}
 
 const RECORD_TAB_PREFIX = "__record__:";
 const EMPTY_TABS: LVETab[] = [];
@@ -14,10 +28,12 @@ const toRecordTabId = (recordId: string) => `${RECORD_TAB_PREFIX}${recordId}`;
 const isRecordTabId = (tabId?: string) =>
   Boolean(tabId?.startsWith(RECORD_TAB_PREFIX));
 
-const getRecordIdFromTabId = (tabId: string) => tabId.slice(RECORD_TAB_PREFIX.length);
+const getRecordIdFromTabId = (tabId: string) =>
+  tabId.slice(RECORD_TAB_PREFIX.length);
 
 const areStringArraysEqual = (left: string[], right: string[]) =>
-  left.length === right.length && left.every((value, index) => value === right[index]);
+  left.length === right.length &&
+  left.every((value, index) => value === right[index]);
 
 const getDefaultRecordLabel = <T extends LVERecord>(
   record: T,
@@ -47,7 +63,9 @@ const appendRecordTab = (
   recordId: string,
   maxOpen?: number,
 ) => {
-  const nextOpenRecordTabIds = openRecordTabIds.filter((openId) => openId !== recordId);
+  const nextOpenRecordTabIds = openRecordTabIds.filter(
+    (openId) => openId !== recordId,
+  );
   nextOpenRecordTabIds.push(recordId);
 
   if (!maxOpen || nextOpenRecordTabIds.length <= maxOpen) {
@@ -58,6 +76,9 @@ const appendRecordTab = (
 };
 
 /**
+ * @deprecated This component is deprecated. Use the canonical workspace from @/components/layout/workspace instead.
+ * See MIGRATION.md at src/components/layout/workspace/MIGRATION.md for migration guidance.
+ *
  * LVEWorkspace - Smart config-driven orchestrator
  *
  * Handles all business logic, state management, and data flow.
@@ -80,7 +101,8 @@ export const LVEWorkspace = <T extends LVERecord>({
 }: LVEWorkspaceProps<T>) => {
   const baseTabs = config.tabs ?? EMPTY_TABS;
   const selectedRecordId = selectedRecord?.id;
-  const defaultBaseTabId = baseTabs.find((tab) => tab.isActive)?.id ?? baseTabs[0]?.id;
+  const defaultBaseTabId =
+    baseTabs.find((tab) => tab.isActive)?.id ?? baseTabs[0]?.id;
   const recordTabsEnabled = config.recordTabs?.enabled ?? true;
   const recordTabMaxOpen = config.recordTabs?.maxOpen;
   const recordTabsClosable = config.recordTabs?.canClose ?? true;
@@ -89,9 +111,10 @@ export const LVEWorkspace = <T extends LVERecord>({
 
   const [state, setState] = useState<LVEWorkspaceState>({
     selectedRecordId: selectedRecord?.id,
-    activeTabId: selectedRecordId && recordTabsEnabled
-      ? toRecordTabId(selectedRecordId)
-      : defaultBaseTabId,
+    activeTabId:
+      selectedRecordId && recordTabsEnabled
+        ? toRecordTabId(selectedRecordId)
+        : defaultBaseTabId,
     activeBaseTabId: defaultBaseTabId,
     openRecordTabIds:
       selectedRecordId && recordTabsEnabled ? [selectedRecordId] : [],
@@ -120,20 +143,25 @@ export const LVEWorkspace = <T extends LVERecord>({
 
     setState((prev) => {
       const availableRecordIds = new Set(records.map((record) => record.id));
-      const nextActiveBaseTabId =
-        baseTabs.some((tab) => tab.id === prev.activeBaseTabId)
-          ? prev.activeBaseTabId
-          : defaultBaseTabId;
+      const nextActiveBaseTabId = baseTabs.some(
+        (tab) => tab.id === prev.activeBaseTabId,
+      )
+        ? prev.activeBaseTabId
+        : defaultBaseTabId;
 
       let nextSelectedRecordId =
-        moduleChanged || !prev.selectedRecordId || !availableRecordIds.has(prev.selectedRecordId)
+        moduleChanged ||
+        !prev.selectedRecordId ||
+        !availableRecordIds.has(prev.selectedRecordId)
           ? undefined
           : prev.selectedRecordId;
 
       let nextOpenRecordTabIds =
         moduleChanged || !recordTabsEnabled
           ? []
-          : prev.openRecordTabIds.filter((recordId) => availableRecordIds.has(recordId));
+          : prev.openRecordTabIds.filter((recordId) =>
+              availableRecordIds.has(recordId),
+            );
 
       if (selectedRecordId && availableRecordIds.has(selectedRecordId)) {
         nextSelectedRecordId = selectedRecordId;
@@ -146,7 +174,9 @@ export const LVEWorkspace = <T extends LVERecord>({
         }
       }
 
-      let nextActiveTabId = moduleChanged ? nextActiveBaseTabId : prev.activeTabId;
+      let nextActiveTabId = moduleChanged
+        ? nextActiveBaseTabId
+        : prev.activeTabId;
 
       if (selectedRecordId && recordTabsEnabled) {
         nextActiveTabId = toRecordTabId(selectedRecordId);
@@ -155,9 +185,16 @@ export const LVEWorkspace = <T extends LVERecord>({
         if (!nextOpenRecordTabIds.includes(activeRecordId)) {
           nextActiveTabId = nextActiveBaseTabId;
         }
-      } else if (nextActiveTabId && !baseTabs.some((tab) => tab.id === nextActiveTabId)) {
+      } else if (
+        nextActiveTabId &&
+        !baseTabs.some((tab) => tab.id === nextActiveTabId)
+      ) {
         nextActiveTabId = nextActiveBaseTabId;
-      } else if (!nextActiveTabId && nextSelectedRecordId && recordTabsEnabled) {
+      } else if (
+        !nextActiveTabId &&
+        nextSelectedRecordId &&
+        recordTabsEnabled
+      ) {
         nextActiveTabId = toRecordTabId(nextSelectedRecordId);
       } else if (!nextActiveTabId) {
         nextActiveTabId = nextActiveBaseTabId;
@@ -231,7 +268,9 @@ export const LVEWorkspace = <T extends LVERecord>({
       setState((prev) => ({
         ...prev,
         selectedRecordId: record.id,
-        activeTabId: recordTabsEnabled ? toRecordTabId(record.id) : prev.activeTabId,
+        activeTabId: recordTabsEnabled
+          ? toRecordTabId(record.id)
+          : prev.activeTabId,
         openRecordTabIds: recordTabsEnabled
           ? appendRecordTab(prev.openRecordTabIds, record.id, recordTabMaxOpen)
           : prev.openRecordTabIds,
@@ -290,7 +329,10 @@ export const LVEWorkspace = <T extends LVERecord>({
         let nextSelectedRecordId = prev.selectedRecordId;
         let nextActiveTabId = prev.activeTabId;
 
-        if (prev.selectedRecordId === closedRecordId || prev.activeTabId === tabId) {
+        if (
+          prev.selectedRecordId === closedRecordId ||
+          prev.activeTabId === tabId
+        ) {
           const fallbackRecordId =
             nextOpenRecordTabIds[closedIndex] ??
             nextOpenRecordTabIds[closedIndex - 1];

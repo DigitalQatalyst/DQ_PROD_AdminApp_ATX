@@ -1,6 +1,37 @@
-# LVE Workspace System
+# ⚠️ DEPRECATED - LVE Workspace System
 
-A config-driven, reusable List | View | Edit workspace system for ATX Admin Platform.
+**This folder and all components within it are deprecated.**
+
+## Migration Required
+
+Please migrate to the canonical workspace system at:
+
+- **Location**: `src/components/layout/workspace`
+- **Migration Guide**: `src/components/layout/workspace/MIGRATION.md`
+- **Quick Start**: `src/components/layout/workspace/QUICK_START.md`
+- **Documentation**: `src/components/layout/workspace/README.md`
+
+## Why Migrate?
+
+The canonical workspace system provides:
+
+- ✅ Stronger type safety and contracts
+- ✅ Better API-first integration patterns
+- ✅ Comprehensive property-based testing
+- ✅ Improved documentation and examples
+- ✅ Support for all module types (record, workflow, parent-workspace)
+- ✅ Runtime state management
+- ✅ CRUD handler integration
+- ✅ Session persistence
+
+## Deprecation Timeline
+
+- **Current**: Console warnings logged when using legacy components
+- **Future**: This folder will be removed in a future release
+
+---
+
+# Legacy Documentation (For Reference Only)
 
 ## Overview
 
@@ -52,7 +83,7 @@ function LeadsPage() {
 const moduleConfig: LVEWorkspaceConfig = {
   moduleId: "leads",
   title: "Lead Management",
-
+b
   // Optional tabs
   tabs: [
     { id: "all", label: "All Leads", isActive: true },

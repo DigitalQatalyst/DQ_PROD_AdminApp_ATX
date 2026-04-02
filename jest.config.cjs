@@ -5,8 +5,8 @@ const tsJestTransformCfg = createDefaultPreset().transform;
 /** @type {import('jest').Config} */
 module.exports = {
   preset: 'ts-jest',
-  testEnvironment: 'node',
-  roots: ['<rootDir>/tests'],
+  testEnvironment: 'jsdom', // Changed to jsdom for React component testing
+  roots: ['<rootDir>/tests', '<rootDir>/src'], // Added src for component tests
   transform: {
     ...tsJestTransformCfg,
   },
@@ -22,5 +22,24 @@ module.exports = {
   ],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   testTimeout: 30000, // 30 seconds for database operations
-  verbose: true
+  verbose: true,
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
+  },
+  // Property-based testing configuration
+  globals: {
+    'ts-jest': {
+      tsconfig: {
+        jsx: 'react-jsx'
+      }
+    }
+  },
+  // Mock import.meta for Vite compatibility
+  transformIgnorePatterns: [
+    'node_modules/(?!(lucide-react)/)'
+  ],
+  // Automatically mock certain modules
+  automock: false,
+  modulePathIgnorePatterns: ['<rootDir>/dist/'],
 };

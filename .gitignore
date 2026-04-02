@@ -6,13 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
-
 .env
-
-
-
-
 
 node_modules
 dist
@@ -43,6 +37,8 @@ database/
 *.njsproj
 *.sln
 *.sw?
+*.md
+!README.md
 
 # Workspace directory for temporary and auto-generated files
 workspace/

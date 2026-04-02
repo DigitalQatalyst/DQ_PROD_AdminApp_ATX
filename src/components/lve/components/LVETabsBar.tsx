@@ -2,12 +2,24 @@ import { LVETab } from "../types";
 import { cn } from "../../../utils/cn";
 import { X } from "lucide-react";
 
+// Log deprecation warning once
+if (typeof window !== "undefined") {
+  console.warn(
+    "[DEPRECATED] LVETabsBar from @/components/lve is deprecated. " +
+      "Please migrate to the canonical workspace at @/components/layout/workspace. " +
+      "See MIGRATION.md at src/components/layout/workspace/MIGRATION.md for guidance.",
+  );
+}
+
 interface LVETabsBarProps {
   tabs: LVETab[];
   onTabSelect?: (tabId: string, tab?: LVETab) => void;
   onTabClose?: (tabId: string, tab?: LVETab) => void;
 }
 
+/**
+ * @deprecated This component is deprecated. Use the canonical workspace components from @/components/layout/workspace instead.
+ */
 export const LVETabsBar = ({
   tabs,
   onTabSelect,
@@ -18,7 +30,10 @@ export const LVETabsBar = ({
   }
 
   return (
-    <div className="flex items-center gap-1 overflow-x-auto px-2 py-1" role="tablist">
+    <div
+      className="flex items-center gap-1 overflow-x-auto px-2 py-1"
+      role="tablist"
+    >
       {tabs.map((tab) => (
         <div
           key={tab.id}

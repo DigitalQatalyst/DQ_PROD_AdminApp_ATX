@@ -5,6 +5,15 @@ import { ChevronDown, ChevronRight, FileText } from "lucide-react";
 import { ScrollArea } from "../../ui/scroll-area";
 import Button from "../../ui/ButtonComponent";
 
+// Log deprecation warning once
+if (typeof window !== "undefined") {
+  console.warn(
+    "[DEPRECATED] LVEWorkPane from @/components/lve is deprecated. " +
+      "Please migrate to the canonical workspace at @/components/layout/workspace. " +
+      "See MIGRATION.md at src/components/layout/workspace/MIGRATION.md for guidance.",
+  );
+}
+
 interface LVEWorkPaneProps<T extends LVERecord> {
   selectedRecord?: T;
   sections: LVESection[];
@@ -13,6 +22,9 @@ interface LVEWorkPaneProps<T extends LVERecord> {
   onRecordUpdate?: (record: T) => void;
 }
 
+/**
+ * @deprecated This component is deprecated. Use DefaultWorkPane from @/components/layout/workspace instead.
+ */
 export const LVEWorkPane = <T extends LVERecord>({
   selectedRecord,
   sections,
@@ -85,7 +97,9 @@ export const LVEWorkPane = <T extends LVERecord>({
                       : undefined
                   }
                 >
-                  <h4 className="font-medium text-foreground">{section.title}</h4>
+                  <h4 className="font-medium text-foreground">
+                    {section.title}
+                  </h4>
                   {section.collapsible &&
                     (isCollapsed ? (
                       <ChevronRight className="h-4 w-4" />

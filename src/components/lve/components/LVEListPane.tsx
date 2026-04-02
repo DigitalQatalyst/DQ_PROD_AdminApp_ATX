@@ -4,6 +4,15 @@ import { cn } from "../../../utils/cn";
 import { Search, Filter, ChevronUp, ChevronDown } from "lucide-react";
 import { ScrollArea } from "../../ui/scroll-area";
 
+// Log deprecation warning once
+if (typeof window !== "undefined") {
+  console.warn(
+    "[DEPRECATED] LVEListPane from @/components/lve is deprecated. " +
+      "Please migrate to the canonical workspace at @/components/layout/workspace. " +
+      "See MIGRATION.md at src/components/layout/workspace/MIGRATION.md for guidance.",
+  );
+}
+
 interface LVEListPaneProps<T extends LVERecord> {
   records: T[];
   columns: LVEColumn[];
@@ -48,6 +57,9 @@ const toSearchableText = (value: unknown): string => {
   return "";
 };
 
+/**
+ * @deprecated This component is deprecated. Use DefaultListPane from @/components/layout/workspace instead.
+ */
 export const LVEListPane = <T extends LVERecord>({
   records,
   columns,
@@ -74,9 +86,15 @@ export const LVEListPane = <T extends LVERecord>({
     }
 
     return records.filter((record) => {
-      const columnValues = columns.map((column) => toSearchableText(record[column.field]));
-      const recordValues = Object.values(record).map((value) => toSearchableText(value));
-      const haystack = [...columnValues, ...recordValues].join(" ").toLowerCase();
+      const columnValues = columns.map((column) =>
+        toSearchableText(record[column.field]),
+      );
+      const recordValues = Object.values(record).map((value) =>
+        toSearchableText(value),
+      );
+      const haystack = [...columnValues, ...recordValues]
+        .join(" ")
+        .toLowerCase();
 
       return haystack.includes(normalizedSearchTerm);
     });
@@ -131,13 +149,15 @@ export const LVEListPane = <T extends LVERecord>({
             </button>
           ) : (
             <span className="text-xs text-muted-foreground">
-              {visibleRecords.length} result{visibleRecords.length === 1 ? "" : "s"}
+              {visibleRecords.length} result
+              {visibleRecords.length === 1 ? "" : "s"}
             </span>
           )}
 
           {filters.length > 0 && (
             <span className="text-xs text-muted-foreground">
-              {visibleRecords.length} result{visibleRecords.length === 1 ? "" : "s"}
+              {visibleRecords.length} result
+              {visibleRecords.length === 1 ? "" : "s"}
             </span>
           )}
         </div>
@@ -172,13 +192,19 @@ export const LVEListPane = <T extends LVERecord>({
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0 text-sm font-medium">
                     {primaryColumn?.render
-                      ? primaryColumn.render(record[primaryColumn.field], record)
+                      ? primaryColumn.render(
+                          record[primaryColumn.field],
+                          record,
+                        )
                       : record[primaryColumn?.field]}
                   </div>
                   {statusColumn && (
                     <div className="shrink-0 text-sm">
                       {statusColumn.render
-                        ? statusColumn.render(record[statusColumn.field], record)
+                        ? statusColumn.render(
+                            record[statusColumn.field],
+                            record,
+                          )
                         : record[statusColumn.field]}
                     </div>
                   )}
