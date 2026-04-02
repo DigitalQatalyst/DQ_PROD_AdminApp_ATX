@@ -48,11 +48,8 @@ database/
 !CONTRIBUTING.md
 !LICENSE.md
 
-# Ignore all markdown documentation in workspace directory except README.md
-src/components/layout/workspace/*.md
-src/components/layout/workspace/docs/*.md
-!src/components/layout/workspace/README.md
-!src/components/layout/workspace/__tests__/README.md
+# Allow all workspace documentation (it's important!)
+!src/components/layout/workspace/**/*.md
 
 # Workspace directory for temporary and auto-generated files
 /workspace/
