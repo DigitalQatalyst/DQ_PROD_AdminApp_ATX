@@ -130,7 +130,14 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
       )}
 
       {/* Main Workspace Grid */}
-      <div className="flex-1 grid grid-cols-[minmax(200px,240px)_minmax(260px,320px)_minmax(420px,1fr)_minmax(260px,320px)] min-h-0">
+      <div 
+        className="flex-1 grid min-h-0" 
+        style={{
+          gridTemplateColumns: popPane 
+            ? "minmax(200px, 240px) minmax(320px, 400px) minmax(420px, 1fr) minmax(260px, 320px)"
+            : "minmax(200px, 240px) minmax(350px, 450px) minmax(420px, 1fr)"
+        }}
+      >
         {/* Menu Pane */}
         <section className="border-r border-border bg-muted/30 overflow-y-auto">
           {menuPane ?? (
@@ -169,13 +176,11 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
         </section>
 
         {/* Pop Pane */}
-        <section className="bg-muted/30 overflow-y-auto">
-          {popPane ?? (
-            <div className="p-4 text-xs text-muted-foreground">
-              Pop Pane — use this for related context, timelines, or actions.
-            </div>
-          )}
-        </section>
+        {popPane && (
+          <section className="bg-muted/30 overflow-y-auto border-l border-border">
+            {popPane}
+          </section>
+        )}
       </div>
 
       {/* Footer */}

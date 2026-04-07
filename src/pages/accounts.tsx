@@ -3,12 +3,17 @@ import {
   LVEWorkspaceLayout,
   LVETab,
 } from "../components/layout/LVEWorkspaceLayout";
+import { User, ShieldAlert } from "lucide-react";
 import {
   Account,
   AccountInput,
   AccountLifecycleStage,
   AccountService,
 } from "../api/accounts/accountService";
+import { ServiceRequestApi } from "../api/services/serviceRequestApi";
+import { ServiceRequest } from "../modules/services/types";
+import { ServiceRequestCard } from "../modules/services/components/ServiceRequestCard";
+import Spinner from "../components/ui/Spinner";
 
 const lifecycleOptions: AccountLifecycleStage[] = [
   "Prospect",
@@ -42,6 +47,7 @@ const AccountsPage: React.FC = () => {
 
   const [activeAccountId, setActiveAccountId] = useState<string | null>(null);
   const [tabs, setTabs] = useState<LVETab[]>([]);
+  const [activeSubTab, setActiveSubTab] = useState<"overview" | "contacts" | "services">("overview");
   const [form, setForm] = useState<AccountInput>(emptyForm);
   const [isEditing, setIsEditing] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -389,148 +395,184 @@ const AccountsPage: React.FC = () => {
           </div>
         )}
       </div>
+      <div className="border-b border-slate-200 px-4 flex items-center bg-slate-50">
+        {[
+          { id: "overview", label: "Overview" },
+          { id: "contacts", label: "Contacts" },
+          { id: "services", label: "Services" },
+        ].map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setActiveSubTab(t.id as any)}
+            className={`px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider border-b-2 transition-colors ${
+              activeSubTab === t.id
+                ? "border-indigo-600 text-indigo-600"
+                : "border-transparent text-slate-400 hover:text-slate-600"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
       <div className="flex-1 overflow-auto px-4 py-3 text-xs text-slate-700 space-y-4">
-        {formError && (
-          <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800 text-xs">
-            {formError}
+        {activeSubTab === "overview" && (
+          <>
+            {formError && (
+              <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800 text-xs">
+                {formError}
+              </div>
+            )}
+            {duplicateNameWarning && (
+              <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800 text-[11px]">
+                {duplicateNameWarning}
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Account Name<span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    value={form.name}
+                    onChange={(e) => handleFormChange("name", e.target.value)}
+                    className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    placeholder="Organization name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Industry
+                  </label>
+                  <input
+                    value={form.industry || ""}
+                    onChange={(e) =>
+                      handleFormChange("industry", e.target.value || undefined)
+                    }
+                    className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    placeholder="e.g. Banking, Technology"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Website
+                  </label>
+                  <input
+                    value={form.website || ""}
+                    onChange={(e) =>
+                      handleFormChange("website", e.target.value || undefined)
+                    }
+                    className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    placeholder="https://"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Phone
+                  </label>
+                  <input
+                    value={form.phone || ""}
+                    onChange={(e) =>
+                      handleFormChange("phone", e.target.value || undefined)
+                    }
+                    className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    placeholder="+971..."
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Country
+                  </label>
+                  <input
+                    value={form.country || ""}
+                    onChange={(e) =>
+                      handleFormChange("country", e.target.value || undefined)
+                    }
+                    className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    placeholder="e.g. UAE"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Address
+                  </label>
+                  <textarea
+                    value={form.address || ""}
+                    onChange={(e) =>
+                      handleFormChange("address", e.target.value || undefined)
+                    }
+                    className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 min-h-[60px]"
+                    placeholder="Street, city"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Owner
+                  </label>
+                  <input
+                    value={form.ownerName || ""}
+                    onChange={(e) =>
+                      handleFormChange("ownerName", e.target.value || undefined)
+                    }
+                    className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    placeholder="Assigned account manager"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Lifecycle Stage
+                    </label>
+                    <select
+                      value={form.lifecycleStage || "Prospect"}
+                      onChange={(e) =>
+                        handleFormChange(
+                          "lifecycleStage",
+                          e.target.value as AccountLifecycleStage
+                        )
+                      }
+                      className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    >
+                      {lifecycleOptions.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Account Tier
+                    </label>
+                    <input
+                      value={form.accountTier || ""}
+                      onChange={(e) =>
+                        handleFormChange("accountTier", e.target.value || undefined)
+                      }
+                      className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      placeholder="e.g. Strategic, Standard"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {activeSubTab === "contacts" && (
+          <div className="py-20 text-center">
+            <User className="mx-auto h-12 w-12 text-slate-200 mb-2" />
+            <h3 className="text-sm font-medium text-slate-900">Contacts Workspace</h3>
+            <p className="text-slate-500 mt-1">Contact management for this account is being modularized.</p>
           </div>
         )}
-        {duplicateNameWarning && (
-          <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800 text-[11px]">
-            {duplicateNameWarning}
-          </div>
+
+        {activeSubTab === "services" && (
+            <AccountServicesTab accountId={activeAccountId} />
         )}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                Account Name<span className="text-rose-500">*</span>
-              </label>
-              <input
-                value={form.name}
-                onChange={(e) => handleFormChange("name", e.target.value)}
-                className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                placeholder="Organization name"
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                Industry
-              </label>
-              <input
-                value={form.industry || ""}
-                onChange={(e) =>
-                  handleFormChange("industry", e.target.value || undefined)
-                }
-                className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                placeholder="e.g. Banking, Technology"
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                Website
-              </label>
-              <input
-                value={form.website || ""}
-                onChange={(e) =>
-                  handleFormChange("website", e.target.value || undefined)
-                }
-                className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                placeholder="https://"
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                Phone
-              </label>
-              <input
-                value={form.phone || ""}
-                onChange={(e) =>
-                  handleFormChange("phone", e.target.value || undefined)
-                }
-                className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                placeholder="+971..."
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                Country
-              </label>
-              <input
-                value={form.country || ""}
-                onChange={(e) =>
-                  handleFormChange("country", e.target.value || undefined)
-                }
-                className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                placeholder="e.g. UAE"
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                Address
-              </label>
-              <textarea
-                value={form.address || ""}
-                onChange={(e) =>
-                  handleFormChange("address", e.target.value || undefined)
-                }
-                className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 min-h-[60px]"
-                placeholder="Street, city"
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                Owner
-              </label>
-              <input
-                value={form.ownerName || ""}
-                onChange={(e) =>
-                  handleFormChange("ownerName", e.target.value || undefined)
-                }
-                className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                placeholder="Assigned account manager"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                  Lifecycle Stage
-                </label>
-                <select
-                  value={form.lifecycleStage || "Prospect"}
-                  onChange={(e) =>
-                    handleFormChange(
-                      "lifecycleStage",
-                      e.target.value as AccountLifecycleStage
-                    )
-                  }
-                  className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                >
-                  {lifecycleOptions.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                  Account Tier
-                </label>
-                <input
-                  value={form.accountTier || ""}
-                  onChange={(e) =>
-                    handleFormChange("accountTier", e.target.value || undefined)
-                  }
-                  className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  placeholder="e.g. Strategic, Standard"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
       <div className="border-t border-slate-200 px-4 py-2 flex items-center justify-between bg-slate-50">
         <div className="text-[11px] text-slate-500">
@@ -618,6 +660,55 @@ const AccountsPage: React.FC = () => {
           </span>
         }
       />
+    </div>
+  );
+};
+
+const AccountServicesTab: React.FC<{ accountId: string | null }> = ({ accountId }) => {
+  const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!accountId) return;
+    const load = async () => {
+      setLoading(true);
+      try {
+        const data = await ServiceRequestApi.listServiceRequests();
+        // Filter by accountId on frontend for now, or update API to support filter
+        setRequests(data.filter(r => r.account_id === accountId));
+      } catch (error) {
+        console.error("Error loading account services:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [accountId]);
+
+  if (loading) return <div className="py-10 text-center text-slate-400">Loading services...</div>;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h4 className="text-[11px] font-bold text-slate-900 uppercase tracking-wider">Service History</h4>
+      </div>
+      {requests.length > 0 ? (
+        <div className="grid grid-cols-1 gap-2">
+          {requests.map(req => (
+            <ServiceRequestCard 
+                key={req.id} 
+                request={req} 
+                isSelected={false} 
+                onClick={() => {}} 
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="py-12 text-center border rounded-lg border-dashed">
+          <ShieldAlert className="mx-auto h-8 w-8 text-slate-200 mb-2" />
+          <p className="text-slate-500 italic">No service requests found for this account.</p>
+        </div>
+      )}
     </div>
   );
 };

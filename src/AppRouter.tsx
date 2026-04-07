@@ -15,6 +15,7 @@ import ContentFormRoute from "./pages/content-form";
 import AccountsPage from "./pages/accounts";
 import ContactsPage from "./pages/contacts";
 import LeadsPage from "./pages/leads";
+import ServicesPage from "./pages/services";
 import LoginPage from "./pages/login";
 import SettingsPage from "./pages/settings";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -27,9 +28,7 @@ import EJPTransactionDashboard from "./modules/ejp-transaction-dashboard";
 // import TaxonomyTagFormRoute from './pages/taxonomy-tag-form';
 // REFACTOR: Service Delivery Overview disabled - only EJP Transaction Dashboard is active
 // import ServiceDeliveryOverview from "./modules/service-delivery-overview";
-import { useAuth } from "./context/AuthContext";
 import { ChatInterface } from "./modules/chat-support/pages/ChatInterface";
-import ContactsPage from "./pages/contacts";
 
 // Component to redirect to primary dashboard (EJP Transaction Dashboard)
 const DashboardRedirect = () => {
@@ -108,7 +107,11 @@ export function AppRouter() {
               requiredRoles={["admin", "approver", "editor", "viewer"]}
               requiredSegments={["partner", "internal"]}
             >
+              <AppShell>
+                <EJPTransactionDashboard />
+              </AppShell>
             </ProtectedRoute>
+          }
         />
 
         {/* Redirect legacy dashboard route to correct dashboard */}
@@ -179,6 +182,19 @@ export function AppRouter() {
             >
               <AppShell>
                 <LeadsPage />
+              </AppShell>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/services"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+              requiredSegments={["internal"]}
+            >
+              <AppShell>
+                <ServicesPage />
               </AppShell>
             </ProtectedRoute>
           }
@@ -292,18 +308,6 @@ export function AppRouter() {
         </ProtectedRoute>
       } />
       */}
-        {/* Contact Management */}
-        <Route
-          path="/contacts"
-          element={
-            <ProtectedRoute
-              requiredRoles={["admin", "approver", "editor", "viewer"]}
-            >
-              <ContactsPage />
-            </ProtectedRoute>
-          }
-        />
-
         <Route
           path="/content-form"
           element={

@@ -25,6 +25,7 @@ import contentsRouter from './routes/contents';
 import servicesRouter from './routes/services';
 import accountsRouter from './routes/accounts';
 import contactsRouter from './routes/contacts';
+import serviceRequestsRouter from './routes/service-requests';
 import vendureRouter from './routes/vendure';
 import uploadsRouter from './routes/uploads';
 
@@ -92,6 +93,9 @@ app.use('/api/accounts', accountsRouter);
 // Contacts routes (MVP - server-side API)
 app.use('/api/contacts', contactsRouter);
 
+// Service Requests routes
+app.use('/api/service-requests', serviceRequestsRouter);
+
 // CRM Webhook routes are now handled by Vercel serverless function
 // See: api/webhooks/crm/user-provisioning.ts
 
@@ -121,6 +125,7 @@ app.use((error: any, req: express.Request, res: express.Response, next: express.
     reason: 'server_error',
     message: 'An internal server error occurred'
   });
+  return;
 });
 
 // 404 handler  
