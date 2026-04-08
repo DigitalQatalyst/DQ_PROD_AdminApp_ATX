@@ -30,6 +30,7 @@ import EJPTransactionDashboard from "./modules/ejp-transaction-dashboard";
 // import ServiceDeliveryOverview from "./modules/service-delivery-overview";
 import { useAuth } from "./context/AuthContext";
 import { ChatInterface } from "./modules/chat-support/pages/ChatInterface";
+import ContactsPage from "./pages/contacts";
 
 // Component to redirect to primary dashboard (EJP Transaction Dashboard)
 const DashboardRedirect = () => {
@@ -108,11 +109,7 @@ export function AppRouter() {
               requiredRoles={["admin", "approver", "editor", "viewer"]}
               requiredSegments={["partner", "internal"]}
             >
-              <AppShell>
-                <EJPTransactionDashboard />
-              </AppShell>
             </ProtectedRoute>
-          }
         />
 
         {/* Redirect legacy dashboard route to correct dashboard */}
@@ -309,6 +306,18 @@ export function AppRouter() {
         </ProtectedRoute>
       } />
       */}
+        {/* Contact Management */}
+        <Route
+          path="/contacts"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+            >
+              <ContactsPage />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/content-form"
           element={

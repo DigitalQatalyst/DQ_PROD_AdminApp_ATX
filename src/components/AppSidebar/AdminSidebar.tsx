@@ -147,7 +147,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           icon: <BarChart3 size={20} />,
           path: "/ejp-transaction-dashboard",
         });
-     
+
       }
 
       // Only show Service Delivery for Staff (internal)
@@ -158,7 +158,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           icon: <CheckCircle size={20} />,
           path: "/service-delivery-overview",
         });
-       
+
       }
     }
 
@@ -210,6 +210,21 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label: "Content Management",
           icon: <FileCheck size={20} />,
           path: "/content-management",
+        }
+      );
+
+      // CRM section
+      items.push(
+        {
+          id: 'crm',
+          label: 'CRM',
+          category: 'category',
+        },
+        {
+          id: 'contacts',
+          label: 'Contacts',
+          icon: <Users size={20} />,
+          path: '/contacts',
         }
       );
     }
@@ -331,9 +346,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   };
   return (
     <div
-      className={`fixed lg:static top-0 left-0 bottom-0 lg:h-full z-30 w-64 bg-gray-50 border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      } lg:translate-x-0 lg:w-60 overflow-y-auto flex-shrink-0 lg:min-h-full`}
+      className={`fixed lg:static top-0 left-0 bottom-0 lg:h-full z-30 w-64 bg-gray-50 border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0 lg:w-60 overflow-y-auto flex-shrink-0 lg:min-h-full`}
       data-id={dataId}
     >
       <div className="p-4 border-b border-gray-200">
@@ -367,9 +381,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
             </div>
             <ChevronDown
               size={18}
-              className={`text-gray-500 transition-transform ml-2 flex-shrink-0 ${
-                companyDropdownOpen ? "rotate-180" : ""
-              }`}
+              className={`text-gray-500 transition-transform ml-2 flex-shrink-0 ${companyDropdownOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
           {companyDropdownOpen && (
@@ -417,7 +430,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
               </div>
             );
           }
-          
+
           const isActive = activeSection === item.id;
           const menuItemIndex = getAdminMenuItems()
             .filter((i: any) => i.category !== "category")
@@ -433,11 +446,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
             <div
               key={item.id}
               ref={(el) => (menuItemsRef.current[menuItemIndex] = el)}
-              className={`flex items-center px-4 py-3 relative transition-colors ${
-                isActive
+              className={`flex items-center px-4 py-3 relative transition-colors ${isActive
                   ? "bg-blue-700 text-white"
                   : "text-gray-700 hover:bg-gray-200 cursor-pointer"
-              }`}
+                }`}
               onClick={handleClick}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {

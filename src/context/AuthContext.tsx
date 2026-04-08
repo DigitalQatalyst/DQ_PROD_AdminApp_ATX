@@ -42,9 +42,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userSegment, setUserSegment] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   // Initialize ability immediately with a minimal empty ability
-  const [ability, setAbility] = useState<AppAbility>(createMongoAbility([]));
+  const [ability, setAbility] = useState<AppAbility>(createMongoAbility<AppAbility>([]));
 
   useEffect(() => {
+    // START AUTH BYPASS CODE
+    console.log('🔓 AUTH BYPASS ENABLED: Logging in as Dev Admin');
+
+    const mockUser: User = {
+      id: 'dev-admin-id',
+      email: 'dev@admin.com',
+      name: 'Dev Admin',
+      role: 'admin' as UserRole,
+      user_segment: 'internal',
+      organization_id: 'default-org-id'
+    };
+
+    // Set state directly
+    setUser(mockUser);
+    setRole('admin' as UserRole);
+    setUserSegment('internal');
+
+    // Build CASL ability or mock context
+    const userContext: UserContext = {
+      role: 'admin' as UserRole,
+      user_segment: 'internal',
+      organizationId: 'default-org-id',
+      id: 'dev-admin-id',
+    };
+
+    const userAbility = buildAbility(userContext);
+    setAbility(userAbility);
+    setIsLoading(false);
+    return;
+    // END AUTH BYPASS CODE
+
+    /* ORIGINAL LOGIC DISABLED
     // Load user from localStorage (simulating session persistence)
     const loadUser = async () => {
       try {
@@ -134,6 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Simulate async auth check
     const timer = setTimeout(loadUser, 500);
     return () => clearTimeout(timer);
+    */
   }, []);
 
   const login = async (userData: User, userSegmentValue?: string, roleValue?: string) => {
@@ -143,13 +176,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       roleValue
     });
 
-    const userRole = roleValue || userData.role || 'viewer';
+    const userRole = (roleValue as UserRole) || userData.role || 'viewer';
     const segment = userSegmentValue || userData.user_segment || null;
 
     setUser(userData);
     setRole(userRole);
     setUserSegment(segment);
-    
+
     // Build CASL ability based on user context
     const userContext: UserContext = {
       role: userRole,
@@ -163,7 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Debug user abilities
     debugUserAbilities(userAbility, userContext);
-    
+
     // Debug organization mapping
     console.log('🏢 Organization Mapping Debug:', {
       'userData.organization_id': userData.organization_id,
@@ -172,22 +205,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       'userData.name': userData.name,
       'userData.email': userData.email
     });
-    
+
     // Store in localStorage
     localStorage.setItem('platform_admin_user', JSON.stringify(userData));
     localStorage.setItem('user_role', userRole);
-    localStorage.setItem('user_segment', segment);
-    
+    localStorage.setItem('user_segment', segment || '');
+
     // Sync Supabase user context for Chat Support module
     await setSupabaseUserContext(userData.id, userData.email || '');
-    
+
     console.log('🔐 AuthContext state set:', {
       user: userData,
       role: userRole,
       userSegment: segment,
       ability: userAbility
     });
-    
+
     setIsLoading(false);
   };
 
@@ -203,7 +236,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setRole('viewer');
     setUserSegment(null);
-    setAbility(createMongoAbility([]));
+    setAbility(createMongoAbility<AppAbility>([]));
     localStorage.removeItem('platform_admin_user');
     localStorage.removeItem('user_role');
     localStorage.removeItem('user_segment');
