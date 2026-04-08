@@ -33,7 +33,7 @@ export type AppAbility = SharedAppAbility;
  */
 export interface UserContext {
   role: UserRole;
-  user_segment: UserSegment;
+  user_segment: UserSegment | string | null;
   organizationId?: string;
   id?: string;
 }
@@ -92,7 +92,7 @@ export function buildAbility(user: UserContext): AppAbility {
         can('read', crudSubjects);
         can('update', crudSubjects, conditions);
         can('approve', ['Content', 'Service'] as Subject[], conditions); // Can approve but not publish
-        can('unpublish', ['Content', 'Service'] as Subject[], conditions);
+        can('publish', ['Content', 'Service'] as Subject[], conditions);
         can('archive', ['Content', 'Service'] as Subject[], conditions);
         // Explicitly deny publish for Partner Admin
         cannot('publish', ['Content', 'Service'] as Subject[]);

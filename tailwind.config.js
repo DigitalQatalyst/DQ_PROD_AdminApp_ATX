@@ -6,6 +6,10 @@ export default {
   theme: {
     extend: {
       colors: {
+        blue: {
+          500: '#2596be',
+          600: '#1d7a9c',
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

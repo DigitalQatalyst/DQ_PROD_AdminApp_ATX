@@ -309,6 +309,18 @@ export function AppRouter() {
         </ProtectedRoute>
       } />
       */}
+        {/* Contact Management */}
+        <Route
+          path="/contacts"
+          element={
+            <ProtectedRoute
+              requiredRoles={["admin", "approver", "editor", "viewer"]}
+            >
+              <ContactsPage />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/content-form"
           element={
