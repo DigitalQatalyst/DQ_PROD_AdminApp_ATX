@@ -213,8 +213,11 @@ const SupportPage: React.FC = () => {
     const update: UpdateTicketInput = { status: transitionTarget };
     if (transitionTarget === 'resolved') update.resolutionNote = resolutionNote;
     if (transitionTarget === 'escalated') update.escalationReason = escalationReason;
-    if (transitionTarget === 'in_progress' && assignOwnerName) {
-      update.ownerName = assignOwnerName;
+    if (transitionTarget === 'in_progress' && assignOwnerName.trim()) {
+      // Backend validation requires ownerId for open -> in_progress.
+      // For MVP, use the entered owner text as both display name and identifier.
+      update.ownerName = assignOwnerName.trim();
+      update.ownerId = assignOwnerName.trim();
     }
 
     try {
@@ -561,6 +564,11 @@ const SupportPage: React.FC = () => {
                     <input
                       value={assignOwnerName}
                       onChange={(e) => setAssignOwnerName(e.target.value)}
+                      onFocus={() => {
+                        if (!assignOwnerName && activeTicket.ownerName) {
+                          setAssignOwnerName(activeTicket.ownerName);
+                        }
+                      }}
                       className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
                       placeholder="Agent name"
                     />
