@@ -6,6 +6,7 @@ export interface LVETab {
   isActive?: boolean;
   isDirty?: boolean;
 }
+export type LVEViewMode = "list-only" | "list-work-context" | "list-work";
 
 export interface LVEWorkspaceLayoutProps {
   headerTitle?: string;
@@ -22,6 +23,10 @@ export interface LVEWorkspaceLayoutProps {
   workPane?: ReactNode;
   popPane?: ReactNode;
   footer?: ReactNode;
+  showPaneControls?: boolean;
+  initialViewMode?: LVEViewMode;
+  viewMode?: LVEViewMode;
+  onViewModeChange?: (mode: LVEViewMode) => void;
 }
 
 /**
@@ -46,91 +51,121 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
   workPane,
   popPane,
   footer,
+  showPaneControls = false,
+  initialViewMode = "list-work-context",
+  viewMode: controlledViewMode,
+  onViewModeChange,
 }) => {
   const hasTabs = tabs && tabs.length > 0;
+  const [internalViewMode, setInternalViewMode] = React.useState<LVEViewMode>(initialViewMode);
+  const viewMode = controlledViewMode ?? internalViewMode;
+
+  const setMode = (mode: LVEViewMode) => {
+    if (!controlledViewMode) {
+      setInternalViewMode(mode);
+    }
+    onViewModeChange?.(mode);
+  };
+
+  const showWorkPane = viewMode === "list-work-context" || viewMode === "list-work";
+  const showPopPane = viewMode === "list-work-context";
+  const gridTemplateColumns = menuPane
+    ? viewMode === "list-only"
+      ? "minmax(200px,240px) minmax(420px,1fr)"
+      : viewMode === "list-work-context"
+        ? "minmax(200px,240px) minmax(320px,380px) minmax(520px,1fr) minmax(260px,320px)"
+        : "minmax(200px,240px) minmax(360px,420px) minmax(620px,1fr)"
+    : viewMode === "list-only"
+      ? "minmax(420px,1fr)"
+      : viewMode === "list-work-context"
+        ? "minmax(320px,380px) minmax(520px,1fr) minmax(260px,320px)"
+        : "minmax(360px,420px) minmax(620px,1fr)";
 
   return (
     <div className="flex flex-col h-full w-full bg-background border border-border overflow-hidden">
-      {/* Global Header */}
-      <header className="border-b border-border bg-card px-4 py-2 flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onTenantClick}
-            className="inline-flex items-center px-2 py-1 rounded-full border border-border text-xs font-medium text-foreground hover:bg-accent"
-          >
-            <span className="h-2 w-2 rounded-full bg-emerald-500 mr-1" />
-            {tenantLabel}
-          </button>
-          <button
-            type="button"
-            onClick={onStreamClick}
-            className="inline-flex items-center px-2 py-1 rounded-full border border-primary/30 bg-primary/10 text-xs font-medium text-primary hover:bg-primary/20"
-          >
-            {streamLabel}
-          </button>
-        </div>
-
-        <div className="flex-1 flex items-center justify-center">
-          <h1 className="text-sm font-semibold text-foreground truncate">
-            {headerTitle}
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {onSettingsClick && (
-            <button
-              type="button"
-              onClick={onSettingsClick}
-              className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-border text-muted-foreground hover:bg-accent text-xs"
-              aria-label="Workspace settings"
-            >
-              ⚙
-            </button>
-          )}
-        </div>
-      </header>
 
       {/* Tabs Row */}
       {hasTabs && (
-        <div className="border-b border-border bg-muted/50 px-2 py-1 flex items-center gap-1 overflow-x-auto">
-          {tabs.map((tab) => {
-            const active = tab.isActive;
-            return (
+        <div className="border-b border-border bg-muted/50 px-2 py-1 flex items-center gap-2">
+          <div className="flex-1 flex items-center gap-1 overflow-x-auto">
+            {tabs.map((tab) => {
+              const active = tab.isActive;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => onTabSelect?.(tab.id)}
+                  className={`group inline-flex items-center max-w-xs px-3 py-1.5 rounded-md text-xs border transition-colors ${
+                    active
+                      ? "bg-card border-primary text-primary shadow-sm"
+                      : "bg-muted border-border text-muted-foreground hover:bg-card"
+                  }`}
+                >
+                  <span className="truncate">{tab.label}</span>
+                  {tab.isDirty && (
+                    <span className="ml-1 text-[10px] text-amber-500">●</span>
+                  )}
+                  {onTabClose && (
+                    <span
+                      role="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onTabClose(tab.id);
+                      }}
+                      className="ml-2 text-[10px] text-muted-foreground hover:text-foreground"
+                    >
+                      ✕
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {showPaneControls && (
+            <div className="flex items-center gap-1 shrink-0">
               <button
-                key={tab.id}
                 type="button"
-                onClick={() => onTabSelect?.(tab.id)}
-                className={`group inline-flex items-center max-w-xs px-3 py-1.5 rounded-md text-xs border transition-colors ${
-                  active
-                    ? "bg-card border-primary text-primary shadow-sm"
-                    : "bg-muted border-border text-muted-foreground hover:bg-card"
+                onClick={() => setMode("list-work-context")}
+                className={`h-7 px-2 rounded border text-[10px] ${
+                  viewMode === "list-work-context"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-card border-border text-muted-foreground"
                 }`}
+                title="Show list, workspace and context panes"
               >
-                <span className="truncate">{tab.label}</span>
-                {tab.isDirty && (
-                  <span className="ml-1 text-[10px] text-amber-500">●</span>
-                )}
-                {onTabClose && (
-                  <span
-                    role="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onTabClose(tab.id);
-                    }}
-                    className="ml-2 text-[10px] text-muted-foreground hover:text-foreground"
-                  >
-                    ✕
-                  </span>
-                )}
+                3 panes
               </button>
-            );
-          })}
+              <button
+                type="button"
+                onClick={() => setMode("list-work")}
+                className={`h-7 px-2 rounded border text-[10px] ${
+                  viewMode === "list-work"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-card border-border text-muted-foreground"
+                }`}
+                title="Show list and workspace panes"
+              >
+                List + Workspace
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("list-context")}
+                className={`h-7 px-2 rounded border text-[10px] ${
+                  viewMode === "list-context"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-card border-border text-muted-foreground"
+                }`}
+                title="Show list and context panes"
+              >
+                List + Context
+              </button>
+            </div>
+          )}
         </div>
       )}
 
       {/* Main Workspace Grid */}
-      <div className={`flex-1 grid min-h-0 ${menuPane ? 'grid-cols-[minmax(200px,240px)_minmax(360px,420px)_minmax(420px,1fr)_minmax(240px,280px)]' : 'grid-cols-[minmax(360px,420px)_minmax(420px,1fr)_minmax(240px,280px)]'}`}>
+      <div className="flex-1 grid min-h-0" style={{ gridTemplateColumns }}>
         {/* Menu Pane — hidden when not provided */}
         {menuPane && (
           <section className="border-r border-border bg-muted/30 overflow-y-auto">
@@ -148,32 +183,36 @@ export const LVEWorkspaceLayout: React.FC<LVEWorkspaceLayoutProps> = ({
         </section>
 
         {/* Work Window */}
-        <section className="border-r border-border bg-card overflow-y-auto">
-          {workPane ?? (
-            <div className="h-full flex items-center justify-center px-6 py-8">
-              <div className="text-center max-w-sm">
-                <div className="mb-3 text-3xl">🧩</div>
-                <h2 className="text-sm font-semibold text-foreground mb-1">
-                  LVE Workspace Shell
-                </h2>
-                <p className="text-xs text-muted-foreground">
-                  Connect this workspace to a core data entity (e.g. Account,
-                  Lead, Case) and drive it via configuration—no module-specific
-                  logic should live in this layout.
-                </p>
+        {showWorkPane && (
+          <section className={`bg-card overflow-y-auto ${showPopPane ? "border-r border-border" : ""}`}>
+            {workPane ?? (
+              <div className="h-full flex items-center justify-center px-6 py-8">
+                <div className="text-center max-w-sm">
+                  <div className="mb-3 text-3xl">🧩</div>
+                  <h2 className="text-sm font-semibold text-foreground mb-1">
+                    LVE Workspace Shell
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    Connect this workspace to a core data entity (e.g. Account,
+                    Lead, Case) and drive it via configuration—no module-specific
+                    logic should live in this layout.
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
-        </section>
+            )}
+          </section>
+        )}
 
         {/* Pop Pane */}
-        <section className="bg-muted/30 overflow-y-auto">
-          {popPane ?? (
-            <div className="p-4 text-xs text-muted-foreground">
-              Pop Pane — use this for related context, timelines, or actions.
-            </div>
-          )}
-        </section>
+        {showPopPane && (
+          <section className="bg-muted/30 overflow-y-auto">
+            {popPane ?? (
+              <div className="p-4 text-xs text-muted-foreground">
+                Pop Pane — use this for related context, timelines, or actions.
+              </div>
+            )}
+          </section>
+        )}
       </div>
 
       {/* Footer */}
